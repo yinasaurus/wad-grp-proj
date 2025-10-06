@@ -1,2 +1,2 @@
-# wad-grp-porj
+# wad-grp-proj
 For WAD2 group project purposes.
