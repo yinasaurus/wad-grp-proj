@@ -1,0 +1,124 @@
+:root {
+    --primary-green: #15dd9a;
+    --dark-green: #05714e;
+    --light-green: #d1fae5;
+    }
+/* currently only for the header cuz rest are in body tag*/
+        
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f4f6;
+    }
+        
+.navbar {
+    background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+        
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    }
+        
+.auth-buttons .btn {
+    margin-left: 0.5rem;
+    border-radius: 20px;
+    padding: 0.4rem 1.2rem;
+    }
+        
+.search-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+    margin-bottom: 2rem;
+    }
+        
+.business-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-left: 4px solid var(--primary-green);
+    }
+        
+.business-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.15);
+    }
+        
+.business-card.selected {
+    border-left-width: 6px;
+    background: var(--light-green);
+    }
+        
+.certified-badge {
+    background: var(--light-green);
+    color: var(--dark-green);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    }
+        
+.category-badge {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 0.3rem 0.7rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    }
+        
+.map-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 20px;
+    }
+        
+.map-placeholder {
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+    border-radius: 10px;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    }
+        
+.modal-content {
+    border-radius: 15px;
+    }
+        
+.btn-primary {
+    background: var(--primary-green);
+    border: none;
+    transition: all 0.3s ease;
+    }
+        
+.btn-primary:hover {
+    background: var(--dark-green);
+    transform: translateY(-2px);
+    }
+        
+.btn-outline-light {
+    border-color: white;
+    }
+        
+.btn-outline-light:hover {
+    background: white;
+    color: var(--primary-green);
+    }
+        
+@media (max-width: 992px) {
+    .map-container {
+        position: relative;
+        margin-top: 2rem;
+        }
+    }
+/* media rule - width within 992px will abide the rule below, else will not follow */

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Business Directory - Singapore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-leaf me-2"></i>Green Business Directory
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click.prevent="activeTab = 'directory'" :class="{active: activeTab === 'directory'}">Directory</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click.prevent="activeTab = 'about'" :class="{active: activeTab === 'about'}">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click.prevent="activeTab = 'contact'" :class="{active: activeTab === 'contact'}">Contact</a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Auth Buttons - Not Logged In -->
+                    <div class="auth-buttons d-flex align-items-center" v-if="!isLoggedIn">
+                        <button class="btn btn-outline-light btn-sm" @click="openModal('login')">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </button>
+                        <button class="btn btn-outline-light btn-sm" @click="openModal('register')">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </button>
+                        <div class="dropdown ms-2">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-building me-1"></i>For Businesses
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" @click.prevent="openModal('registerBusiness')">
+                                    <i class="fas fa-store me-2"></i>Register Green Business
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" @click.prevent="openModal('login')">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Business Sign In
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Logged In User -->
+                    <div class="auth-buttons d-flex align-items-center" v-else>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" @click.prevent="openModal('registerBusiness')">
+                                    <i class="fas fa-plus me-2"></i>Add Business
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" @click.prevent="logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Directory Tab -->
+        <div v-if="activeTab === 'directory'" class="container mt-4">
+            <!-- Search and Filter Section -->
+            <div class="search-section">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                placeholder="Search businesses, locations, categories..."
+                                v-model="searchTerm"
+                                @input="filterBusinesses">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select form-select-lg" v-model="selectedCategory" @change="filterBusinesses">
+                            <option value="all">All Categories</option>
+                            <option v-for="cat in categories.filter(c => c !== 'all')" :key="cat" :value="cat">{{ cat }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business List and Map -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <h4 class="mb-3">
+                        <i class="fas fa-store me-2"></i>Green Businesses ({{ filteredBusinesses.length }})
+                    </h4>
+                    
+                    <div v-if="filteredBusinesses.length === 0" class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>No businesses found matching your criteria.
+                    </div>
+                    
+                    <div v-for="business in filteredBusinesses" 
+                         :key="business.id"
+                         class="business-card"
+                         :class="{selected: selectedBusiness && selectedBusiness.id === business.id}"
+                         @click="selectBusiness(business)">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="mb-0">{{ business.name }}</h5>
+                            <span class="certified-badge">
+                                <i class="fas fa-leaf me-1"></i>Certified
+                            </span>
+                        </div>
+                        <p class="text-muted mb-2">{{ business.description }}</p>
+                        <div class="mb-2">
+                            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                            <small>{{ business.address }}</small>
+                        </div>
+                        <div class="d-flex gap-2 mb-2">
+                            <span class="category-badge">{{ business.category }}</span>
+                        </div>
+                        <div>
+                            <small class="text-success">
+                                <i class="fas fa-certificate me-1"></i>
+                                {{ business.certifications.join(' • ') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="map-container">
+                        <h4 class="mb-3"><i class="fas fa-map me-2"></i>Location Map</h4>
+                        <div v-if="selectedBusiness">
+                            <div class="alert alert-success">
+                                <h6 class="mb-2">{{ selectedBusiness.name }}</h6>
+                                <p class="mb-2"><small>{{ selectedBusiness.address }}</small></p>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span v-for="cert in selectedBusiness.certifications" 
+                                          :key="cert"
+                                          class="badge bg-success">{{ cert }}</span>
+                                </div>
+                            </div>
+                            <!-- Google Maps Embed -->
+                            <div id="map" class="map-placeholder">
+                                <i class="fas fa-map-marked-alt fa-4x text-success mb-3"></i>
+                                <h5>{{ selectedBusiness.name }}</h5>
+                                <p class="text-muted">{{ selectedBusiness.address }}</p>
+                                <small class="text-muted">
+                                    Add your Google Maps API key to enable interactive map<br>
+                                    <code>https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY</code>
+                                </small>
+                            </div>
+                        </div>
+                        <div v-else class="map-placeholder">
+                            <i class="fas fa-map-marked-alt fa-4x text-secondary mb-3"></i>
+                            <p class="text-muted">Select a business to view location</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Tab -->
+        <div v-if="activeTab === 'about'" class="container mt-4">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4"><i class="fas fa-info-circle me-2"></i>About Green Business Directory</h2>
+                    <p class="lead">Our platform connects conscious consumers with certified green businesses in Singapore.</p>
+                    <p>We verify each business's environmental credentials to ensure authenticity and promote sustainable practices across the nation.</p>
+                    <p>Join us in supporting sustainable practices and building a greener future for Singapore.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Tab -->
+        <div v-if="activeTab === 'contact'" class="container mt-4">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4"><i class="fas fa-envelope me-2"></i>Contact Us</h2>
+                    <p><strong>Email:</strong> info@greenbusiness.sg</p>
+                    <p><strong>Phone:</strong> +65 1234 5678</p>
+                    <p><strong>Address:</strong> 123 Sustainability Street, Singapore 123456</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sign In Modal -->
+        <div class="modal fade" id="loginModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title"><i class="fas fa-sign-in-alt me-2 text-primary"></i>Sign In</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email Address</label>
+                            <input type="email" class="form-control form-control-lg" v-model="loginForm.email" placeholder="your@email.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Password</label>
+                            <input type="password" class="form-control form-control-lg" v-model="loginForm.password" placeholder="Enter your password">
+                        </div>
+                        <div class="alert alert-success" v-if="loginMessage && !loginError">
+                            <i class="fas fa-check-circle me-2"></i>{{ loginMessage }}
+                        </div>
+                        <div class="alert alert-danger" v-if="loginError">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ loginError }}
+                        </div>
+                        <p class="text-muted small">Don't have an account? <a href="#" @click.prevent="switchModal('login', 'register')">Register here</a></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" @click="handleLogin">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register User Modal -->
+        <div class="modal fade" id="registerModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title"><i class="fas fa-user-plus me-2 text-success"></i>Create Account</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Full Name</label>
+                            <input type="text" class="form-control" v-model="userRegisterForm.name" placeholder="Your full name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email Address</label>
+                            <input type="email" class="form-control" v-model="userRegisterForm.email" placeholder="your@email.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Password</label>
+                            <input type="password" class="form-control" v-model="userRegisterForm.password" placeholder="Create a password">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Confirm Password</label>
+                            <input type="password" class="form-control" v-model="userRegisterForm.confirmPassword" placeholder="Confirm your password">
+                        </div>
+                        <div class="alert alert-success" v-if="userRegisterMessage && !userRegisterError">
+                            <i class="fas fa-check-circle me-2"></i>{{ userRegisterMessage }}
+                        </div>
+                        <div class="alert alert-danger" v-if="userRegisterError">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ userRegisterError }}
+                        </div>
+                        <p class="text-muted small">Already have an account? <a href="#" @click.prevent="switchModal('register', 'login')">Sign in here</a></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" @click="handleUserRegister">
+                            <i class="fas fa-user-plus me-1"></i>Create Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Business Modal -->
+        <div class="modal fade" id="registerBusinessModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title"><i class="fas fa-store me-2 text-success"></i>Register Green Business</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Register your eco-friendly business to be featured in our directory. A valid green certification code is required.
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Business Name *</label>
+                                <input type="text" class="form-control" v-model="businessRegisterForm.name" placeholder="Your business name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Contact Email *</label>
+                                <input type="email" class="form-control" v-model="businessRegisterForm.email" placeholder="business@email.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Password *</label>
+                                <input type="password" class="form-control" v-model="businessRegisterForm.password" placeholder="Create a password">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Category *</label>
+                                <select class="form-select" v-model="businessRegisterForm.category">
+                                    <option value="">Select Category</option>
+                                    <option v-for="cat in categories.filter(c => c !== 'all')" :key="cat" :value="cat">{{ cat }}</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Business Address (Singapore) *</label>
+                                <input type="text" class="form-control" v-model="businessRegisterForm.address" placeholder="Full business address">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Business Description *</label>
+                                <textarea class="form-control" rows="3" v-model="businessRegisterForm.description" placeholder="Describe your green business and practices..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Green Certification Code *</label>
+                                <input type="text" class="form-control" v-model="businessRegisterForm.certificationCode" placeholder="e.g., GREEN2024">
+                                <small class="text-muted">Valid codes: GREEN2024, ECO2024, SUSTAIN2024</small>
+                            </div>
+                        </div>
+                        <div class="alert alert-success mt-3" v-if="businessRegisterMessage && !businessRegisterError">
+                            <i class="fas fa-check-circle me-2"></i>{{ businessRegisterMessage }}
+                        </div>
+                        <div class="alert alert-danger mt-3" v-if="businessRegisterError">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ businessRegisterError }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" @click="handleBusinessRegister">
+                            <i class="fas fa-check me-1"></i>Register Business
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'directory',
+                    searchTerm: '',
+                    selectedCategory: 'all',
+                    selectedBusiness: null,
+                    businesses: [],
+                    filteredBusinesses: [],
+                    categories: ['all', 'Technology', 'Food & Beverage', 'Energy', 'Retail', 'Manufacturing', 'Services'],
+                    isLoggedIn: false,
+                    userName: '',
+                    
+                    // Login Form
+                    loginForm: {
+                        email: '',
+                        password: ''
+                    },
+                    loginMessage: '',
+                    loginError: '',
+                    
+                    // User Registration Form
+                    userRegisterForm: {
+                        name: '',
+                        email: '',
+                        password: '',
+                        confirmPassword: ''
+                    },
+                    userRegisterMessage: '',
+                    userRegisterError: '',
+                    
+                    // Business Registration Form
+                    businessRegisterForm: {
+                        name: '',
+                        email: '',
+                        password: '',
+                        category: '',
+                        address: '',
+                        description: '',
+                        certificationCode: ''
+                    },
+                    businessRegisterMessage: '',
+                    businessRegisterError: '',
+                    
+                    // Modal instances
+                    loginModalInstance: null,
+                    registerModalInstance: null,
+                    registerBusinessModalInstance: null
+                }
+            },
+            mounted() {
+                this.fetchBusinesses();
+                this.initModals();
+            },
+            methods: {
+                initModals() {
+                    this.loginModalInstance = new bootstrap.Modal(document.getElementById('loginModal'));
+                    this.registerModalInstance = new bootstrap.Modal(document.getElementById('registerModal'));
+                    this.registerBusinessModalInstance = new bootstrap.Modal(document.getElementById('registerBusinessModal'));
+                },
+                
+                openModal(type) {
+                    if (type === 'login') {
+                        this.loginModalInstance.show();
+                    } else if (type === 'register') {
+                        this.registerModalInstance.show();
+                    } else if (type === 'registerBusiness') {
+                        this.registerBusinessModalInstance.show();
+                    }
+                },
+                
+                switchModal(from, to) {
+                    if (from === 'login') this.loginModalInstance.hide();
+                    if (from === 'register') this.registerModalInstance.hide();
+                    
+                    setTimeout(() => {
+                        if (to === 'login') this.loginModalInstance.show();
+                        if (to === 'register') this.registerModalInstance.show();
+                    }, 300);
+                },
+                
+                async fetchBusinesses() {
+                    try {
+                        const response = await fetch('api/get_businesses.php');
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.businesses = data.businesses;
+                            this.filterBusinesses();
+                        }
+                    } catch (error) {
+                        console.error('Error fetching businesses:', error);
+                        this.loadDemoData();
+                    }
+                },
+                
+                loadDemoData() {
+                    this.businesses = [
+                        {
+                            id: 1,
+                            name: "EcoTech Solutions",
+                            category: "Technology",
+                            address: "1 Marina Boulevard, Singapore 018989",
+                            lat: 1.2821,
+                            lng: 103.8545,
+                            isGreen: true,
+                            certifications: ["Green Mark Gold", "ISO 14001"],
+                            description: "Sustainable IT solutions provider"
+                        },
+                        {
+                            id: 2,
+                            name: "Green Harvest Cafe",
+                            category: "Food & Beverage",
+                            address: "100 Orchard Road, Singapore 238840",
+                            lat: 1.3048,
+                            lng: 103.8318,
+                            isGreen: true,
+                            certifications: ["Green Mark Certified", "Zero Waste"],
+                            description: "Farm-to-table organic restaurant"
+                        },
+                        {
+                            id: 3,
+                            name: "Solar Power Plus",
+                            category: "Energy",
+                            address: "50 Jurong Gateway Road, Singapore 608549",
+                            lat: 1.3339,
+                            lng: 103.7436,
+                            isGreen: true,
+                            certifications: ["Green Mark Platinum", "BCA Green Mark"],
+                            description: "Renewable energy installations"
+                        }
+                    ];
+                    this.filterBusinesses();
+                },
+                
+                filterBusinesses() {
+                    let filtered = this.businesses;
+
+                    if (this.searchTerm) {
+                        const term = this.searchTerm.toLowerCase();
+                        filtered = filtered.filter(b =>
+                            b.name.toLowerCase().includes(term) ||
+                            b.address.toLowerCase().includes(term) ||
+                            b.category.toLowerCase().includes(term) ||
+                            b.description.toLowerCase().includes(term)
+                        );
+                    }
+
+                    if (this.selectedCategory !== 'all') {
+                        filtered = filtered.filter(b => b.category === this.selectedCategory);
+                    }
+
+                    this.filteredBusinesses = filtered;
+                },
+                
+                selectBusiness(business) {
+                    this.selectedBusiness = business;
+                    this.loadGoogleMap(business);
+                },
+                
+                loadGoogleMap(business) {
+                    console.log('Loading map for:', business.name, business.lat, business.lng);
+                },
+                
+                async handleLogin() {
+                    this.loginError = '';
+                    this.loginMessage = '';
+                    
+                    if (!this.loginForm.email || !this.loginForm.password) {
+                        this.loginError = 'Please fill in all fields';
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch('api/login.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(this.loginForm)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.isLoggedIn = true;
+                            this.userName = data.userName;
+                            this.loginMessage = 'Login successful!';
+                            
+                            setTimeout(() => {
+                                this.loginModalInstance.hide();
+                                this.loginForm = { email: '', password: '' };
+                                this.loginMessage = '';
+                            }, 1500);
+                        } else {
+                            this.loginError = data.message || 'Login failed';
+                        }
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        this.loginError = 'An error occurred during login';
+                    }
+                },
+                
+                async handleUserRegister() {
+                    this.userRegisterError = '';
+                    this.userRegisterMessage = '';
+                    
+                    if (!this.userRegisterForm.name || !this.userRegisterForm.email || 
+                        !this.userRegisterForm.password || !this.userRegisterForm.confirmPassword) {
+                        this.userRegisterError = 'Please fill in all fields';
+                        return;
+                    }
+                    
+                    if (this.userRegisterForm.password !== this.userRegisterForm.confirmPassword) {
+                        this.userRegisterError = 'Passwords do not match';
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch('api/user_register.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(this.userRegisterForm)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.userRegisterMessage = 'Account created successfully!';
+                            
+                            setTimeout(() => {
+                                this.registerModalInstance.hide();
+                                this.userRegisterForm = {
+                                    name: '',
+                                    email: '',
+                                    password: '',
+                                    confirmPassword: ''
+                                };
+                                this.userRegisterMessage = '';
+                                this.loginModalInstance.show();
+                            }, 1500);
+                        } else {
+                            this.userRegisterError = data.message || 'Registration failed';
+                        }
+                    } catch (error) {
+                        console.error('Registration error:', error);
+                        this.userRegisterError = 'An error occurred during registration';
+                    }
+                },
+                
+                async handleBusinessRegister() {
+                    this.businessRegisterError = '';
+                    this.businessRegisterMessage = '';
+                    
+                    if (!this.businessRegisterForm.name || !this.businessRegisterForm.email || 
+                        !this.businessRegisterForm.password || !this.businessRegisterForm.category ||
+                        !this.businessRegisterForm.address || !this.businessRegisterForm.description ||
+                        !this.businessRegisterForm.certificationCode) {
+                        this.businessRegisterError = 'Please fill in all fields';
+                        return;
+                    }
+                    
+                    const validCodes = ['GREEN2024', 'ECO2024', 'SUSTAIN2024'];
+                    if (!validCodes.includes(this.businessRegisterForm.certificationCode.toUpperCase())) {
+                        this.businessRegisterError = 'Invalid green certification code';
+                        return;
+                    }
+                    
+                    try {
+                        const verifyResponse = await fetch('api/verify_green_cert.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                code: this.businessRegisterForm.certificationCode,
+                                businessName: this.businessRegisterForm.name
+                            })
+                        });
+                        
+                        const verifyData = await verifyResponse.json();
+                        
+                        if (!verifyData.isValid) {
+                            this.businessRegisterError = 'Green certification could not be verified';
+                            return;
+                        }
+                        
+                        const response = await fetch('api/register_business.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(this.businessRegisterForm)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.businessRegisterMessage = 'Business successfully registered! Awaiting admin approval.';
+                            
+                            setTimeout(() => {
+                                this.registerBusinessModalInstance.hide();
+                                this.businessRegisterForm = {
+                                    name: '',
+                                    email: '',
+                                    password: '',
+                                    category: '',
+                                    address: '',
+                                    description: '',
+                                    certificationCode: ''
+                                };
+                                this.businessRegisterMessage = '';
+                                this.fetchBusinesses();
+                            }, 2500);
+                        } else {
+                            this.businessRegisterError = data.message || 'Registration failed';
+                        }
+                    } catch (error) {
+                        console.error('Business registration error:', error);
+                        this.businessRegisterError = 'An error occurred during registration';
+                    }
+                },
+                
+                logout() {
+                    this.isLoggedIn = false;
+                    this.userName = '';
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
