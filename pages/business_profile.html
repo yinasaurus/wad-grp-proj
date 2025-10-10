@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Profile - Green Business Directory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="fas fa-leaf me-2"></i>Green Business Directory
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="directory.html">Directory</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="about.html">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contact.html">Contact</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="auth-buttons d-flex align-items-center" v-if="!isLoggedIn">
+                        <a href="login.html" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </a>
+                    </div>
+                    
+                    <div class="auth-buttons d-flex align-items-center" v-else>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="partner-dashboard.html">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" @click.prevent="logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Loading State -->
+        <div v-if="!businessLoaded" class="container text-center py-5">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading business profile...</p>
+        </div>
+
+        <!-- Profile Content -->
+        <template v-if="businessLoaded">
+            <!-- Profile Hero -->
+            <div class="profile-hero">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="profile-image">
+                                <i :class="business.icon"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h1 class="mb-2">{{ business.name }}</h1>
+                            <p class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ business.address }}</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="badge bg-light text-dark">{{ business.category }}</span>
+                                <span v-for="cert in business.certifications" :key="cert" class="badge bg-success">
+                                    <i class="fas fa-certificate me-1"></i>{{ cert }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <a href="directory.html" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Directory
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="container mb-5">
+                <div class="row g-4">
+                    <!-- Left Column -->
+                    <div class="col-lg-8">
+                        <!-- About Section -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h3 class="mb-3"><i class="fas fa-info-circle me-2 text-success"></i>About</h3>
+                                <p>{{ business.description }}</p>
+                                <p class="mb-0">{{ business.longDescription }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Eco Practices -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h3 class="mb-3"><i class="fas fa-leaf me-2 text-success"></i>Eco-Friendly Practices</h3>
+                                <div v-for="(practice, index) in business.ecoPractices" :key="index" class="eco-practice-item">
+                                    <h5 class="mb-2"><i class="fas fa-check-circle me-2 text-success"></i>{{ practice.title }}</h5>
+                                    <p class="mb-0 text-muted">{{ practice.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Products/Services -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h3 class="mb-3"><i class="fas fa-box me-2 text-success"></i>Green Products & Services</h3>
+                                <div class="row g-3">
+                                    <div v-for="product in business.products" :key="product.name" class="col-md-6">
+                                        <div class="product-card">
+                                            <h5 class="mb-2">{{ product.name }}</h5>
+                                            <p class="text-muted mb-2">{{ product.description }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge" :class="product.available ? 'bg-success' : 'bg-secondary'">
+                                                    {{ product.available ? 'Available' : 'Out of Stock' }}
+                                                </span>
+                                                <small class="text-muted">{{ product.price }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Retail Locations -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h3 class="mb-3"><i class="fas fa-store me-2 text-success"></i>Retail Locations</h3>
+                                <div v-for="location in business.locations" :key="location.name" class="location-pin">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="mb-1"><i class="fas fa-map-marker-alt me-2 text-danger"></i>{{ location.name }}</h5>
+                                            <p class="text-muted mb-1">{{ location.address }}</p>
+                                            <small class="text-muted">{{ location.hours }}</small>
+                                        </div>
+                                        <a :href="location.mapLink" target="_blank" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-directions me-1"></i>Directions
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-lg-4">
+                        <!-- Sustainability Score -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4 text-center">
+                                <h4 class="mb-3">Sustainability Score</h4>
+                                <div class="sustainability-score">{{ business.sustainabilityScore }}/100</div>
+                                <div class="progress mt-3" style="height: 20px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         :style="{width: business.sustainabilityScore + '%'}"
+                                         :aria-valuenow="business.sustainabilityScore" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <p class="text-muted mt-3 mb-0">Excellent Environmental Performance</p>
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h4 class="mb-3">Impact Statistics</h4>
+                                <div class="stat-box mb-3">
+                                    <h3>{{ business.stats.carbonReduced }}</h3>
+                                    <small class="text-muted">Tons CO₂ Reduced</small>
+                                </div>
+                                <div class="stat-box mb-3">
+                                    <h3>{{ business.stats.wasteRecycled }}</h3>
+                                    <small class="text-muted">Waste Recycled</small>
+                                </div>
+                                <div class="stat-box mb-3">
+                                    <h3>{{ business.stats.energySaved }}</h3>
+                                    <small class="text-muted">Energy Saved</small>
+                                </div>
+                                <div class="stat-box">
+                                    <h3>{{ business.stats.waterSaved }}</h3>
+                                    <small class="text-muted">Water Conserved</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Certifications -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h4 class="mb-3">Certifications & Awards</h4>
+                                <div v-for="cert in business.fullCertifications" :key="cert.name" class="certification-card mb-3">
+                                    <h5 class="mb-2">
+                                        <i class="fas fa-award me-2 text-warning"></i>{{ cert.name }}
+                                    </h5>
+                                    <small class="text-muted d-block">Issued: {{ cert.issued }}</small>
+                                    <small class="text-muted d-block">Valid Until: {{ cert.expiry }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact -->
+                        <div class="card shadow-sm">
+                            <div class="card-body p-4">
+                                <h4 class="mb-3">Contact Information</h4>
+                                <p class="mb-2">
+                                    <i class="fas fa-phone me-2 text-success"></i>
+                                    <a :href="'tel:' + business.contact.phone">{{ business.contact.phone }}</a>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-envelope me-2 text-success"></i>
+                                    <a :href="'mailto:' + business.contact.email">{{ business.contact.email }}</a>
+                                </p>
+                                <p class="mb-3">
+                                    <i class="fas fa-globe me-2 text-success"></i>
+                                    <a :href="'https://' + business.contact.website" target="_blank">{{ business.contact.website }}</a>
+                                </p>
+                                <button class="btn btn-success w-100">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Message
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    isLoggedIn: false,
+                    userName: '',
+                    businessLoaded: false,
+                    business: null,
+                    allBusinessesData: {
+                        1: {
+                            id: 1,
+                            name: "EcoTech Solutions",
+                            icon: "fas fa-laptop-code",
+                            category: "Technology",
+                            address: "1 Marina Boulevard, Singapore 018989",
+                            description: "Leading provider of sustainable IT solutions and green technology services.",
+                            longDescription: "We specialize in helping businesses transition to eco-friendly technology infrastructure. Our services include energy-efficient data center solutions, carbon-neutral cloud computing, e-waste recycling programs, and sustainable IT consulting. Since 2015, we've helped over 500 companies reduce their carbon footprint while improving operational efficiency.",
+                            certifications: ["Green Mark Gold", "ISO 14001", "Carbon Neutral"],
+                            sustainabilityScore: 92,
+                            ecoPractices: [
+                                {
+                                    title: "100% Renewable Energy",
+                                    description: "All our operations run on solar and wind power, with zero reliance on fossil fuels."
+                                },
+                                {
+                                    title: "E-Waste Recycling Program",
+                                    description: "We recycle and refurbish electronic equipment, preventing 50 tons of e-waste annually."
+                                },
+                                {
+                                    title: "Carbon Offset Initiatives",
+                                    description: "We offset 150% of our carbon emissions through verified reforestation projects."
+                                },
+                                {
+                                    title: "Green Supply Chain",
+                                    description: "All our suppliers meet strict environmental standards and sustainability criteria."
+                                }
+                            ],
+                            products: [
+                                {
+                                    name: "Eco Server Hosting",
+                                    description: "Carbon-neutral cloud hosting",
+                                    price: "From $99/month",
+                                    available: true
+                                },
+                                {
+                                    name: "IT Sustainability Audit",
+                                    description: "Comprehensive assessment",
+                                    price: "$500",
+                                    available: true
+                                },
+                                {
+                                    name: "Green IT Consulting",
+                                    description: "Expert advisory services",
+                                    price: "$150/hour",
+                                    available: true
+                                },
+                                {
+                                    name: "Refurbished Equipment",
+                                    description: "Certified pre-owned devices",
+                                    price: "Varies",
+                                    available: false
+                                }
+                            ],
+                            locations: [
+                                {
+                                    name: "Marina Bay Office",
+                                    address: "1 Marina Boulevard, #12-01, Singapore 018989",
+                                    hours: "Mon-Fri: 9:00 AM - 6:00 PM",
+                                    mapLink: "#"
+                                },
+                                {
+                                    name: "Jurong Facility",
+                                    address: "50 Jurong Gateway Road, #05-01, Singapore 608549",
+                                    hours: "Mon-Fri: 8:00 AM - 5:00 PM",
+                                    mapLink: "#"
+                                }
+                            ],
+                            stats: {
+                                carbonReduced: "125",
+                                wasteRecycled: "95%",
+                                energySaved: "450 MWh",
+                                waterSaved: "2.5M L"
+                            },
+                            fullCertifications: [
+                                {
+                                    name: "BCA Green Mark Gold",
+                                    issued: "Jan 2023",
+                                    expiry: "Dec 2026"
+                                },
+                                {
+                                    name: "ISO 14001:2015",
+                                    issued: "Mar 2022",
+                                    expiry: "Mar 2025"
+                                },
+                                {
+                                    name: "Carbon Neutral Certified",
+                                    issued: "Jun 2023",
+                                    expiry: "Jun 2024"
+                                }
+                            ],
+                            contact: {
+                                phone: "+65 1234 5678",
+                                email: "info@ecotech.sg",
+                                website: "www.ecotech.sg"
+                            }
+                        },
+                        2: {
+                            id: 2,
+                            name: "Green Harvest Cafe",
+                            icon: "fas fa-leaf",
+                            category: "Food and Beverage",
+                            address: "100 Orchard Road, Singapore 238840",
+                            description: "Farm-to-table organic restaurant with sustainable practices.",
+                            longDescription: "Our cafe serves 100% organic, locally-sourced ingredients with a zero food waste policy. We compost all organic waste, use only biodegradable packaging, and support local farmers. Our menu changes seasonally to reduce carbon footprint and ensure the freshest ingredients.",
+                            certifications: ["Green Mark Certified", "Zero Waste", "Organic Certified"],
+                            sustainabilityScore: 88,
+                            ecoPractices: [
+                                {
+                                    title: "100% Organic Ingredients",
+                                    description: "All ingredients sourced from certified organic local farms."
+                                },
+                                {
+                                    title: "Zero Food Waste",
+                                    description: "Composting program and food donation to eliminate waste."
+                                },
+                                {
+                                    title: "Biodegradable Packaging",
+                                    description: "All takeaway containers are fully compostable."
+                                },
+                                {
+                                    title: "Water Conservation",
+                                    description: "Rainwater harvesting and grey water recycling systems."
+                                }
+                            ],
+                            products: [
+                                {
+                                    name: "Organic Breakfast Set",
+                                    description: "Farm-fresh eggs and vegetables",
+                                    price: "$18",
+                                    available: true
+                                },
+                                {
+                                    name: "Sustainable Coffee",
+                                    description: "Fair trade organic beans",
+                                    price: "$6",
+                                    available: true
+                                },
+                                {
+                                    name: "Zero-Waste Lunch Bowl",
+                                    description: "Seasonal local produce",
+                                    price: "$15",
+                                    available: true
+                                }
+                            ],
+                            locations: [
+                                {
+                                    name: "Orchard Outlet",
+                                    address: "100 Orchard Road, #01-05, Singapore 238840",
+                                    hours: "Daily: 8:00 AM - 9:00 PM",
+                                    mapLink: "#"
+                                }
+                            ],
+                            stats: {
+                                carbonReduced: "45",
+                                wasteRecycled: "100%",
+                                energySaved: "120 MWh",
+                                waterSaved: "800K L"
+                            },
+                            fullCertifications: [
+                                {
+                                    name: "Green Mark Certified",
+                                    issued: "Feb 2023",
+                                    expiry: "Feb 2026"
+                                },
+                                {
+                                    name: "Zero Waste Certification",
+                                    issued: "Jan 2023",
+                                    expiry: "Jan 2024"
+                                }
+                            ],
+                            contact: {
+                                phone: "+65 2345 6789",
+                                email: "hello@greenharvest.sg",
+                                website: "www.greenharvest.sg"
+                            }
+                        },
+                        3: {
+                            id: 3,
+                            name: "Solar Power Plus",
+                            icon: "fas fa-solar-panel",
+                            category: "Energy",
+                            address: "50 Jurong Gateway Road, Singapore 608549",
+                            description: "Renewable energy installations and solar panel solutions.",
+                            longDescription: "Leading provider of solar energy solutions for residential and commercial properties. We have installed over 500 solar systems across Singapore, generating over 50MW of clean energy annually. Our team of certified engineers ensures optimal system design and installation.",
+                            certifications: ["Green Mark Platinum", "BCA Green Mark", "ISO 50001"],
+                            sustainabilityScore: 95,
+                            ecoPractices: [
+                                {
+                                    title: "Clean Energy Generation",
+                                    description: "Installing solar systems that prevent 25,000 tons of CO2 annually."
+                                },
+                                {
+                                    title: "Recycling Program",
+                                    description: "100% recycling of old solar panels and equipment."
+                                },
+                                {
+                                    title: "Energy Storage Solutions",
+                                    description: "Battery systems to maximize renewable energy usage."
+                                },
+                                {
+                                    title: "Education Initiatives",
+                                    description: "Free workshops on renewable energy for communities."
+                                }
+                            ],
+                            products: [
+                                {
+                                    name: "Residential Solar System",
+                                    description: "Complete home installation",
+                                    price: "From $8,000",
+                                    available: true
+                                },
+                                {
+                                    name: "Commercial Solar Solutions",
+                                    description: "Large-scale installations",
+                                    price: "Custom Quote",
+                                    available: true
+                                },
+                                {
+                                    name: "Solar Maintenance",
+                                    description: "Annual service package",
+                                    price: "$500/year",
+                                    available: true
+                                }
+                            ],
+                            locations: [
+                                {
+                                    name: "Jurong Headquarters",
+                                    address: "50 Jurong Gateway Road, #10-15, Singapore 608549",
+                                    hours: "Mon-Fri: 9:00 AM - 6:00 PM",
+                                    mapLink: "#"
+                                },
+                                {
+                                    name: "East Branch",
+                                    address: "10 Tampines Central, #03-20, Singapore 529536",
+                                    hours: "Mon-Sat: 9:00 AM - 5:00 PM",
+                                    mapLink: "#"
+                                },
+                                {
+                                    name: "North Showroom",
+                                    address: "15 Woodlands Avenue, #01-10, Singapore 738322",
+                                    hours: "Tue-Sat: 10:00 AM - 6:00 PM",
+                                    mapLink: "#"
+                                }
+                            ],
+                            stats: {
+                                carbonReduced: "250",
+                                wasteRecycled: "98%",
+                                energySaved: "2,500 MWh",
+                                waterSaved: "500K L"
+                            },
+                            fullCertifications: [
+                                {
+                                    name: "Green Mark Platinum",
+                                    issued: "Apr 2022",
+                                    expiry: "Apr 2027"
+                                },
+                                {
+                                    name: "BCA Green Mark",
+                                    issued: "May 2022",
+                                    expiry: "May 2025"
+                                },
+                                {
+                                    name: "ISO 50001",
+                                    issued: "Jun 2022",
+                                    expiry: "Jun 2025"
+                                }
+                            ],
+                            contact: {
+                                phone: "+65 3456 7890",
+                                email: "contact@solarplus.sg",
+                                website: "www.solarplus.sg"
+                            }
+                        },
+                        4: {
+                            id: 4,
+                            name: "EcoMart Retail",
+                            icon: "fas fa-shopping-bag",
+                            category: "Retail",
+                            address: "10 Tampines Central, Singapore 529536",
+                            description: "Zero-waste retail store offering sustainable products.",
+                            longDescription: "Singapore's first zero-waste retail store. We offer package-free shopping with bulk bins, refill stations, and eco-friendly alternatives to everyday products. Our mission is to make sustainable living accessible and affordable for everyone.",
+                            certifications: ["Green Mark Gold", "Plastic-Free", "B Corp"],
+                            sustainabilityScore: 85,
+                            ecoPractices: [
+                                {
+                                    title: "Package-Free Shopping",
+                                    description: "Customers bring their own containers to reduce packaging waste."
+                                },
+                                {
+                                    title: "Plastic-Free Store",
+                                    description: "Zero single-use plastics throughout the entire store."
+                                },
+                                {
+                                    title: "Local Sourcing",
+                                    description: "80% of products sourced from local sustainable suppliers."
+                                },
+                                {
+                                    title: "Education Programs",
+                                    description: "Weekly workshops on sustainable living practices."
+                                }
+                            ],
+                            products: [
+                                {
+                                    name: "Bulk Food Items",
+                                    description: "Organic grains, nuts, and dried goods",
+                                    price: "Varies",
+                                    available: true
+                                },
+                                {
+                                    name: "Reusable Products",
+                                    description: "Bottles, bags, and containers",
+                                    price: "From $5",
+                                    available: true
+                                },
+                                {
+                                    name: "Natural Cleaning Products",
+                                    description: "Eco-friendly cleaning supplies",
+                                    price: "From $8",
+                                    available: true
+                                }
+                            ],
+                            locations: [
+                                {
+                                    name: "Tampines Outlet",
+                                    address: "10 Tampines Central, #02-15, Singapore 529536",
+                                    hours: "Daily: 10:00 AM - 9:00 PM",
+                                    mapLink: "#"
+                                },
+                                {
+                                    name: "Orchard Branch",
+                                    address: "100 Orchard Road, #B1-20, Singapore 238840",
+                                    hours: "Daily: 11:00 AM - 8:00 PM",
+                                    mapLink: "#"
+                                }
+                            ],
+                            stats: {
+                                carbonReduced: "60",
+                                wasteRecycled: "92%",
+                                energySaved: "180 MWh",
+                                waterSaved: "1.2M L"
+                            },
+                            fullCertifications: [
+                                {
+                                    name: "Green Mark Gold",
+                                    issued: "Aug 2023",
+                                    expiry: "Aug 2026"
+                                },
+                                {
+                                    name: "Plastic-Free Certified",
+                                    issued: "Sep 2023",
+                                    expiry: "Sep 2024"
+                                }
+                            ],
+                            contact: {
+                                phone: "+65 4567 8901",
+                                email: "info@ecomart.sg",
+                                website: "www.ecomart.sg"
+                            }
+                        },
+                        5: {
+                            id: 5,
+                            name: "GreenBuild Manufacturing",
+                            icon: "fas fa-industry",
+                            category: "Manufacturing",
+                            address: "15 Woodlands Industrial Park, Singapore 738322",
+                            description: "Sustainable manufacturing with eco-friendly materials.",
+                            longDescription: "We manufacture construction materials using recycled and sustainable resources. Our factory runs on 100% renewable energy and implements circular economy principles. We're committed to revolutionizing the construction industry with sustainable alternatives.",
+                            certifications: ["ISO 14001", "Carbon Neutral", "Cradle to Cradle"],
+                            sustainabilityScore: 90,
+                            ecoPractices: [
+                                {
+                                    title: "Recycled Materials",
+                                    description: "90% of our materials are recycled or sustainably sourced."
+                                },
+                                {
+                                    title: "Zero Emissions Factory",
+                                    description: "Carbon-neutral production powered by renewable energy."
+                                },
+                                {
+                                    title: "Circular Economy",
+                                    description: "Take-back program for end-of-life products."
+                                },
+                                {
+                                    title: "Water Recycling",
+                                    description: "95% of water used in production is recycled."
+                                }
+                            ],
+                            products: [
+                                {
+                                    name: "Eco Concrete Blocks",
+                                    description: "Recycled aggregate blocks",
+                                    price: "$5/block",
+                                    available: true
+                                },
+                                {
+                                    name: "Sustainable Insulation",
+                                    description: "Natural fiber insulation",
+                                    price: "$15/sqm",
+                                    available: true
+                                },
+                                {
+                                    name: "Recycled Steel",
+                                    description: "Construction-grade steel",
+                                    price: "Market Rate",
+                                    available: true
+                                }
+                            ],
+                            locations: [
+                                {
+                                    name: "Woodlands Factory",
+                                    address: "15 Woodlands Industrial Park, Singapore 738322",
+                                    hours: "Mon-Fri: 8:00 AM - 5:00 PM",
+                                    mapLink: "#"
+                                }
+                            ],
+                            stats: {
+                                carbonReduced: "180",
+                                wasteRecycled: "96%",
+                                energySaved: "800 MWh",
+                                waterSaved: "3.5M L"
+                            },
+                            fullCertifications: [
+                                {
+                                    name: "ISO 14001:2015",
+                                    issued: "Oct 2022",
+                                    expiry: "Oct 2025"
+                                },
+                                {
+                                    name: "Carbon Neutral Certified",
+                                    issued: "Nov 2022",
+                                    expiry: "Nov 2024"
+                                }
+                            ],
+                            contact: {
+                                phone: "+65 5678 9012",
+                                email: "contact@greenbuild.sg",
+                                website: "www.greenbuild.sg"
+                            }
+                        },
+                        6: {
+                            id: 6,
+                            name: "Eco Consulting Services",
+                            icon: "fas fa-briefcase",
+                            category: "Services",
+                            address: "20 Cecil Street, Singapore 049705",
+                            description: "Environmental consulting and sustainability advisory services.",
+                            longDescription: "We help businesses achieve their sustainability goals through expert consulting, audits, and strategic planning. Our team of environmental specialists has helped over 200 companies reduce their environmental impact while improving profitability.",
+                            certifications: ["Green Mark Certified", "B Corp", "ISO 14001"],
+                            sustainabilityScore: 87,
+                            ecoPractices: [
+                                {
+                                    title: "Carbon Footprint Analysis",
+                                    description: "Comprehensive assessments to identify reduction opportunities."
+                                },
+                                {
+                                    title: "Sustainability Strategy",
+                                    description: "Custom roadmaps for achieving environmental goals."
+                                },
+                                {
+                                    title: "Green Certifications",
+                                    description: "Guidance through certification processes."
+                                },
+                                {
+                                    title: "Employee Training",
+                                    description: "Sustainability workshops and education programs."
+                                }
+                            ],
+                            products: [
+                                {
+                                    name: "Sustainability Audit",
+                                    description: "Complete environmental assessment",
+                                    price: "$2,500",
+                                    available: true
+                                },
+                                {
+                                    name: "Strategy Development",
+                                    description: "Custom sustainability roadmap",
+                                    price: "$5,000",
+                                    available: true
+                                },
+                                {
+                                    name: "Ongoing Consulting",
+                                    description: "Monthly advisory services",
+                                    price: "$1,000/month",
+                                    available: true
+                                }
+                            ],
+                            locations: [
+                                {
+                                    name: "Cecil Street Office",
+                                    address: "20 Cecil Street, #15-01, Singapore 049705",
+                                    hours: "Mon-Fri: 9:00 AM - 6:00 PM",
+                                    mapLink: "#"
+                                }
+                            ],
+                            stats: {
+                                carbonReduced: "300",
+                                wasteRecycled: "85%",
+                                energySaved: "200 MWh",
+                                waterSaved: "1M L"
+                            },
+                            fullCertifications: [
+                                {
+                                    name: "Green Mark Certified",
+                                    issued: "Dec 2022",
+                                    expiry: "Dec 2025"
+                                },
+                                {
+                                    name: "B Corp Certified",
+                                    issued: "Jan 2023",
+                                    expiry: "Jan 2026"
+                                }
+                            ],
+                            contact: {
+                                phone: "+65 6789 0123",
+                                email: "hello@ecoconsult.sg",
+                                website: "www.ecoconsult.sg"
+                            }
+                        }
+                    }
+                }
+            },
+            mounted() {
+                this.checkLoginStatus();
+                this.loadBusinessFromUrl();
+            },
+            methods: {
+                checkLoginStatus() {
+                    const user = sessionStorage.getItem('currentUser');
+                    if (user) {
+                        const userData = JSON.parse(user);
+                        this.isLoggedIn = true;
+                        this.userName = userData.name;
+                    }
+                },
+                loadBusinessFromUrl() {
+                    const params = new URLSearchParams(window.location.search);
+                    const businessId = parseInt(params.get('id') || '1');
+                    
+                    console.log('Loading business profile for ID:', businessId);
+                    console.log('Available business IDs:', Object.keys(this.allBusinessesData));
+                    
+                    if (this.allBusinessesData[businessId]) {
+                        this.business = this.allBusinessesData[businessId];
+                        this.businessLoaded = true;
+                        console.log('Successfully loaded business:', this.business.name);
+                    } else {
+                        console.error('Business not found for ID:', businessId);
+                        alert('Business not found. Redirecting to directory...');
+                        window.location.href = 'directory.html';
+                    }
+                },
+                logout() {
+                    sessionStorage.removeItem('currentUser');
+                    this.isLoggedIn = false;
+                    this.userName = '';
+                    window.location.href = 'index.html';
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
