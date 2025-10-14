@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Business Directory - Singapore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="fas fa-leaf me-2"></i>Green Business Directory
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="directory.html">Directory</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="about.html">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contact.html">Contact</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="auth-buttons d-flex align-items-center" v-if="!isLoggedIn">
+                        <a href="login.html" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </a>
+                        <a href="register.html" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                        <div class="dropdown ms-2">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-building me-1"></i>For Businesses
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="register_business.html">
+                                    <i class="fas fa-store me-2"></i>Register Green Business
+                                </a></li>
+                                <li><a class="dropdown-item" href="login.html">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Business Sign In
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="auth-buttons d-flex align-items-center" v-else>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="register_business.html">
+                                    <i class="fas fa-plus me-2"></i>Add Business
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" @click.prevent="logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- hero section -->
+        <div class="hero-section">
+            <div class="container text-center">
+                <h1><i class="fas fa-leaf me-3"></i>Discover Green Businesses in Singapore</h1>
+                <p class="lead">Connect with certified sustainable businesses committed to environmental excellence</p>
+                <div class="mt-4">
+                    <a href="directory.html" class="btn btn-light btn-lg me-3">
+                        <i class="fas fa-search me-2"></i>Browse Directory
+                    </a>
+                    <a href="register_business.html" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-store me-2"></i>List Your Business
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- stats section -->
+        <div class="container">
+            <div class="stats-section">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ businessCount }}+</div>
+                            <div class="stat-label">Certified Businesses</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <div class="stat-number">6</div>
+                            <div class="stat-label">Categories</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">Verified Green</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- features section -->
+        <div class="container mt-5 mb-5 fade-in fade-in-visible">
+            <h2 class="text-center mb-5" style="color: var(--primary-green); font-weight: 700;">
+                Why Choose Green Businesses?
+            </h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-certificate fa-3x"></i>
+                        <h4 class="mt-3 mb-3">Verified Certifications</h4>
+                        <p class="text-muted">Every business is validated with genuine environmental certifications</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-leaf fa-3x"></i>
+                        <h4 class="mt-3 mb-3">Sustainable Practices</h4>
+                        <p class="text-muted">Supporting businesses committed to reducing environmental impact</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-map-marked-alt fa-3x"></i>
+                        <h4 class="mt-3 mb-3">Local & Accessible</h4>
+                        <p class="text-muted">Find eco-friendly businesses conveniently located near you</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Preview -->
+        <div class="container mt-5 mb-5 fade-in fade-in-visible">
+            <h2 class="text-center mb-5" style="color: var(--primary-green); font-weight: 700;">
+                Browse by Category
+            </h2>
+            <div class="row g-3">
+                <!-- vue loop with specific icons for each category -->
+                <div class="col-md-4" v-for="cat in categories.filter(c => c !== 'all')" :key="cat">
+                    <a :href="'directory.html?category=' + cat" class="text-decoration-none">
+                        <div class="feature-card">
+                            <i :class="getCategoryIcon(cat) + ' fa-2x'"></i>
+                            <h5 class="mt-3">{{ cat }}</h5>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- call to action -->
+        <div class="container mt-5 mb-5 fade-in fade-in-visible">
+            <div class="hero-section" style="border-radius: 15px; padding: 60px 20px;">
+                <div class="text-center">
+                    <h2 class="mb-4">Ready to Go Green?</h2>
+                    <p class="lead mb-4">Join our community of sustainable businesses today</p>
+                    <a href="register_business.html" class="btn btn-light btn-lg">
+                        <i class="fas fa-rocket me-2"></i>Register Your Business
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    isLoggedIn: false,
+                    userName: '',
+                    businessCount: 150,
+                    categories: [
+                        'all', 
+                        'Technology', 
+                        'Food and Beverage', 
+                        'Energy', 
+                        'Retail', 
+                        'Manufacturing', 
+                        'Services'
+                    ]
+                }
+            },
+            mounted() {
+                this.checkLoginStatus();
+            },
+            methods: {
+                checkLoginStatus() {
+                    const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                    if (user) {
+                        this.isLoggedIn = true;
+                        this.userName = user.name;
+                    }
+                },
+                logout() {
+                    localStorage.removeItem('currentUser');
+                    this.isLoggedIn = false;
+                    this.userName = '';
+                    window.location.reload();
+                },
+                /**
+                 * Returns the appropriate Font Awesome icon class for each category
+                 * @param {string} category - The category name
+                 * @returns {string} Font Awesome icon class
+                 */
+                getCategoryIcon(category) {
+                    const iconMap = {
+                        'Technology': 'fas fa-laptop-code',
+                        'Food and Beverage': 'fas fa-utensils',
+                        'Energy': 'fas fa-bolt',
+                        'Retail': 'fas fa-shopping-bag',
+                        'Manufacturing': 'fas fa-industry',
+                        'Services': 'fas fa-hands-helping'
+                    };
+                    return iconMap[category] || 'fas fa-building';
+                }
+            }
+        }).mount('#app');
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            const elements = document.querySelectorAll(".fade-in");
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.2 });
+            elements.forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>
