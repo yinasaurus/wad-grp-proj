@@ -6,7 +6,155 @@
     <title>Business Profile - Green Business Directory</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .profile-hero {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #4caf50;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .sustainability-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        .stat-box {
+            padding: 1rem;
+            background: #f1f8e9;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-box h3 {
+            color: #2e7d32;
+            margin: 0;
+        }
+        
+        .eco-practice-item {
+            padding: 1rem;
+            background: #f1f8e9;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .product-card {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            height: 100%;
+            transition: all 0.3s;
+        }
+        
+        .product-card:hover {
+            background: #e8f5e9;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .location-pin {
+            padding: 1rem;
+            background: #f1f8e9;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .certification-card {
+            padding: 1rem;
+            background: #fff3e0;
+            border-radius: 10px;
+        }
+        
+        .comparison-wrapper {
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .comparison-box {
+            padding: 0.75rem;
+            border-radius: 10px;
+            height: 100%;
+        }
+        
+        .green-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 2px solid #4caf50;
+        }
+        
+        .conventional-box {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border: 2px solid #f44336;
+        }
+        
+        .metric-item {
+            margin-bottom: 0.4rem;
+            padding: 0.4rem 0.5rem;
+            background: rgba(255,255,255,0.6);
+            border-radius: 5px;
+        }
+        
+        .metric-item small {
+            font-size: 0.7rem;
+            line-height: 1.2;
+        }
+        
+        .metric-item strong {
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+        
+        .savings-highlight {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #ff9800;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -124,20 +272,68 @@
                             </div>
                         </div>
 
-                        <!-- Products/Services -->
+                        <!-- Products/Services with Comparison -->
                         <div class="card shadow-sm mb-4">
                             <div class="card-body p-4">
                                 <h3 class="mb-3"><i class="fas fa-box me-2 text-success"></i>Green Products & Services</h3>
                                 <div class="row g-3">
                                     <div v-for="product in business.products" :key="product.name" class="col-md-6">
                                         <div class="product-card">
-                                            <h5 class="mb-2">{{ product.name }}</h5>
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="mb-0">{{ product.name }}</h5>
+                                                <button 
+                                                    v-if="product.comparison"
+                                                    class="btn btn-sm btn-outline-success"
+                                                    @click="toggleComparison(product.name)">
+                                                    <i class="fas fa-chart-bar me-1"></i>Compare
+                                                </button>
+                                            </div>
                                             <p class="text-muted mb-2">{{ product.description }}</p>
-                                            <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <span class="badge" :class="product.available ? 'bg-success' : 'bg-secondary'">
                                                     {{ product.available ? 'Available' : 'Out of Stock' }}
                                                 </span>
                                                 <small class="text-muted">{{ product.price }}</small>
+                                            </div>
+                                            
+                                            <!-- Comparison Section -->
+                                            <div v-if="product.comparison && showComparison[product.name]" class="comparison-wrapper mt-3 pt-3" style="border-top: 2px dashed #4caf50;">
+                                                <h6 class="text-success mb-3">
+                                                    <i class="fas fa-leaf me-2"></i>Environmental Impact Comparison
+                                                </h6>
+                                                
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-6">
+                                                        <div class="comparison-box green-box">
+                                                            <div class="text-center mb-2">
+                                                                <i class="fas fa-check-circle text-success fs-4"></i>
+                                                                <div class="fw-bold text-success small">GREEN PRODUCT</div>
+                                                            </div>
+                                                            <div class="metric-item" v-for="(value, key) in product.comparison.green" :key="key">
+                                                                <small class="text-muted d-block">{{ formatMetricName(key) }}</small>
+                                                                <strong class="text-success">{{ value }}</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="comparison-box conventional-box">
+                                                            <div class="text-center mb-2">
+                                                                <i class="fas fa-times-circle text-danger fs-4"></i>
+                                                                <div class="fw-bold text-danger small">CONVENTIONAL</div>
+                                                            </div>
+                                                            <div class="metric-item" v-for="(value, key) in product.comparison.conventional" :key="key">
+                                                                <small class="text-muted d-block">{{ formatMetricName(key) }}</small>
+                                                                <strong class="text-danger">{{ value }}</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="savings-highlight">
+                                                    <i class="fas fa-award me-2 text-warning"></i>
+                                                    <strong>Annual Savings:</strong>
+                                                    <span class="text-success">{{ product.comparison.savings }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -258,6 +454,7 @@
                     userName: '',
                     businessLoaded: false,
                     business: null,
+                    showComparison: {},
                     allBusinessesData: {
                         1: {
                             id: 1,
@@ -292,7 +489,20 @@
                                     name: "Eco Server Hosting",
                                     description: "Carbon-neutral cloud hosting",
                                     price: "From $99/month",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            energyUse: "50 kWh/month",
+                                            co2Emissions: "0 kg CO₂",
+                                            renewableEnergy: "100%"
+                                        },
+                                        conventional: {
+                                            energyUse: "180 kWh/month",
+                                            co2Emissions: "95 kg CO₂",
+                                            renewableEnergy: "0%"
+                                        },
+                                        savings: "130 kWh & 95 kg CO₂ per month"
+                                    }
                                 },
                                 {
                                     name: "IT Sustainability Audit",
@@ -310,7 +520,20 @@
                                     name: "Refurbished Equipment",
                                     description: "Certified pre-owned devices",
                                     price: "Varies",
-                                    available: false
+                                    available: false,
+                                    comparison: {
+                                        green: {
+                                            co2Emissions: "45 kg CO₂",
+                                            eWaste: "0 kg",
+                                            waterUsage: "15 L"
+                                        },
+                                        conventional: {
+                                            co2Emissions: "280 kg CO₂",
+                                            eWaste: "8 kg",
+                                            waterUsage: "450 L"
+                                        },
+                                        savings: "235 kg CO₂, 8 kg e-waste, 435 L water saved"
+                                    }
                                 }
                             ],
                             locations: [
@@ -389,13 +612,39 @@
                                     name: "Organic Breakfast Set",
                                     description: "Farm-fresh eggs and vegetables",
                                     price: "$18",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            co2Emissions: "0.5 kg CO₂",
+                                            waterUsage: "25 L",
+                                            pesticides: "0 g"
+                                        },
+                                        conventional: {
+                                            co2Emissions: "2.8 kg CO₂",
+                                            waterUsage: "85 L",
+                                            pesticides: "45 g"
+                                        },
+                                        savings: "2.3 kg CO₂, 60 L water, 45 g pesticides per meal"
+                                    }
                                 },
                                 {
                                     name: "Sustainable Coffee",
                                     description: "Fair trade organic beans",
                                     price: "$6",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            co2Emissions: "0.2 kg CO₂",
+                                            waterUsage: "140 L",
+                                            deforestation: "0 m²"
+                                        },
+                                        conventional: {
+                                            co2Emissions: "1.1 kg CO₂",
+                                            waterUsage: "280 L",
+                                            deforestation: "2.5 m²"
+                                        },
+                                        savings: "0.9 kg CO₂, 140 L water, 2.5 m² forest per kg"
+                                    }
                                 },
                                 {
                                     name: "Zero-Waste Lunch Bowl",
@@ -469,13 +718,39 @@
                                     name: "Residential Solar System",
                                     description: "Complete home installation",
                                     price: "From $8,000",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            energyCost: "$30/month",
+                                            co2Emissions: "0 kg CO₂/year",
+                                            gridDependency: "10%"
+                                        },
+                                        conventional: {
+                                            energyCost: "$180/month",
+                                            co2Emissions: "4,200 kg CO₂/year",
+                                            gridDependency: "100%"
+                                        },
+                                        savings: "$1,800/year & 4,200 kg CO₂ annually"
+                                    }
                                 },
                                 {
                                     name: "Commercial Solar Solutions",
                                     description: "Large-scale installations",
                                     price: "Custom Quote",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            energyCost: "$500/month",
+                                            co2Emissions: "0 kg CO₂/year",
+                                            paybackPeriod: "5-7 years"
+                                        },
+                                        conventional: {
+                                            energyCost: "$3,500/month",
+                                            co2Emissions: "48,000 kg CO₂/year",
+                                            paybackPeriod: "N/A"
+                                        },
+                                        savings: "$36,000/year & 48 tons CO₂ annually"
+                                    }
                                 },
                                 {
                                     name: "Solar Maintenance",
@@ -566,13 +841,39 @@
                                     name: "Bulk Food Items",
                                     description: "Organic grains, nuts, and dried goods",
                                     price: "Varies",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            packaging: "0 g plastic",
+                                            co2Emissions: "0.3 kg CO₂/kg",
+                                            transportDistance: "50 km avg"
+                                        },
+                                        conventional: {
+                                            packaging: "85 g plastic",
+                                            co2Emissions: "1.8 kg CO₂/kg",
+                                            transportDistance: "2,500 km avg"
+                                        },
+                                        savings: "85 g plastic & 1.5 kg CO₂ per kg of food"
+                                    }
                                 },
                                 {
                                     name: "Reusable Products",
                                     description: "Bottles, bags, and containers",
                                     price: "From $5",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            lifespan: "5+ years",
+                                            plasticSaved: "1,500 items",
+                                            co2Emissions: "2 kg CO₂"
+                                        },
+                                        conventional: {
+                                            lifespan: "Single use",
+                                            plasticSaved: "0 items",
+                                            co2Emissions: "450 kg CO₂"
+                                        },
+                                        savings: "1,500 single-use items & 448 kg CO₂ over 5 years"
+                                    }
                                 },
                                 {
                                     name: "Natural Cleaning Products",
@@ -652,13 +953,39 @@
                                     name: "Eco Concrete Blocks",
                                     description: "Recycled aggregate blocks",
                                     price: "$5/block",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            co2Emissions: "8 kg CO₂/m³",
+                                            recycledContent: "65%",
+                                            strength: "40 MPa"
+                                        },
+                                        conventional: {
+                                            co2Emissions: "410 kg CO₂/m³",
+                                            recycledContent: "0%",
+                                            strength: "40 MPa"
+                                        },
+                                        savings: "402 kg CO₂ per cubic meter"
+                                    }
                                 },
                                 {
                                     name: "Sustainable Insulation",
                                     description: "Natural fiber insulation",
                                     price: "$15/sqm",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            co2Emissions: "5 kg CO₂/m²",
+                                            embodiedEnergy: "26 MJ/m²",
+                                            biodegradable: "Yes"
+                                        },
+                                        conventional: {
+                                            co2Emissions: "45 kg CO₂/m²",
+                                            embodiedEnergy: "250 MJ/m²",
+                                            biodegradable: "No"
+                                        },
+                                        savings: "40 kg CO₂ & 224 MJ per square meter"
+                                    }
                                 },
                                 {
                                     name: "Recycled Steel",
@@ -732,7 +1059,20 @@
                                     name: "Sustainability Audit",
                                     description: "Complete environmental assessment",
                                     price: "$2,500",
-                                    available: true
+                                    available: true,
+                                    comparison: {
+                                        green: {
+                                            avgCO2Reduction: "35%",
+                                            costSavings: "$15K/year",
+                                            roi: "6 months"
+                                        },
+                                        conventional: {
+                                            avgCO2Reduction: "0%",
+                                            costSavings: "$0/year",
+                                            roi: "N/A"
+                                        },
+                                        savings: "Typical client saves 150 tons CO₂ & $15K annually"
+                                    }
                                 },
                                 {
                                     name: "Strategy Development",
@@ -795,22 +1135,84 @@
                         this.userName = userData.name;
                     }
                 },
-                loadBusinessFromUrl() {
-                    const params = new URLSearchParams(window.location.search);
-                    const businessId = parseInt(params.get('id') || '1');
-                    
-                    console.log('Loading business profile for ID:', businessId);
-                    console.log('Available business IDs:', Object.keys(this.allBusinessesData));
-                    
-                    if (this.allBusinessesData[businessId]) {
-                        this.business = this.allBusinessesData[businessId];
-                        this.businessLoaded = true;
-                        console.log('Successfully loaded business:', this.business.name);
-                    } else {
-                        console.error('Business not found for ID:', businessId);
-                        alert('Business not found. Redirecting to directory...');
-                        window.location.href = 'directory.html';
-                    }
+                async loadBusinessFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const businessId = parseInt(params.get('id') || '1');
+    
+    console.log('Loading business ID:', businessId);
+    
+    try {
+        const response = await fetch(`api/data.php?action=get_business&id=${businessId}`);
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        console.log('Full API Response:', JSON.stringify(data, null, 2));
+        
+        if (data && data.success === true && data.business) {
+            console.log('Setting business data:', data.business);
+            
+            this.business = { ...data.business };
+            
+            // Add icon based on category
+            const categoryIcons = {
+                'Technology': 'fas fa-laptop-code',
+                'Food and Beverage': 'fas fa-leaf',
+                'Food & Beverage': 'fas fa-leaf',
+                'Energy': 'fas fa-solar-panel',
+                'Retail': 'fas fa-shopping-bag',
+                'Manufacturing': 'fas fa-industry',
+                'Services': 'fas fa-briefcase'
+            };
+            
+            this.business.icon = categoryIcons[this.business.category] || 'fas fa-building';
+            
+            this.businessLoaded = true;
+            console.log('Business loaded successfully');
+        } else {
+            console.error('Invalid response format. Expected success:true and business object', data);
+            alert('Business not found. Redirecting to directory...');
+            setTimeout(() => window.location.href = 'directory.html', 1000);
+        }
+    } catch (error) {
+        console.error('Error loading business:', error);
+        alert('Error loading business profile: ' + error.message);
+        setTimeout(() => window.location.href = 'directory.html', 1000);
+    }
+},
+                toggleComparison(productName) {
+                    this.showComparison[productName] = !this.showComparison[productName];
+                },
+                formatMetricName(key) {
+                    const nameMap = {
+                        energyUse: 'Energy Use',
+                        co2Emissions: 'CO₂ Emissions',
+                        renewableEnergy: 'Renewable Energy',
+                        eWaste: 'E-Waste',
+                        waterUsage: 'Water Usage',
+                        pesticides: 'Pesticides',
+                        deforestation: 'Deforestation',
+                        energyCost: 'Energy Cost',
+                        gridDependency: 'Grid Dependency',
+                        paybackPeriod: 'Payback Period',
+                        packaging: 'Packaging',
+                        transportDistance: 'Transport Distance',
+                        lifespan: 'Lifespan',
+                        plasticSaved: 'Plastic Saved',
+                        recycledContent: 'Recycled Content',
+                        strength: 'Strength',
+                        embodiedEnergy: 'Embodied Energy',
+                        biodegradable: 'Biodegradable',
+                        avgCO2Reduction: 'Avg CO₂ Reduction',
+                        costSavings: 'Cost Savings',
+                        roi: 'ROI'
+                    };
+                    return nameMap[key] || key;
                 },
                 logout() {
                     sessionStorage.removeItem('currentUser');

@@ -10,7 +10,6 @@
 </head>
 <body>
     <div id="app">
-        <!-- Navigation -->
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
                 <a class="navbar-brand" href="index.html">
@@ -35,36 +34,51 @@
                         </li>
                     </ul>
                     
-                    <div class="auth-buttons d-flex align-items-center" v-if="!isLoggedIn">
-                        <a href="login.html" class="btn btn-outline-light btn-sm">
-                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
-                        </a>
-                        <a href="register.html" class="btn btn-outline-light btn-sm">
-                            <i class="fas fa-user-plus me-1"></i>Register
-                        </a>
-                    </div>
-                    
-                    <div class="auth-buttons d-flex align-items-center" v-else>
-                        <div class="dropdown">
-                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i>{{ userName }}
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="register_business.html">
-                                    <i class="fas fa-plus me-2"></i>Add Business
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#" @click.prevent="logout">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </a></li>
-                            </ul>
-                        </div>
+                    <div class="auth-block">
+                        <template v-if="!isLoggedIn">
+                            <a href="login.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                            </a>
+                            <a href="register.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                        </template>
+                        
+                        <template v-else>
+                            <div class="position-relative" style="cursor: pointer;" @click="goToNotifications">
+                                <i class="fas fa-bell fa-lg text-white"></i>
+                                <span class="notification-badge" v-if="unreadCount > 0">{{ unreadCount }}</span>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item fw-bold" href="user_account.html">
+                                        <i class="fas fa-tachometer-alt me-2"></i>My Dashboard
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="user_account.html#interests">
+                                        <i class="fas fa-heart me-2"></i>My Interests
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="user_account.html#settings">
+                                        <i class="fas fa-cog me-2"></i>Settings
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="register_business.html">
+                                        <i class="fas fa-plus me-2"></i>List Your Business
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" @click.prevent="logout">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
         </nav>
 
-        <!-- Hero Section -->
         <div class="hero-section">
             <div class="container">
                 <h1><i class="fas fa-envelope me-3"></i>Get In Touch</h1>
@@ -72,7 +86,6 @@
             </div>
         </div>
 
-        <!-- Contact Section -->
         <div class="container">
     <div class="contact-container">
         <div class="contact-card">
@@ -187,14 +200,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="auth.js"></script>
     <script>
         const { createApp } = Vue;
 
         createApp({
+            mixins: [authMixin],
             data() {
                 return {
-                    isLoggedIn: false,
-                    userName: '',
                     contactForm: {
                         name: '',
                         email: '',
@@ -208,23 +221,13 @@
                 }
             },
             mounted() {
-                this.checkLoginStatus();
+                // authMixin calls checkLoginStatus()
                 this.prefillUserData();
             },
             methods: {
-                checkLoginStatus() {
-                    const user = sessionStorage.getItem('currentUser');
-                    if (user) {
-                        const userData = JSON.parse(user);
-                        this.isLoggedIn = true;
-                        this.userName = userData.name;
-                    }
-                },
-                
                 prefillUserData() {
-                    const user = sessionStorage.getItem('currentUser');
-                    if (user) {
-                        const userData = JSON.parse(user);
+                    if (this.isLoggedIn) {
+                        const userData = JSON.parse(sessionStorage.getItem('currentUser'));
                         this.contactForm.name = userData.name || '';
                         this.contactForm.email = userData.email || '';
                     }
@@ -247,51 +250,24 @@
 
                     this.isLoading = true;
                     
+                    // --- API call simulation ---
                     try {
-                        const response = await fetch('api/contact.php', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify(this.contactForm)
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            this.successMessage = 'Thank you! Your message has been sent successfully. We\'ll get back to you soon.';
-                            this.contactForm = {
-                                name: '',
-                                email: '',
-                                phone: '',
-                                subject: '',
-                                message: ''
-                            };
-                            this.prefillUserData();
-                        } else {
-                            this.errorMessage = data.message || 'Failed to send message';
-                        }
-                    } catch (error) {
-                        console.error('Contact form error:', error);
-                        
-                        // Demo mode - simulate successful submission
+                        // In a real app, you'd fetch data here
+                        // Simulating successful submission for demo
                         this.successMessage = 'Thank you! Your message has been sent successfully. We\'ll get back to you soon.';
                         this.contactForm = {
-                            name: '',
-                            email: '',
+                            name: this.contactForm.name, // Keep name/email if logged in
+                            email: this.contactForm.email,
                             phone: '',
                             subject: '',
                             message: ''
                         };
-                        this.prefillUserData();
+                        this.prefillUserData(); // Re-prefill name/email
+                    } catch (error) {
+                        this.errorMessage = 'A network or server error occurred. Please try again.';
                     } finally {
                         this.isLoading = false;
                     }
-                },
-                
-                logout() {
-                    sessionStorage.removeItem('currentUser');
-                    this.isLoggedIn = false;
-                    this.userName = '';
-                    window.location.href = 'index.html';
                 }
             }
         }).mount('#app');

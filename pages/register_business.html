@@ -6,45 +6,105 @@
     <title>Register Green Business - Green Business Directory</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    
-   
+    <style>
+        :root {
+            --primary-green: #2d5016;
+            --accent-green: #6ba539;
+            --light-green: #9bc15d;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: rgba(45, 80, 22, 0.95) !important;
+        }
+
+        .register-container {
+            padding: 40px 20px;
+        }
+
+        .register-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 50px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .register-header i {
+            font-size: 60px;
+            color: var(--accent-green);
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: var(--primary-green);
+            border-bottom: 2px solid var(--accent-green);
+            padding-bottom: 10px;
+            margin: 30px 0 20px 0;
+        }
+
+        .category-checkbox {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .category-checkbox:hover {
+            border-color: var(--accent-green);
+            background-color: #f8f9fa;
+        }
+
+        .category-checkbox input:checked + label {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, var(--accent-green), var(--light-green));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid var(--accent-green);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
-                <a class="navbar-brand" href="index.html" style="color: var(--primary-green);">
+                <a class="navbar-brand" href="index.html">
                     <i class="fas fa-leaf me-2"></i>Green Business Directory
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.html">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="directory.html">Directory</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="about.html">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="contact.html">Contact</a>
-                        </li>
-                    </ul>
-                    
-                    <div class="auth-buttons d-flex align-items-center">
-                        <a href="login.html" class="btn btn-outline-light btn-sm me-2">
-                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
-                        </a>
-                        <a href="register.html" class="btn btn-success btn-sm">
-                            <i class="fas fa-user-plus me-1"></i>Register
-                        </a>
-                    </div>
-                </div>
             </div>
         </nav>
 
@@ -59,10 +119,7 @@
 
                     <div class="info-box">
                         <i class="fas fa-info-circle me-2"></i>
-                        <strong>Verification:</strong> We use real-time APIs to verify your certification. Please use the official certificate number for: 
-                        <span class="badge bg-success ms-2">ISO 14001</span>
-                        <span class="badge bg-success ms-1">BCA Green Mark</span>
-                        <span class="badge bg-success ms-1">SEC Green Label</span>
+                        <strong>Verification:</strong> We use real-time APIs to verify your certification.
                     </div>
 
                     <form @submit.prevent="handleRegister">
@@ -73,100 +130,41 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Business Name *</label>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    v-model="registerForm.name" 
-                                    placeholder="Your business name"
-                                    required>
+                                <input type="text" class="form-control" v-model="registerForm.name" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Contact Email *</label>
-                                <input 
-                                    type="email" 
-                                    class="form-control" 
-                                    v-model="registerForm.email" 
-                                    placeholder="business@email.com"
-                                    required>
+                                <input type="email" class="form-control" v-model="registerForm.email" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Password *</label>
-                                <input 
-                                    type="password" 
-                                    class="form-control" 
-                                    v-model="registerForm.password" 
-                                    placeholder="Create a password"
-                                    required>
+                                <input type="password" class="form-control" v-model="registerForm.password" minlength="6" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Phone Number</label>
-                                <input 
-                                    type="tel" 
-                                    class="form-control" 
-                                    v-model="registerForm.phone" 
-                                    placeholder="+65 1234 5678">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Business Address (Singapore) *</label>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    v-model="registerForm.address" 
-                                    placeholder="Full business address in Singapore"
-                                    required>
+                                <input type="tel" class="form-control" v-model="registerForm.phone">
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-bold">Business Description *</label>
-                                <textarea 
-                                    class="form-control" 
-                                    rows="4" 
-                                    v-model="registerForm.description" 
-                                    placeholder="Describe your green business, sustainable practices, and environmental initiatives..."
-                                    maxlength="500"
-                                    required></textarea>
+                                <textarea class="form-control" rows="4" v-model="registerForm.description" maxlength="500" required></textarea>
                                 <small class="text-muted">{{ registerForm.description.length }}/500 characters</small>
                             </div>
                         </div>
 
                         <h5 class="section-title">
-                            <i class="fas fa-tag me-2"></i>Business Categories * (Select all that apply)
+                            <i class="fas fa-tag me-2"></i>Business Category *
                         </h5>
 
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-4" v-for="cat in availableCategories" :key="cat.name">
-                                <div class="category-checkbox">
-                                    <div class="form-check">
-                                        <input 
-                                            class="form-check-input" 
-                                            type="checkbox" 
-                                            :id="'cat-' + cat.name"
-                                            :value="cat.name"
-                                            v-model="registerForm.categories">
-                                        <label class="form-check-label w-100" :for="'cat-' + cat.name" style="cursor: pointer;">
-                                            <div class="text-center">
-                                                <i :class="cat.icon + ' category-icon'"></i>
-                                                <div>{{ cat.name }}</div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div v-if="registerForm.categories.length > 0" class="alert alert-info">
-                            <strong><i class="fas fa-check-circle me-2"></i>Selected Categories:</strong>
-                            <div class="selected-categories">
-                                <span 
-                                    v-for="cat in registerForm.categories" 
-                                    :key="cat" 
-                                    class="badge bg-primary">
-                                    {{ cat }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div v-if="registerForm.categories.length === 0" class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>Please select at least one category for your business
+                        <div class="mb-3">
+                            <select class="form-select" v-model="registerForm.category" required>
+                                <option value="">Select a category</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Food and Beverage">Food and Beverage</option>
+                                <option value="Energy">Energy</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Manufacturing">Manufacturing</option>
+                                <option value="Services">Services</option>
+                            </select>
                         </div>
 
                         <h5 class="section-title">
@@ -176,44 +174,17 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Certification Name *</label>
-                                <select 
-                                    class="form-select" 
-                                    v-model="registerForm.certificationName"
-                                    required>
-                                    <option value="" disabled>Select a Certification</option>
-                                    <option v-for="cert in availableCertifications" :value="cert.name" :key="cert.name">{{ cert.name }}</option>
+                                <select class="form-select" v-model="registerForm.certificationName" required>
+                                    <option value="">Select a Certification</option>
+                                    <option value="ISO 14001 (Environmental)">ISO 14001 (Environmental)</option>
+                                    <option value="ISO 50001 (Energy Management)">ISO 50001 (Energy Management)</option>
+                                    <option value="BCA Green Mark">BCA Green Mark</option>
+                                    <option value="SEC Green Label">SEC Green Label</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Certificate Number *</label>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    v-model="registerForm.certificateNumber" 
-                                    placeholder="e.g., SG/14001/00123"
-                                    required>
-                                <small class="text-muted">Enter the official certificate number for verification</small>
-                            </div>
-                            
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Verification Status</label>
-                                <div class="form-control bg-light" style="height: auto; padding: 10px;">
-                                    <span v-if="!registerForm.certificateNumber" class="text-muted">
-                                        <i class="fas fa-clock me-2"></i>Awaiting certificate number entry
-                                    </span>
-                                    <span v-else-if="verificationStatus === 'Verified'" class="text-success">
-                                        <i class="fas fa-check-circle me-2"></i>Verified! Status: Active
-                                    </span>
-                                    <span v-else-if="verificationStatus === 'Pending'" class="text-info">
-                                        <i class="fas fa-spinner fa-spin me-2"></i>Verifying...
-                                    </span>
-                                    <span v-else-if="verificationStatus === 'Failed'" class="text-danger">
-                                        <i class="fas fa-times-circle me-2"></i>Verification failed. Invalid or expired.
-                                    </span>
-                                    <span v-else class="text-muted">
-                                        <i class="fas fa-exclamation-circle me-2"></i>Please click Register to verify
-                                    </span>
-                                </div>
+                                <input type="text" class="form-control" v-model="registerForm.certificateNumber" required>
                             </div>
                         </div>
 
@@ -225,10 +196,7 @@
                             <i class="fas fa-exclamation-circle me-2"></i>{{ registerError }}
                         </div>
 
-                        <button 
-                            type="submit" 
-                            class="btn btn-register btn-lg w-100 mt-4" 
-                            :disabled="isLoading || registerForm.categories.length === 0 || verificationStatus === 'Pending'">
+                        <button type="submit" class="btn btn-register btn-lg w-100 mt-4" :disabled="isLoading">
                             <span v-if="!isLoading">
                                 <i class="fas fa-check me-2"></i>Register Business
                             </span>
@@ -240,7 +208,7 @@
 
                     <div class="text-center mt-4 pt-4" style="border-top: 1px solid #eee;">
                         <p class="mb-0">Already have an account? 
-                            <a href="login.html" class="text-decoration-none fw-bold" style="color: var(--accent-green);">
+                            <a href="login_business.html" class="text-decoration-none fw-bold" style="color: var(--accent-green);">
                                 Sign in here
                             </a>
                         </p>
@@ -263,115 +231,73 @@
                         email: '',
                         password: '',
                         phone: '',
-                        categories: [],
-                        address: '',
+                        category: '',
                         description: '',
-                        // NEW FIELDS
                         certificationName: '',
                         certificateNumber: ''
                     },
-                    availableCategories: [
-                        { name: 'Technology', icon: 'fas fa-laptop-code' },
-                        { name: 'Food and Beverage', icon: 'fas fa-utensils' },
-                        { name: 'Energy', icon: 'fas fa-bolt' },
-                        { name: 'Retail', icon: 'fas fa-shopping-bag' },
-                        { name: 'Manufacturing', icon: 'fas fa-industry' },
-                        { name: 'Services', icon: 'fas fa-hands-helping' }
-                    ],
-                    availableCertifications: [
-                        { name: 'ISO 14001 (Environmental)' },
-                        { name: 'ISO 50001 (Energy Management)' },
-                        { name: 'BCA Green Mark' },
-                        { name: 'SEC Green Label' }
-                        // Note: For BCA Green Mark & SEC Green Label, verification will be via a directory lookup or manual process in the backend proxy
-                    ],
                     registerMessage: '',
                     registerError: '',
-                    isLoading: false,
-                    // NEW: Status to track verification state
-                    verificationStatus: null // null, 'Pending', 'Verified', 'Failed'
+                    isLoading: false
                 }
             },
             methods: {
                 async handleRegister() {
                     this.registerError = '';
                     this.registerMessage = '';
-                    this.verificationStatus = null;
                     
-                    const requiredFields = [
-                        'name', 'email', 'password', 'address', 'description', 
-                        'certificationName', 'certificateNumber'
-                    ];
-
-                    for (const field of requiredFields) {
-                        if (!this.registerForm[field] || (field === 'categories' && this.registerForm[field].length === 0)) {
-                            this.registerError = 'Please fill in all required fields and select at least one category.';
-                            return;
-                        }
+                    if (!this.registerForm.name || !this.registerForm.email || 
+                        !this.registerForm.password || !this.registerForm.category ||
+                        !this.registerForm.description || !this.registerForm.certificationName ||
+                        !this.registerForm.certificateNumber) {
+                        this.registerError = 'Please fill in all required fields';
+                        return;
                     }
 
                     this.isLoading = true;
-                    this.verificationStatus = 'Pending';
                     
                     try {
-                        // 1. VERIFICATION STEP (Using the backend proxy)
-                        const verifyResponse = await fetch('api/verify_green_cert.php', {
+                        const response = await fetch('api/auth.php?action=register', {
                             method: 'POST',
                             headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify({
-                                certificationName: this.registerForm.certificationName,
-                                certificateNumber: this.registerForm.certificateNumber,
+                                name: this.registerForm.name,
+                                email: this.registerForm.email,
+                                password: this.registerForm.password,
+                                phone: this.registerForm.phone,
+                                userType: 'business',
                                 businessName: this.registerForm.name,
-                                businessAddress: this.registerForm.address // Include address for better local search (BCA/SEC)
+                                category: this.registerForm.category,
+                                description: this.registerForm.description,
+                                certificationName: this.registerForm.certificationName,
+                                certificateNumber: this.registerForm.certificateNumber
                             })
                         });
                         
-                        const verifyData = await verifyResponse.json();
+                        const responseText = await response.text();
+                        console.log('Raw response:', responseText);
                         
-                        if (!verifyData.isValid) {
-                            this.registerError = verifyData.message || 'Green certification could not be verified. Check the name and number.';
-                            this.verificationStatus = 'Failed';
-                            this.isLoading = false;
+                        let data;
+                        try {
+                            data = JSON.parse(responseText);
+                        } catch (e) {
+                            console.error('JSON parse error:', e);
+                            this.registerError = 'Server error: ' + responseText.substring(0, 200);
                             return;
                         }
                         
-                        this.verificationStatus = 'Verified';
-                        
-                        // 2. REGISTRATION STEP (If verification is successful)
-                        const response = await fetch('api/register_business.php', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            // IMPORTANT: Include the verification score in the registration data
-                            body: JSON.stringify({
-                                ...this.registerForm,
-                                verificationScore: verifyData.score || 10 // Use a default if the API doesn't return a score
-                            })
-                        });
-                        
-                        const data = await response.json();
-                        
                         if (data.success) {
-                            this.registerMessage = 'Business successfully registered and certified! Awaiting admin approval. Redirecting...';
-                            
-                            // Optional: Store the calculated score in local storage or state if needed elsewhere
-                            // localStorage.setItem('newBusinessScore', verifyData.score);
+                            this.registerMessage = 'Business registered successfully! Redirecting to login...';
                             
                             setTimeout(() => {
-                                window.location.href = 'directory.html';
-                            }, 3000);
+                                window.location.href = 'login_business.html';
+                            }, 2000);
                         } else {
-                            this.registerError = data.message || 'Registration failed (Server error)';
+                            this.registerError = data.error || 'Registration failed';
                         }
                     } catch (error) {
-                        console.error('Business registration error:', error);
-                        this.verificationStatus = 'Failed'; // Assuming network error is a failure
-                        this.registerError = 'A network or server error occurred. Please try again.';
-                        
-                        // Fallback Demo Mode - Keep this for development testing if real API fails
-                        // this.registerMessage = 'Business successfully registered! Your listing will appear after admin approval. Redirecting...';
-                        // setTimeout(() => {
-                        //     window.location.href = 'directory.html';
-                        // }, 3000);
+                        console.error('Registration error:', error);
+                        this.registerError = 'Connection error: ' + error.message;
                     } finally {
                         this.isLoading = false;
                     }

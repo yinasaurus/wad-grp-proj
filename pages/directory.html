@@ -50,7 +50,7 @@
                                 <li><a class="dropdown-item" href="register_business.html">
                                     <i class="fas fa-store me-2"></i>Register Green Business
                                 </a></li>
-                                <li><a class="dropdown-item" href="login.html">
+                                <li><a class="dropdown-item" href="login_business.html">
                                     <i class="fas fa-sign-in-alt me-2"></i>Business Sign In
                                 </a></li>
                             </ul>
@@ -148,7 +148,7 @@
                         <label class="form-label fw-bold small">
                             <i class="fas fa-sort me-1"></i>Sort By
                         </label>
-                        <select class="form-select" v-model="sortBy" @change="sortBusinesses" >
+                        <select class="form-select" v-model="sortBy" @change="sortBusinesses">
                             <option value="name">Name (A-Z)</option>
                             <option value="score">Sustainability Score</option>
                             <option value="category">Category</option>
@@ -162,10 +162,7 @@
                     </button>
                 </div>
             </div>
-            
         </div>
-        
-        
 
         <!-- Business List and Map -->
         <div class="container mb-5 mt-4">
@@ -284,8 +281,7 @@
             },
             mounted() {
                 this.checkLoginStatus();
-                this.loadDemoData();
-                this.checkCategoryParam();
+                this.loadBusinessesFromDatabase();
                 this.initMap();
             },
             methods: {
@@ -298,93 +294,40 @@
                     }
                 },
                 
-                checkCategoryParam() {
-                    const params = new URLSearchParams(window.location.search);
-                    const category = params.get('category');
-                    if (category) {
-                        this.selectedCategory = category;
-                        this.filterBusinesses();
+                async loadBusinessesFromDatabase() {
+                    try {
+                        const response = await fetch('api/data.php?action=all_businesses');
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.businesses = data.businesses.map(b => ({
+                                id: b.id,
+                                name: b.name,
+                                category: b.category,
+                                address: b.address || 'Singapore',
+                                description: b.description || 'Green business',
+                                lat: b.lat ? parseFloat(b.lat) : (1.3521 + (Math.random() - 0.5) * 0.1),
+                                lng: b.lng ? parseFloat(b.lng) : (103.8198 + (Math.random() - 0.5) * 0.1),
+                                certifications: b.certifications || [],
+                                sustainabilityScore: b.sustainabilityScore || 85,
+                                verified: b.verified
+                            }));
+                            
+                            this.filterBusinesses();
+                            console.log('Loaded ' + this.businesses.length + ' businesses from database');
+                            if (this.businesses.length > 0) {
+                                console.log('First business name:', this.businesses[0].name);
+                                console.log('First business address:', this.businesses[0].address);
+                                console.log('First business lat:', this.businesses[0].lat);
+                                console.log('First business lng:', this.businesses[0].lng);
+                            }
+                        } else {
+                            console.error('Failed to load businesses:', data.error);
+                        }
+                    } catch (error) {
+                        console.error('Error loading businesses:', error);
                     }
                 },
-                
-               
-
-loadDemoData() {
-    this.businesses = [
-        {
-            id: 1,
-            name: "EcoTech Solutions",
-            category: "Technology",
-            address: "1 Marina Boulevard, Singapore 018989",
-            lat: 1.2821,
-            lng: 103.8545,
-            certifications: ["Green Mark Gold", "ISO 14001"],
-            description: "Sustainable IT solutions and green technology provider",
-            sustainabilityScore: 92
-        },
-        {
-            id: 2,
-            name: "Green Harvest Cafe",
-            category: "Food and Beverage",
-            address: "100 Orchard Road, Singapore 238840",
-            lat: 1.3048,
-            lng: 103.8318,
-            certifications: ["Green Mark Certified", "Zero Waste"],
-            description: "Farm-to-table organic restaurant with sustainable practices",
-            sustainabilityScore: 88
-        },
-        {
-            id: 3,
-            name: "Solar Power Plus",
-            category: "Energy",
-            address: "50 Jurong Gateway Road, Singapore 608549",
-            lat: 1.3339,
-            lng: 103.7436,
-            certifications: ["Green Mark Platinum", "BCA Green Mark"],
-            description: "Renewable energy installations and solar panel solutions",
-            sustainabilityScore: 95
-        },
-        {
-            id: 4,
-            name: "EcoMart Retail",
-            category: "Retail",
-            address: "10 Tampines Central, Singapore 529536",
-            lat: 1.3538,
-            lng: 103.9446,
-            certifications: ["Green Mark Gold", "Plastic-Free"],
-            description: "Zero-waste retail store offering sustainable products",
-            sustainabilityScore: 85
-        },
-        {
-            id: 5,
-            name: "GreenBuild Manufacturing",
-            category: "Manufacturing",
-            address: "15 Woodlands Industrial Park, Singapore 738322",
-            lat: 1.4501,
-            lng: 103.7949,
-            certifications: ["ISO 14001", "Carbon Neutral"],
-            description: "Sustainable manufacturing with eco-friendly materials",
-            sustainabilityScore: 90
-        },
-        {
-            id: 6,
-            name: "Eco Consulting Services",
-            category: "Services",
-            address: "20 Cecil Street, Singapore 049705",
-            lat: 1.2825,
-            lng: 103.8499,
-            certifications: ["Green Mark Certified", "B Corp"],
-            description: "Environmental consulting and sustainability advisory services",
-            sustainabilityScore: 87
-        }
-    ];
-    this.filterBusinesses();
-},
-
-viewProfile(businessId) {
-    console.log('Navigating to business profile with ID:', businessId);
-    window.location.href = 'business_profile.html?id=' + businessId;
-},
                 
                 filterBusinesses() {
                     let filtered = this.businesses;
@@ -444,25 +387,6 @@ viewProfile(businessId) {
                 async initMap() {
                     try {
                         const { Map } = await google.maps.importLibrary("maps");
-                        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-                        
-                        this.map = new Map(document.getElementById("map"), {
-                            center: { lat: 1.3521, lng: 103.8198 },
-                            zoom: 12,
-                            mapId: "GREEN_BUSINESS_MAP"
-                        });
-                        
-                        this.mapInitialized = true;
-                        this.showAllBusinesses();
-                    } catch (error) {
-                        console.error('Error loading map:', error);
-                        this.initBasicMap();
-                    }
-                },
-                
-                async initBasicMap() {
-                    try {
-                        const { Map } = await google.maps.importLibrary("maps");
                         
                         this.map = new Map(document.getElementById("map"), {
                             center: { lat: 1.3521, lng: 103.8198 },
@@ -472,7 +396,7 @@ viewProfile(businessId) {
                         this.mapInitialized = true;
                         this.showAllBusinesses();
                     } catch (error) {
-                        console.error('Failed to initialize map:', error);
+                        console.error('Error loading map:', error);
                     }
                 },
                 
@@ -525,52 +449,11 @@ viewProfile(businessId) {
                         const position = { lat: business.lat, lng: business.lng };
                         this.map.setCenter(position);
                         this.map.setZoom(16);
-                        
-                        this.markers.forEach(marker => marker.setMap(null));
-                        this.markers = [];
-                        
-                        const marker = new google.maps.Marker({
-                            position: position,
-                            map: this.map,
-                            title: business.name,
-                            animation: google.maps.Animation.DROP,
-                            icon: {
-                                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
-                            }
-                        });
-                        
-                        const infoWindow = new google.maps.InfoWindow({
-                            content: `
-                                <div style="padding: 12px; max-width: 280px;">
-                                    <h5 style="margin: 0 0 10px 0; color: #2d6a4f; font-weight: 600;">${business.name}</h5>
-                                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #555;">${business.description}</p>
-                                    <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">
-                                        <i class="fas fa-map-marker-alt" style="color: #dc3545;"></i> ${business.address}
-                                    </p>
-                                    <div style="margin: 8px 0;">
-                                        <span style="background: #e9ecef; padding: 4px 10px; border-radius: 12px; font-size: 11px; margin-right: 5px;">${business.category}</span>
-                                    </div>
-                                    <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 8px; border-radius: 6px; margin-top: 10px;">
-                                        <strong style="color: #155724; font-size: 13px;">Sustainability Score: ${business.sustainabilityScore}/100</strong>
-                                    </div>
-                                    <div style="margin-top: 10px; font-size: 11px; color: #28a745;">
-                                        <strong>Certifications:</strong><br>
-                                        ${business.certifications.join(', ')}
-                                    </div>
-                                </div>
-                            `
-                        });
-                        
-                        infoWindow.open(this.map, marker);
-                        this.markers.push(marker);
                     }
-                    
-                    if (window.innerWidth < 992) {
-                        document.querySelector('.map-container').scrollIntoView({ 
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
+                },
+                
+                viewProfile(businessId) {
+                    window.location.href = 'business_profile.html?id=' + businessId;
                 },
                 
                 logout() {
@@ -581,7 +464,6 @@ viewProfile(businessId) {
                 }
             }
         }).mount('#app');
-        
     </script>
 </body>
 </html>
