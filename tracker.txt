@@ -1,0 +1,5 @@
+Added 
+- business page - rodney ✅` integrated but user log in doesnt work yet (rating gives undefined)
+- forum - nil
+- to add - user favourites 
+         - clean up folder ✅✅

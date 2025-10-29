@@ -1,0 +1,176 @@
+body {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .navbar {
+        background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .profile-hero {
+        background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .profile-image {
+        width: 100px;
+        height: 100px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #4caf50;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .sustainability-score {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #2e7d32;
+    }
+    
+    .stat-box {
+        padding: 1rem;
+        background: #f1f8e9;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .stat-box h3 {
+        color: #2e7d32;
+        margin: 0;
+    }
+    
+    .eco-practice-item {
+        padding: 1rem;
+        background: #f1f8e9;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .product-card {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        height: 100%;
+        transition: all 0.3s;
+    }
+    
+    .product-card:hover {
+        background: #e8f5e9;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .location-pin {
+        padding: 1rem;
+        background: #f1f8e9;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .certification-card {
+        padding: 1rem;
+        background: #fff3e0;
+        border-radius: 10px;
+    }
+    
+    .comparison-wrapper {
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .comparison-box {
+        padding: 0.75rem;
+        border-radius: 10px;
+        height: 100%;
+    }
+    
+    .green-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border: 2px solid #4caf50;
+    }
+    
+    .conventional-box {
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        border: 2px solid #f44336;
+    }
+    
+    .metric-item {
+        margin-bottom: 0.4rem;
+        padding: 0.4rem 0.5rem;
+        background: rgba(255,255,255,0.6);
+        border-radius: 5px;
+    }
+    
+    .metric-item small {
+        font-size: 0.7rem;
+        line-height: 1.2;
+    }
+    
+    .metric-item strong {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+    
+    .savings-highlight {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        border: 2px solid #ff9800;
+    }
+
+/* from here is new/ from rodney */
+
+.star-rating {
+        font-size: 2rem;
+        cursor: pointer;
+    }
+    .star-icon {
+        transition: color 0.2s, transform 0.2s;
+        cursor: pointer;
+        margin-right: 0.25rem;
+    }
+    .star-icon:hover {
+        transform: scale(1.1);
+    }
+    .review-item {
+        transition: background-color 0.2s;
+        padding: 10px;
+        border-radius: 8px;
+    }
+    .review-item:hover {
+        background-color: #f8f9fa;
+    }
+    .write-review-section {
+        border: 2px dashed #dee2e6;
+    }
+    .stars i {
+        font-size: 0.875rem;
+    }

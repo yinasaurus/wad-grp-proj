@@ -1,0 +1,767 @@
+// this.businesses = [
+//     {
+//         id: 1,
+//         name: "EcoTech Solutions",
+//         category: "Technology",
+//         address: "1 Marina Boulevard, Singapore 018989",
+//         lat: 1.2821,
+//         lng: 103.8545,
+//         certifications: ["Green Mark Gold", "ISO 14001"],
+//         description: "Sustainable IT solutions and green technology provider",
+//         sustainabilityScore: 92
+//     },
+//     {
+//         id: 2,
+//         name: "Green Harvest Cafe",
+//         category: "Food and Beverage",
+//         address: "100 Orchard Road, Singapore 238840",
+//         lat: 1.3048,
+//         lng: 103.8318,
+//         certifications: ["Green Mark Certified", "Zero Waste"],
+//         description: "Farm-to-table organic restaurant with sustainable practices",
+//         sustainabilityScore: 88
+//     },
+//     {
+//         id: 3,
+//         name: "Solar Power Plus",
+//         category: "Energy",
+//         address: "50 Jurong Gateway Road, Singapore 608549",
+//         lat: 1.3339,
+//         lng: 103.7436,
+//         certifications: ["Green Mark Platinum", "BCA Green Mark"],
+//         description: "Renewable energy installations and solar panel solutions",
+//         sustainabilityScore: 95
+//     },
+//     {
+//         id: 4,
+//         name: "EcoMart Retail",
+//         category: "Retail",
+//         address: "10 Tampines Central, Singapore 529536",
+//         lat: 1.3538,
+//         lng: 103.9446,
+//         certifications: ["Green Mark Gold", "Plastic-Free"],
+//         description: "Zero-waste retail store offering sustainable products",
+//         sustainabilityScore: 85
+//     },
+//     {
+//         id: 5,
+//         name: "GreenBuild Manufacturing",
+//         category: "Manufacturing",
+//         address: "15 Woodlands Industrial Park, Singapore 738322",
+//         lat: 1.4501,
+//         lng: 103.7949,
+//         certifications: ["ISO 14001", "Carbon Neutral"],
+//         description: "Sustainable manufacturing with eco-friendly materials",
+//         sustainabilityScore: 90
+//     },
+//     {
+//         id: 6,
+//         name: "Eco Consulting Services",
+//         category: "Services",
+//         address: "20 Cecil Street, Singapore 049705",
+//         lat: 1.2825,
+//         lng: 103.8499,
+//         certifications: ["Green Mark Certified", "B Corp"],
+//         description: "Environmental consulting and sustainability advisory services",
+//         sustainabilityScore: 87
+//     }
+// ];
+
+
+other: 
+1: {
+    'id' => $row['id'], ok
+    'name' => $row['name'], ok
+    icon
+    'category' => $row['category'], ok
+    'address' => $row['address'], ok
+    'lat' => floatval($row['lat']),
+    'lng' => floatval($row['lng']),
+    'description' => $row['description'], ok
+    'sustainabilityScore' => intval($row['sustainability_score']), ok
+    'certifications' => $row['certifications'] ? explode(',', $row['certifications']) : [],
+    'ecoPractices' => $ecoPractices, ok
+    'products' => $greenProducts, ok
+    'locations' => $locations, ok
+    stats 
+    fullCertifications
+    contact
+    
+    id: 1,
+    name: "EcoTech Solutions",
+    icon: "fas fa-laptop-code",
+    category: "Technology",
+    address: "1 Marina Boulevard, Singapore 018989",
+    description: "Leading provider of sustainable IT solutions and green technology services.",
+    longDescription: "We specialize in helping businesses transition to eco-friendly technology infrastructure. Our services include energy-efficient data center solutions, carbon-neutral cloud computing, e-waste recycling programs, and sustainable IT consulting. Since 2015, we've helped over 500 companies reduce their carbon footprint while improving operational efficiency.",
+    certifications: ["Green Mark Gold", "ISO 14001", "Carbon Neutral"],
+    sustainabilityScore: 92,
+    ecoPractices: [
+        {
+            title: "100% Renewable Energy",
+            description: "All our operations run on solar and wind power, with zero reliance on fossil fuels."
+        },
+        {
+            title: "E-Waste Recycling Program",
+            description: "We recycle and refurbish electronic equipment, preventing 50 tons of e-waste annually."
+        },
+        {
+            title: "Carbon Offset Initiatives",
+            description: "We offset 150% of our carbon emissions through verified reforestation projects."
+        },
+        {
+            title: "Green Supply Chain",
+            description: "All our suppliers meet strict environmental standards and sustainability criteria."
+        }
+    ],
+    products: [
+        {
+            name: "Eco Server Hosting",
+            description: "Carbon-neutral cloud hosting",
+            price: "From $99/month",
+            available: true,
+            comparison: {
+                green: {
+                    energyUse: "50 kWh/month",
+                    co2Emissions: "0 kg CO₂",
+                    renewableEnergy: "100%"
+                },
+                conventional: {
+                    energyUse: "180 kWh/month",
+                    co2Emissions: "95 kg CO₂",
+                    renewableEnergy: "0%"
+                },
+                savings: "130 kWh & 95 kg CO₂ per month"
+            }
+        },
+        {
+            name: "IT Sustainability Audit",
+            description: "Comprehensive assessment",
+            price: "$500",
+            available: true
+        },
+        {
+            name: "Green IT Consulting",
+            description: "Expert advisory services",
+            price: "$150/hour",
+            available: true
+        },
+        {
+            name: "Refurbished Equipment",
+            description: "Certified pre-owned devices",
+            price: "Varies",
+            available: false,
+            comparison: {
+                green: {
+                    co2Emissions: "45 kg CO₂",
+                    eWaste: "0 kg",
+                    waterUsage: "15 L"
+                },
+                conventional: {
+                    co2Emissions: "280 kg CO₂",
+                    eWaste: "8 kg",
+                    waterUsage: "450 L"
+                },
+                savings: "235 kg CO₂, 8 kg e-waste, 435 L water saved"
+            }
+        }
+    ],
+    locations: [
+        {
+            name: "Marina Bay Office",
+            address: "1 Marina Boulevard, #12-01, Singapore 018989",
+            hours: "Mon-Fri: 9:00 AM - 6:00 PM",
+            mapLink: "#"
+        },
+        {
+            name: "Jurong Facility",
+            address: "50 Jurong Gateway Road, #05-01, Singapore 608549",
+            hours: "Mon-Fri: 8:00 AM - 5:00 PM",
+            mapLink: "#"
+        }
+    ],
+    stats: {
+        carbonReduced: "125",
+        wasteRecycled: "95%",
+        energySaved: "450 MWh",
+        waterSaved: "2.5M L"
+    },
+    fullCertifications: [
+        {
+            name: "BCA Green Mark Gold",
+            issued: "Jan 2023",
+            expiry: "Dec 2026"
+        },
+        {
+            name: "ISO 14001:2015",
+            issued: "Mar 2022",
+            expiry: "Mar 2025"
+        },
+        {
+            name: "Carbon Neutral Certified",
+            issued: "Jun 2023",
+            expiry: "Jun 2024"
+        }
+    ],
+    contact: {
+        phone: "+65 1234 5678",
+        email: "info@ecotech.sg",
+        website: "www.ecotech.sg"
+    }
+    },
+    2: {
+    id: 2,
+    name: "Green Harvest Cafe",
+    icon: "fas fa-leaf",
+    category: "Food and Beverage",
+    address: "100 Orchard Road, Singapore 238840",
+    description: "Farm-to-table organic restaurant with sustainable practices.",
+    longDescription: "Our cafe serves 100% organic, locally-sourced ingredients with a zero food waste policy. We compost all organic waste, use only biodegradable packaging, and support local farmers. Our menu changes seasonally to reduce carbon footprint and ensure the freshest ingredients.",
+    certifications: ["Green Mark Certified", "Zero Waste", "Organic Certified"],
+    sustainabilityScore: 88,
+    ecoPractices: [
+        {
+            title: "100% Organic Ingredients",
+            description: "All ingredients sourced from certified organic local farms."
+        },
+        {
+            title: "Zero Food Waste",
+            description: "Composting program and food donation to eliminate waste."
+        },
+        {
+            title: "Biodegradable Packaging",
+            description: "All takeaway containers are fully compostable."
+        },
+        {
+            title: "Water Conservation",
+            description: "Rainwater harvesting and grey water recycling systems."
+        }
+    ],
+    products: [
+        {
+            name: "Organic Breakfast Set",
+            description: "Farm-fresh eggs and vegetables",
+            price: "$18",
+            available: true,
+            comparison: {
+                green: {
+                    co2Emissions: "0.5 kg CO₂",
+                    waterUsage: "25 L",
+                    pesticides: "0 g"
+                },
+                conventional: {
+                    co2Emissions: "2.8 kg CO₂",
+                    waterUsage: "85 L",
+                    pesticides: "45 g"
+                },
+                savings: "2.3 kg CO₂, 60 L water, 45 g pesticides per meal"
+            }
+        },
+        {
+            name: "Sustainable Coffee",
+            description: "Fair trade organic beans",
+            price: "$6",
+            available: true,
+            comparison: {
+                green: {
+                    co2Emissions: "0.2 kg CO₂",
+                    waterUsage: "140 L",
+                    deforestation: "0 m²"
+                },
+                conventional: {
+                    co2Emissions: "1.1 kg CO₂",
+                    waterUsage: "280 L",
+                    deforestation: "2.5 m²"
+                },
+                savings: "0.9 kg CO₂, 140 L water, 2.5 m² forest per kg"
+            }
+        },
+        {
+            name: "Zero-Waste Lunch Bowl",
+            description: "Seasonal local produce",
+            price: "$15",
+            available: true
+        }
+    ],
+    locations: [
+        {
+            name: "Orchard Outlet",
+            address: "100 Orchard Road, #01-05, Singapore 238840",
+            hours: "Daily: 8:00 AM - 9:00 PM",
+            mapLink: "#"
+        }
+    ],
+    stats: {
+        carbonReduced: "45",
+        wasteRecycled: "100%",
+        energySaved: "120 MWh",
+        waterSaved: "800K L"
+    },
+    fullCertifications: [
+        {
+            name: "Green Mark Certified",
+            issued: "Feb 2023",
+            expiry: "Feb 2026"
+        },
+        {
+            name: "Zero Waste Certification",
+            issued: "Jan 2023",
+            expiry: "Jan 2024"
+        }
+    ],
+    contact: {
+        phone: "+65 2345 6789",
+        email: "hello@greenharvest.sg",
+        website: "www.greenharvest.sg"
+    }
+    },
+    3: {
+    id: 3,
+    name: "Solar Power Plus",
+    icon: "fas fa-solar-panel",
+    category: "Energy",
+    address: "50 Jurong Gateway Road, Singapore 608549",
+    description: "Renewable energy installations and solar panel solutions.",
+    longDescription: "Leading provider of solar energy solutions for residential and commercial properties. We have installed over 500 solar systems across Singapore, generating over 50MW of clean energy annually. Our team of certified engineers ensures optimal system design and installation.",
+    certifications: ["Green Mark Platinum", "BCA Green Mark", "ISO 50001"],
+    sustainabilityScore: 95,
+    ecoPractices: [
+        {
+            title: "Clean Energy Generation",
+            description: "Installing solar systems that prevent 25,000 tons of CO2 annually."
+        },
+        {
+            title: "Recycling Program",
+            description: "100% recycling of old solar panels and equipment."
+        },
+        {
+            title: "Energy Storage Solutions",
+            description: "Battery systems to maximize renewable energy usage."
+        },
+        {
+            title: "Education Initiatives",
+            description: "Free workshops on renewable energy for communities."
+        }
+    ],
+    products: [
+        {
+            name: "Residential Solar System",
+            description: "Complete home installation",
+            price: "From $8,000",
+            available: true,
+            comparison: {
+                green: {
+                    energyCost: "$30/month",
+                    co2Emissions: "0 kg CO₂/year",
+                    gridDependency: "10%"
+                },
+                conventional: {
+                    energyCost: "$180/month",
+                    co2Emissions: "4,200 kg CO₂/year",
+                    gridDependency: "100%"
+                },
+                savings: "$1,800/year & 4,200 kg CO₂ annually"
+            }
+        },
+        {
+            name: "Commercial Solar Solutions",
+            description: "Large-scale installations",
+            price: "Custom Quote",
+            available: true,
+            comparison: {
+                green: {
+                    energyCost: "$500/month",
+                    co2Emissions: "0 kg CO₂/year",
+                    paybackPeriod: "5-7 years"
+                },
+                conventional: {
+                    energyCost: "$3,500/month",
+                    co2Emissions: "48,000 kg CO₂/year",
+                    paybackPeriod: "N/A"
+                },
+                savings: "$36,000/year & 48 tons CO₂ annually"
+            }
+        },
+        {
+            name: "Solar Maintenance",
+            description: "Annual service package",
+            price: "$500/year",
+            available: true
+        }
+    ],
+    locations: [
+        {
+            name: "Jurong Headquarters",
+            address: "50 Jurong Gateway Road, #10-15, Singapore 608549",
+            hours: "Mon-Fri: 9:00 AM - 6:00 PM",
+            mapLink: "#"
+        },
+        {
+            name: "East Branch",
+            address: "10 Tampines Central, #03-20, Singapore 529536",
+            hours: "Mon-Sat: 9:00 AM - 5:00 PM",
+            mapLink: "#"
+        },
+        {
+            name: "North Showroom",
+            address: "15 Woodlands Avenue, #01-10, Singapore 738322",
+            hours: "Tue-Sat: 10:00 AM - 6:00 PM",
+            mapLink: "#"
+        }
+    ],
+    stats: {
+        carbonReduced: "250",
+        wasteRecycled: "98%",
+        energySaved: "2,500 MWh",
+        waterSaved: "500K L"
+    },
+    fullCertifications: [
+        {
+            name: "Green Mark Platinum",
+            issued: "Apr 2022",
+            expiry: "Apr 2027"
+        },
+        {
+            name: "BCA Green Mark",
+            issued: "May 2022",
+            expiry: "May 2025"
+        },
+        {
+            name: "ISO 50001",
+            issued: "Jun 2022",
+            expiry: "Jun 2025"
+        }
+    ],
+    contact: {
+        phone: "+65 3456 7890",
+        email: "contact@solarplus.sg",
+        website: "www.solarplus.sg"
+    }
+    },
+    4: {
+    id: 4,
+    name: "EcoMart Retail",
+    icon: "fas fa-shopping-bag",
+    category: "Retail",
+    address: "10 Tampines Central, Singapore 529536",
+    description: "Zero-waste retail store offering sustainable products.",
+    longDescription: "Singapore's first zero-waste retail store. We offer package-free shopping with bulk bins, refill stations, and eco-friendly alternatives to everyday products. Our mission is to make sustainable living accessible and affordable for everyone.",
+    certifications: ["Green Mark Gold", "Plastic-Free", "B Corp"],
+    sustainabilityScore: 85,
+    ecoPractices: [
+        {
+            title: "Package-Free Shopping",
+            description: "Customers bring their own containers to reduce packaging waste."
+        },
+        {
+            title: "Plastic-Free Store",
+            description: "Zero single-use plastics throughout the entire store."
+        },
+        {
+            title: "Local Sourcing",
+            description: "80% of products sourced from local sustainable suppliers."
+        },
+        {
+            title: "Education Programs",
+            description: "Weekly workshops on sustainable living practices."
+        }
+    ],
+    products: [
+        {
+            name: "Bulk Food Items",
+            description: "Organic grains, nuts, and dried goods",
+            price: "Varies",
+            available: true,
+            comparison: {
+                green: {
+                    packaging: "0 g plastic",
+                    co2Emissions: "0.3 kg CO₂/kg",
+                    transportDistance: "50 km avg"
+                },
+                conventional: {
+                    packaging: "85 g plastic",
+                    co2Emissions: "1.8 kg CO₂/kg",
+                    transportDistance: "2,500 km avg"
+                },
+                savings: "85 g plastic & 1.5 kg CO₂ per kg of food"
+            }
+        },
+        {
+            name: "Reusable Products",
+            description: "Bottles, bags, and containers",
+            price: "From $5",
+            available: true,
+            comparison: {
+                green: {
+                    lifespan: "5+ years",
+                    plasticSaved: "1,500 items",
+                    co2Emissions: "2 kg CO₂"
+                },
+                conventional: {
+                    lifespan: "Single use",
+                    plasticSaved: "0 items",
+                    co2Emissions: "450 kg CO₂"
+                },
+                savings: "1,500 single-use items & 448 kg CO₂ over 5 years"
+            }
+        },
+        {
+            name: "Natural Cleaning Products",
+            description: "Eco-friendly cleaning supplies",
+            price: "From $8",
+            available: true
+        }
+    ],
+    locations: [
+        {
+            name: "Tampines Outlet",
+            address: "10 Tampines Central, #02-15, Singapore 529536",
+            hours: "Daily: 10:00 AM - 9:00 PM",
+            mapLink: "#"
+        },
+        {
+            name: "Orchard Branch",
+            address: "100 Orchard Road, #B1-20, Singapore 238840",
+            hours: "Daily: 11:00 AM - 8:00 PM",
+            mapLink: "#"
+        }
+    ],
+    stats: {
+        carbonReduced: "60",
+        wasteRecycled: "92%",
+        energySaved: "180 MWh",
+        waterSaved: "1.2M L"
+    },
+    fullCertifications: [
+        {
+            name: "Green Mark Gold",
+            issued: "Aug 2023",
+            expiry: "Aug 2026"
+        },
+        {
+            name: "Plastic-Free Certified",
+            issued: "Sep 2023",
+            expiry: "Sep 2024"
+        }
+    ],
+    contact: {
+        phone: "+65 4567 8901",
+        email: "info@ecomart.sg",
+        website: "www.ecomart.sg"
+    }
+    },
+    5: {
+    id: 5,
+    name: "GreenBuild Manufacturing",
+    icon: "fas fa-industry",
+    category: "Manufacturing",
+    address: "15 Woodlands Industrial Park, Singapore 738322",
+    description: "Sustainable manufacturing with eco-friendly materials.",
+    longDescription: "We manufacture construction materials using recycled and sustainable resources. Our factory runs on 100% renewable energy and implements circular economy principles. We're committed to revolutionizing the construction industry with sustainable alternatives.",
+    certifications: ["ISO 14001", "Carbon Neutral", "Cradle to Cradle"],
+    sustainabilityScore: 90,
+    ecoPractices: [
+        {
+            title: "Recycled Materials",
+            description: "90% of our materials are recycled or sustainably sourced."
+        },
+        {
+            title: "Zero Emissions Factory",
+            description: "Carbon-neutral production powered by renewable energy."
+        },
+        {
+            title: "Circular Economy",
+            description: "Take-back program for end-of-life products."
+        },
+        {
+            title: "Water Recycling",
+            description: "95% of water used in production is recycled."
+        }
+    ],
+    products: [
+        {
+            name: "Eco Concrete Blocks",
+            description: "Recycled aggregate blocks",
+            price: "$5/block",
+            available: true,
+            comparison: {
+                green: {
+                    co2Emissions: "8 kg CO₂/m³",
+                    recycledContent: "65%",
+                    strength: "40 MPa"
+                },
+                conventional: {
+                    co2Emissions: "410 kg CO₂/m³",
+                    recycledContent: "0%",
+                    strength: "40 MPa"
+                },
+                savings: "402 kg CO₂ per cubic meter"
+            }
+        },
+        {
+            name: "Sustainable Insulation",
+            description: "Natural fiber insulation",
+            price: "$15/sqm",
+            available: true,
+            comparison: {
+                green: {
+                    co2Emissions: "5 kg CO₂/m²",
+                    embodiedEnergy: "26 MJ/m²",
+                    biodegradable: "Yes"
+                },
+                conventional: {
+                    co2Emissions: "45 kg CO₂/m²",
+                    embodiedEnergy: "250 MJ/m²",
+                    biodegradable: "No"
+                },
+                savings: "40 kg CO₂ & 224 MJ per square meter"
+            }
+        },
+        {
+            name: "Recycled Steel",
+            description: "Construction-grade steel",
+            price: "Market Rate",
+            available: true
+        }
+    ],
+    locations: [
+        {
+            name: "Woodlands Factory",
+            address: "15 Woodlands Industrial Park, Singapore 738322",
+            hours: "Mon-Fri: 8:00 AM - 5:00 PM",
+            mapLink: "#"
+        }
+    ],
+    stats: {
+        carbonReduced: "180",
+        wasteRecycled: "96%",
+        energySaved: "800 MWh",
+        waterSaved: "3.5M L"
+    },
+    fullCertifications: [
+        {
+            name: "ISO 14001:2015",
+            issued: "Oct 2022",
+            expiry: "Oct 2025"
+        },
+        {
+            name: "Carbon Neutral Certified",
+            issued: "Nov 2022",
+            expiry: "Nov 2024"
+        }
+    ],
+    contact: {
+        phone: "+65 5678 9012",
+        email: "contact@greenbuild.sg",
+        website: "www.greenbuild.sg"
+    }
+    },
+    6: {
+    id: 6,
+    name: "Eco Consulting Services",
+    icon: "fas fa-briefcase",
+    category: "Services",
+    address: "20 Cecil Street, Singapore 049705",
+    description: "Environmental consulting and sustainability advisory services.",
+    longDescription:    "We help businesses achieve their sustainability goals through expert consulting, audits, and strategic planning. Our team of environmental specialists has helped over 200 companies reduce their environmental impact while improving profitability.",
+    certifications: ["Green Mark Certified", "B Corp", "ISO 14001"],
+    sustainabilityScore: 87,
+    ecoPractices: [
+        {
+            title: "Carbon Footprint Analysis",
+            description: "Comprehensive assessments to identify reduction opportunities."
+        },
+        {
+            title: "Sustainability Strategy",
+            description: "Custom roadmaps for achieving environmental goals."
+        },
+        {
+            title: "Green Certifications",
+            description: "Guidance through certification processes."
+        },
+        {
+            title: "Employee Training",
+            description: "Sustainability workshops and education programs."
+        }
+    ],
+    products: [
+        {
+            name: "Sustainability Audit",
+            description: "Complete environmental assessment",
+            price: "$2,500",
+            available: true,
+            comparison: {
+                green: {
+                    avgCO2Reduction: "35%",
+                    costSavings: "$15K/year",
+                    roi: "6 months"
+                },
+                conventional: {
+                    avgCO2Reduction: "0%",
+                    costSavings: "$0/year",
+                    roi: "N/A"
+                },
+                savings: "Typical client saves 150 tons CO₂ & $15K annually"
+            }
+        },
+        {
+            name: "Strategy Development",
+            description: "Custom sustainability roadmap",
+            price: "$5,000",
+            available: true
+        },
+        {
+            name: "Ongoing Consulting",
+            description: "Monthly advisory services",
+            price: "$1,000/month",
+            available: true
+        }
+    ],
+    locations: [
+        {
+            name: "Cecil Street Office",
+            address: "20 Cecil Street, #15-01, Singapore 049705",
+            hours: "Mon-Fri: 9:00 AM - 6:00 PM",
+            mapLink: "#"
+        }
+    ],
+    stats: {
+        carbonReduced: "300",
+        wasteRecycled: "85%",
+        energySaved: "200 MWh",
+        waterSaved: "1M L"
+    },
+    fullCertifications: [
+        {
+            name: "Green Mark Certified",
+            issued: "Dec 2022",
+            expiry: "Dec 2025"
+        },
+        {
+            name: "B Corp Certified",
+            issued: "Jan 2023",
+            expiry: "Jan 2026"
+        }
+    ],
+    contact: {
+        phone: "+65 6789 0123",
+        email: "hello@ecoconsult.sg",
+        website: "www.ecoconsult.sg"
+    }
+    }
+
+-- INSERT INTO users (name, email, password) VALUES
+-- ('Sarah Chen', 'sarah.chen@email.com', 'password123'),
+-- ('Michael Wong', 'michael.wong@email.com', 'password123'),
+-- ('Rachel Ng', 'rachel.ng@email.com', 'password123'),
+-- ('James Lim', 'james.lim@email.com', 'password123'),
+-- ('Amanda Koh', 'amanda.koh@email.com', 'password123'),
+-- ('John Tan', 'john.tan@email.com', 'password123'),
+-- ('Lisa Wong', 'lisa.wong@email.com', 'password123'),
+-- ('Emily Lim', 'emily.lim@email.com', 'password123'),
+-- ('David Lee', 'david.lee@email.com', 'password123'),
+-- ('Alex Tan', 'alex.tan@email.com', 'password123');
+OTHER:
+yasmin@test.com, yasmin@test.com
+sasha@test.com, sasha@test.com
+micheal@test.com, micheal@test.com
