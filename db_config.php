@@ -1,9 +1,9 @@
 <?php
 // Database Configuration
-$host = 'localhost';          // Your database host
-$user = 'root';               // Your database user (default for XAMPP)
-$password = '';               // Your database password (empty for XAMPP default)
-$database = 'green_directory'; // Your database name
+$host = 'sql104.infinityfree.com';          // Your database host
+$user = 'if0_40315319';               // Your database user (default for XAMPP)
+$password = 'greenbiz123';               // Your database password (empty for XAMPP default)
+$database = 'if0_40315319_green_directory'; // Your database name
 
 // Create connection
 $conn = new mysqli($host, $user, $password, $database);
