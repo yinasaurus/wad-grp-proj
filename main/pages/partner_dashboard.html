@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Dashboard - Green Business Directory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/partner_dashboard.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="fas fa-leaf me-2"></i>Green Business Directory
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link active" href="partner_dashboard.html">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="messages_business.html">Messages</a></li>
+                    </ul>
+                    
+                    <div class="auth-block">
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>{{ businessName || userName || 'Business' }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a 
+                                        class="dropdown-item" 
+                                        href="#"
+                                        @click="viewPublicProfile"
+                                    >
+                                    <i class="fas fa-eye me-2"></i>View Public Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" @click.prevent="logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="container mt-4 mb-5">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-lg-3 mb-4">
+                    <div class="dashboard-sidebar">
+                        <div style="background: #2e7d32; color: white; padding: 20px;">
+                            <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h5>
+                        </div>
+                        <ul class="sidebar-menu">
+                            <li>
+                                <a href="#" @click.prevent="activeTab = 'overview'" :class="{active: activeTab === 'overview'}">
+                                    <i class="fas fa-home me-2"></i>Overview
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click.prevent="activeTab = 'profile'" :class="{active: activeTab === 'profile'}">
+                                    <i class="fas fa-building me-2"></i>Business Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click.prevent="activeTab = 'certifications'" :class="{active: activeTab === 'certifications'}">
+                                    <i class="fas fa-certificate me-2"></i>Certifications
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click.prevent="activeTab = 'practices'" :class="{active: activeTab === 'practices'}">
+                                    <i class="fas fa-leaf me-2"></i>Eco Practices
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click.prevent="activeTab = 'products'" :class="{active: activeTab === 'products'}">
+                                    <i class="fas fa-box me-2"></i>Products/Services
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click.prevent="activeTab = 'updates'" :class="{active: activeTab === 'updates'}">
+                                    <i class="fas fa-newspaper me-2"></i>Updates & News
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-9">
+                    <!-- Overview Tab -->
+                    <div v-if="activeTab === 'overview'">
+                        <h2 class="mb-4">Welcome back, {{ businessName }}!</h2>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-widget">
+                                    <h3>{{ stats.profileViews }}</h3>
+                                    <p class="mb-0">Profile Views</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-widget">
+                                    <h3>{{ stats.sustainabilityScore }}</h3>
+                                    <p class="mb-0">Sustainability Score</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-widget">
+                                    <h3>{{ stats.certifications }}</h3>
+                                    <p class="mb-0">Active Certifications</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h4 class="mb-3"><i class="fas fa-chart-line me-2 text-success"></i>Quick Actions</h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-success w-100" @click="activeTab = 'profile'">
+                                        <i class="fas fa-edit me-2"></i>Update Business Info
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-success w-100" @click="activeTab = 'certifications'">
+                                        <i class="fas fa-certificate me-2"></i>Upload Certificate
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-success w-100" @click="activeTab = 'practices'">
+                                        <i class="fas fa-leaf me-2"></i>Add Practice
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-success w-100" @click="activeTab = 'updates'">
+                                        <i class="fas fa-newspaper me-2"></i>Post Update
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Profile Tab -->
+                    <div v-if="activeTab === 'profile'">
+                        <h2 class="mb-4">Business Profile</h2>
+                        <div class="dashboard-card">
+                            <form @submit.prevent="updateProfile">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Business Name</label>
+                                        <input type="text" class="form-control" v-model="profile.name">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Category</label>
+                                        <select class="form-select" v-model="profile.category">
+                                            <option value="Technology">Technology</option>
+                                            <option value="Food and Beverage">Food and Beverage</option>
+                                            <option value="Energy">Energy</option>
+                                            <option value="Retail">Retail</option>
+                                            <option value="Manufacturing">Manufacturing</option>
+                                            <option value="Services">Services</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Description</label>
+                                        <textarea class="form-control" rows="4" v-model="profile.description"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Address</label>
+                                        <input type="text" class="form-control" v-model="profile.address" placeholder="e.g., 123 Main St, Singapore" id="address-input">
+                                        <small class="text-muted">Enter address or use Google Maps API to autofill</small>
+                                        <!-- Hidden fields for lat/lng from Google Maps API -->
+                                        <input type="hidden" v-model="profile.lat" id="address-lat">
+                                        <input type="hidden" v-model="profile.lng" id="address-lng">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Phone</label>
+                                        <input type="tel" class="form-control" v-model="profile.phone" placeholder="+65 1234 5678">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Email</label>
+                                        <input type="email" class="form-control" v-model="profile.email">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Website</label>
+                                        <input type="url" class="form-control" v-model="profile.website" placeholder="https://example.com">
+                                    </div>
+                                </div>
+                                <div class="alert alert-success mt-3" v-if="profileUpdateMessage">
+                                    <i class="fas fa-check-circle me-2"></i>{{ profileUpdateMessage }}
+                                </div>
+                                <button type="submit" class="btn btn-success mt-3">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Certifications Tab -->
+                    <div v-if="activeTab === 'certifications'">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="mb-0">Certifications</h2>
+                            <button class="btn btn-success" @click="showAddCert = true">
+                                <i class="fas fa-plus me-2"></i>Add Certification
+                            </button>
+                        </div>
+
+                        <div v-if="showAddCert" class="dashboard-card mb-4">
+                            <h4 class="mb-3">Add New Certification</h4>
+                            <form @submit.prevent="addCertification">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Certification Name</label>
+                                        <input type="text" class="form-control" v-model="newCert.name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Certification Code</label>
+                                        <input type="text" class="form-control" v-model="newCert.code" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Issue Date</label>
+                                        <input type="date" class="form-control" v-model="newCert.issued" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Expiry Date</label>
+                                        <input type="date" class="form-control" v-model="newCert.expiry" required>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-success me-2">
+                                        <i class="fas fa-check me-2"></i>Add
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" @click="showAddCert = false">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div v-for="(cert, index) in certifications" :key="index" class="cert-item">
+                            <div>
+                                <h5 class="mb-1"><i class="fas fa-award me-2 text-warning"></i>{{ cert.name }}</h5>
+                                <small class="text-muted d-block">Code: {{ cert.code }}</small>
+                                <small class="text-muted">Valid: {{ cert.issued }} to {{ cert.expiry }}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" @click="removeCertification(index)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Eco Practices Tab -->
+                    <div v-if="activeTab === 'practices'">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="mb-0">Eco-Friendly Practices</h2>
+                            <button class="btn btn-success" @click="showAddPractice = true">
+                                <i class="fas fa-plus me-2"></i>Add Practice
+                            </button>
+                        </div>
+
+                        <div v-if="showAddPractice" class="dashboard-card mb-4">
+                            <h4 class="mb-3">Add New Practice</h4>
+                            <form @submit.prevent="addPractice">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Practice Title</label>
+                                    <input type="text" class="form-control" v-model="newPractice.title" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Description</label>
+                                    <textarea class="form-control" rows="3" v-model="newPractice.description" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success me-2">
+                                    <i class="fas fa-check me-2"></i>Add
+                                </button>
+                                <button type="button" class="btn btn-secondary" @click="showAddPractice = false">
+                                    Cancel
+                                </button>
+                            </form>
+                        </div>
+
+                        <div v-for="(practice, index) in ecoPractices" :key="index" class="eco-practice-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-2"><i class="fas fa-check-circle me-2 text-success"></i>{{ practice.title }}</h5>
+                                    <p class="mb-0 text-muted">{{ practice.description }}</p>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger ms-3" @click="removePractice(index)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Tab -->
+                    <div v-if="activeTab === 'products'">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="mb-0">Products & Services</h2>
+                            <button class="btn btn-success" @click="showAddProduct = true">
+                                <i class="fas fa-plus me-2"></i>Add
+                            </button>
+                        </div>
+
+                        <div v-if="showAddProduct" class="dashboard-card mb-4">
+                            <h4 class="mb-3">Add New Product/Service</h4>
+                            <form @submit.prevent="addProduct">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Name</label>
+                                        <input type="text" class="form-control" v-model="newProduct.name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Price</label>
+                                        <input type="text" class="form-control" v-model="newProduct.price" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Description</label>
+                                        <textarea class="form-control" rows="2" v-model="newProduct.description" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-success me-2">
+                                        <i class="fas fa-check me-2"></i>Add
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" @click="showAddProduct = false">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div v-for="(product, index) in products" :key="index" class="product-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="mb-0">{{ product.name }}</h5>
+                                <button class="btn btn-sm btn-outline-danger" @click="removeProduct(index)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <p class="text-muted mb-2">{{ product.description }}</p>
+                            <strong>{{ product.price }}</strong>
+                        </div>
+                    </div>
+
+                    <!-- Updates Tab -->
+                    <div v-if="activeTab === 'updates'">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="mb-0">Updates & News</h2>
+                            <button class="btn btn-success" @click="showAddUpdate = true">
+                                <i class="fas fa-plus me-2"></i>Post
+                            </button>
+                        </div>
+
+                        <div v-if="showAddUpdate" class="dashboard-card mb-4">
+                            <h4 class="mb-3">Post New Update</h4>
+                            <form @submit.prevent="addUpdate">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Title</label>
+                                    <input type="text" class="form-control" v-model="newUpdate.title" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Content</label>
+                                    <textarea class="form-control" rows="4" v-model="newUpdate.description" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success me-2">
+                                    <i class="fas fa-paper-plane me-2"></i>Post
+                                </button>
+                                <button type="button" class="btn btn-secondary" @click="showAddUpdate = false">
+                                    Cancel
+                                </button>
+                            </form>
+                        </div>
+
+                        <div v-for="(update, index) in updates" :key="index" class="update-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <strong>{{ update.title }}</strong>
+                                    <p class="text-muted mb-1">{{ update.description }}</p>
+                                    <small class="text-muted">Posted: {{ update.time }}</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger ms-3" @click="removeUpdate(index)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        // FALLBACK: If config.php doesn't work, put your API key here directly
+        const GOOGLE_MAPS_API_KEY_FALLBACK = ''; // Put your API key here if needed
+        
+        // Load Google Maps API key from secure endpoint
+        window.googleMapsReady = (async function() {
+            let apiKey = null;
+            
+            // Try to load from config.php first
+            try {
+                const response = await fetch('api/config.php');
+                if (response.ok) {
+                    const config = await response.json();
+                    if (config.googleMapsApiKey) {
+                        apiKey = config.googleMapsApiKey;
+                        console.log('Loaded Google Maps API key from config.php');
+                    }
+                }
+            } catch (error) {
+                console.warn('Failed to load API key from config.php:', error);
+            }
+            
+            // Fallback to hardcoded key if config.php didn't work
+            if (!apiKey && GOOGLE_MAPS_API_KEY_FALLBACK) {
+                apiKey = GOOGLE_MAPS_API_KEY_FALLBACK;
+                console.log('Using fallback Google Maps API key');
+            }
+            
+            if (!apiKey) {
+                console.error('Google Maps API key not found');
+                console.error('Please either:');
+                console.error('1. Set GOOGLE_MAPS_API_KEY in main/.env file, OR');
+                console.error('2. Set GOOGLE_MAPS_API_KEY_FALLBACK in partner_dashboard.html');
+                return false;
+            }
+            
+            // Load Google Maps API with Places library
+            (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+                        key: apiKey,
+                        v: "weekly",
+                        libraries: ["places"]
+                    });
+            
+            console.log('Google Maps API script loading initiated');
+            return true;
+        })();
+    </script>
+    <script type="module">
+        import { authMixin } from './js/auth-mixin.js';
+        const { createApp } = Vue;
+
+        createApp({
+            mixins: [authMixin],
+            data() {
+                return {
+                    businessId: null,
+                    businessName: '', // Initialize businessName
+                    activeTab: 'overview',
+                    profileUpdateMessage: '',
+                    stats: { profileViews: 0, sustainabilityScore: 0, certifications: 0 },
+                    profile: { 
+                        name: '', 
+                        category: '', 
+                        description: '', 
+                        phone: '', 
+                        email: '', 
+                        website: '', 
+                        address: '',
+                        location: '',
+                        lat: null,
+                        lng: null
+                    },
+                    previousAddress: '',
+                    certifications: [],
+                    showAddCert: false,
+                    newCert: { name: '', code: '', issued: '', expiry: '' },
+                    ecoPractices: [],
+                    showAddPractice: false,
+                    newPractice: { title: '', description: '' },
+                    products: [],
+                    showAddProduct: false,
+                    newProduct: { name: '', description: '', price: '' },
+                    updates: [],
+                    showAddUpdate: false,
+                    newUpdate: { title: '', description: '' }
+                }
+            },
+            watch: {
+                isLoggedIn(newVal) {
+                    // Only react if auth has initialized
+                    if (!this.authInitialized) {
+                        return;
+                    }
+                    
+                    if (newVal && this.userType === 'business') {
+                        // Set business name from userName initially (from authMixin)
+                        if (this.userName && !this.businessName) {
+                            this.businessName = this.userName;
+                        }
+                        
+                        // Use businessId from authMixin
+                        if (this.businessId) {
+                    this.loadBusinessData();
+                        } else {
+                            // Get from session if not in authMixin yet
+                            setTimeout(() => this.loadBusinessData(), 500);
+                        }
+                    } else if (!newVal) {
+                        // Only redirect if auth has initialized and user is definitely not logged in
+                        window.location.href = 'login_business.html';
+                    }
+                },
+                userName(newVal) {
+                    // Update businessName when userName changes (from authMixin)
+                    if (newVal && !this.businessName) {
+                        this.businessName = newVal;
+                    }
+                },
+                authInitialized(newVal) {
+                    // When auth finishes initializing, check login state
+                    if (newVal) {
+                        if (this.isLoggedIn && this.userType === 'business') {
+                            // Set business name if available
+                            if (this.userName && !this.businessName) {
+                                this.businessName = this.userName;
+                            }
+                            // Load business data
+                            if (this.businessId) {
+                                this.loadBusinessData();
+                            } else {
+                                setTimeout(() => this.loadBusinessData(), 500);
+                            }
+                        } else if (!this.isLoggedIn) {
+                            // Auth initialized but user not logged in - redirect to login
+                            console.log('Auth initialized, user not logged in, redirecting...');
+                            window.location.href = 'login_business.html';
+                        }
+                    }
+                }
+            },
+            async mounted() {
+                // Set business name from userName initially if available
+                if (this.userName && !this.businessName) {
+                    this.businessName = this.userName;
+                }
+                
+                // Initialize address autocomplete after Google Maps loads (with delay to ensure API is ready)
+                setTimeout(() => {
+                    this.initAddressAutocomplete();
+                }, 1500); // Wait 1.5 seconds for Google Maps API to fully load
+
+                // Clear coords if user edits address manually to avoid stale lat/lng
+                const addressInputEl = document.getElementById('address-input');
+                if (addressInputEl) {
+                    // Track the original address value when page loads
+                    const originalAddress = this.profile.address || '';
+                    
+                    // Clear coordinates when address is manually changed
+                    addressInputEl.addEventListener('input', () => {
+                        const currentAddress = addressInputEl.value;
+                        // If address has changed from what was originally loaded, clear coords
+                        if (currentAddress !== originalAddress && currentAddress !== this.previousAddress) {
+                            console.log('Address manually changed, clearing old coordinates');
+                            this.profile.lat = null;
+                            this.profile.lng = null;
+                            const latInput = document.getElementById('address-lat');
+                            const lngInput = document.getElementById('address-lng');
+                            if (latInput) latInput.value = '';
+                            if (lngInput) lngInput.value = '';
+                        }
+                    });
+                }
+                
+                // Wait for authMixin to initialize
+                // Check every 200ms if auth has initialized (max 5 seconds = 25 attempts)
+                let attempts = 0;
+                const maxAttempts = 25;
+                const checkAuth = setInterval(() => {
+                    attempts++;
+                    
+                    if (this.authInitialized) {
+                        clearInterval(checkAuth);
+                        // Auth has initialized, now check login state
+                        if (this.isLoggedIn && this.userType === 'business') {
+                            // User is logged in as business
+                            if (this.userName && !this.businessName) {
+                                this.businessName = this.userName;
+                            }
+                            if (this.businessId) {
+                                this.loadBusinessData();
+                            } else {
+                                setTimeout(() => this.loadBusinessData(), 500);
+                            }
+                        } else if (!this.isLoggedIn) {
+                            // User is not logged in
+                            console.log('User not logged in after auth initialization, redirecting...');
+                            window.location.href = 'login_business.html';
+                        }
+                    } else if (attempts >= maxAttempts) {
+                        // Auth hasn't initialized after max attempts - check anyway
+                        clearInterval(checkAuth);
+                        if (!this.isLoggedIn) {
+                            console.log('Auth not initialized after max attempts, redirecting...');
+                            window.location.href = 'login_business.html';
+                        }
+                    }
+                }, 200);
+            },
+            methods: {
+                async initAddressAutocomplete() {
+                    // Wait for Google Maps to load
+                    try {
+                        // Wait for the API config to load first
+                        if (window.googleMapsReady) {
+                            await window.googleMapsReady;
+                        }
+                        
+                        // Wait for Google Maps API script to actually load
+                        let attempts = 0;
+                        const maxAttempts = 100; // 10 seconds max wait
+                        while (attempts < maxAttempts) {
+                            if (window.google && window.google.maps && window.google.maps.importLibrary) {
+                                break;
+                            }
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            attempts++;
+                        }
+                        
+                        if (!window.google || !window.google.maps) {
+                            console.warn('Google Maps API not loaded');
+                            return;
+                        }
+                        
+                        // Load Places library if not already loaded
+                        if (!window.google.maps.places) {
+                            try {
+                                const { Autocomplete } = await google.maps.importLibrary("places");
+                                // Places library is now loaded
+                                console.log('Places library loaded');
+                            } catch (error) {
+                                console.error('Failed to load Places library:', error);
+                                return;
+                            }
+                        }
+                        
+                        if (!window.google.maps.places) {
+                            console.warn('Google Maps Places API not available');
+                            return;
+                        }
+                        
+                        // Initialize Autocomplete
+                        const addressInput = document.getElementById('address-input');
+                        if (!addressInput) {
+                            return;
+                        }
+                        
+                        const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+                            componentRestrictions: { country: 'sg' }, // Restrict to Singapore
+                            fields: ['formatted_address', 'geometry', 'name']
+                        });
+                        
+                        autocomplete.addListener('place_changed', () => {
+                            const place = autocomplete.getPlace();
+                            
+                            if (!place.geometry || !place.geometry.location) {
+                                console.warn('No geometry found for place');
+                                return;
+                            }
+                            
+                            // Update address
+                            this.profile.address = place.formatted_address || addressInput.value;
+                            
+                            // Get lat/lng
+                            const lat = place.geometry.location.lat();
+                            const lng = place.geometry.location.lng();
+                            
+                            // Update Vue data
+                            this.profile.lat = lat;
+                            this.profile.lng = lng;
+                            
+                            // Update hidden inputs
+                            const latInput = document.getElementById('address-lat');
+                            const lngInput = document.getElementById('address-lng');
+                            if (latInput) latInput.value = lat;
+                            if (lngInput) lngInput.value = lng;
+                            
+                            console.log('Address geocoded:', {
+                                address: this.profile.address,
+                                lat: lat,
+                                lng: lng
+                            });
+                        });
+                    } catch (error) {
+                        console.error('Error initializing address autocomplete:', error);
+                    }
+                },
+                
+                async geocodeAddress(address) {
+                    // Wait for Google Maps to be available
+                    if (!window.google || !window.google.maps) {
+                        console.warn('Google Maps not available for geocoding');
+                        return null;
+                    }
+                    
+                    try {
+                        const { Geocoder } = await google.maps.importLibrary("geocoding");
+                        const geocoder = new Geocoder();
+                        
+                        return new Promise((resolve) => {
+                            geocoder.geocode({ address: address }, (results, status) => {
+                                if (status === 'OK' && results && results[0]) {
+                                    const location = results[0].geometry.location;
+                                    resolve({
+                                        lat: location.lat(),
+                                        lng: location.lng()
+                                    });
+                                } else {
+                                    console.warn('Geocoding failed:', status);
+                                    resolve(null);
+                                }
+                            });
+                        });
+                    } catch (error) {
+                        console.error('Error geocoding address:', error);
+                        return null;
+                    }
+                },
+                
+                // Navigate to public business profile
+                async viewPublicProfile(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Ensure we have the MySQL businessId (numeric), not Firebase UID
+                    let businessIdToUse = this.businessId;
+                    
+                    // If businessId is not available or looks like a Firebase UID (non-numeric), reload data
+                    if (!businessIdToUse || isNaN(businessIdToUse) || typeof businessIdToUse === 'string') {
+                        console.log('Business ID not available or invalid, reloading data...');
+                        await this.refreshSession();
+                        await this.loadBusinessData();
+                        
+                        // Wait a bit and try again
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // Check if we now have a valid numeric businessId
+                        businessIdToUse = this.businessId;
+                        
+                        if (!businessIdToUse || isNaN(businessIdToUse)) {
+                            alert('Unable to load business ID. Please refresh the page.');
+                            return;
+                        }
+                    }
+                    
+                    // Ensure it's a number
+                    businessIdToUse = parseInt(businessIdToUse);
+                    
+                    if (isNaN(businessIdToUse) || businessIdToUse <= 0) {
+                        alert('Invalid business ID. Please refresh the page.');
+                        return;
+                    }
+                    
+                    console.log('Navigating to business_profile.html?id=' + businessIdToUse);
+                    window.location.href = 'business_profile.html?id=' + businessIdToUse;
+                },
+                
+                // Refresh PHP session using Firebase token
+                async refreshSession() {
+                    try {
+                        const { auth } = await import('./js/firebase-config.js');
+                        const user = auth.currentUser;
+                        if (!user) {
+                            console.error('No Firebase user found');
+                            window.location.href = 'login_business.html';
+                    return false;
+                        }
+                        
+                        const idToken = await user.getIdToken(true); // Force refresh token
+                        const response = await fetch('api/bridge.php?action=session_login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ idToken })
+                        });
+                        
+                        if (!response.ok) {
+                            console.error('Failed to refresh session:', response.status);
+                            if (response.status === 401) {
+                                window.location.href = 'login_business.html';
+                                return false;
+                            }
+                            return false;
+                        }
+                        
+                        const result = await response.json();
+                        if (!result.success) {
+                            console.error('Session refresh failed:', result);
+                            return false;
+                        }
+                        
+                        return true;
+                    } catch (error) {
+                        console.error('Error refreshing session:', error);
+                        return false;
+                    }
+                },
+
+                async loadBusinessData() {
+                    console.log('loadBusinessData() called');
+                    
+                    // Step 1: Ensure Firebase user is available
+                    const { auth } = await import('./js/firebase-config.js');
+                    if (!auth || !auth.currentUser) {
+                        console.error('No Firebase user found');
+                        window.location.href = 'login_business.html';
+                        return;
+                    }
+                    
+                    // Step 2: Refresh the session using Firebase token
+                    console.log('Refreshing session...');
+                    const sessionRefreshed = await this.refreshSession();
+                    if (!sessionRefreshed) {
+                        console.error('Failed to refresh session');
+                        alert('Unable to establish session. Please log in again.');
+                        window.location.href = 'login_business.html';
+                        return;
+                    }
+                    console.log('Session refreshed successfully');
+                    
+                    // Step 3: Verify session is established by getting user data
+                    let sessionVerified = false;
+                    let retries = 0;
+                    const maxRetries = 3;
+                    
+                    while (!sessionVerified && retries < maxRetries) {
+                        try {
+                            console.log(`Verifying session (attempt ${retries + 1}/${maxRetries})...`);
+                            const sessionResp = await fetch('api/bridge.php?action=get_user', {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+                        
+                            if (sessionResp.ok) {
+                                const sessionData = await sessionResp.json();
+                                console.log('Session data:', sessionData);
+                                
+                                // Check if session is valid and user is a business
+                                if (sessionData.success && sessionData.user?.userType === 'business') {
+                                    // Get businessId from session if available
+                                    if (sessionData.business?.businessId) {
+                                        this.businessId = sessionData.business.businessId;
+                                        console.log('Set businessId from session:', this.businessId);
+                                    }
+                                    // Also set userId if needed
+                                    if (sessionData.user?.userId) {
+                                        this.userId = sessionData.user.userId;
+                                        console.log('Set userId from session:', this.userId);
+                                    }
+                                    
+                                    // Session is valid even if business object is null - we just need userType to be 'business'
+                                    sessionVerified = true;
+                                    console.log('Session verified successfully - user is a business');
+                                } else {
+                                    console.error('Session data invalid - user is not a business:', sessionData);
+                                    console.error('User type:', sessionData.user?.userType);
+                                    // If user type is not business, redirect to login
+                                    if (sessionData.success && sessionData.user?.userType !== 'business') {
+                                        alert('You must be logged in as a business to access this page.');
+                            window.location.href = 'login_business.html';
+                            return;
+                        }
+                                    retries++;
+                                    if (retries < maxRetries) {
+                                        // Wait a bit and retry session refresh
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+                                        await this.refreshSession();
+                                    }
+                                }
+                            } else {
+                                console.error('Session verification failed. Status:', sessionResp.status);
+                                if (sessionResp.status === 401) {
+                                    // Unauthorized - try refreshing session again
+                                    retries++;
+                                    if (retries < maxRetries) {
+                                        await this.refreshSession();
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+                                    }
+                                } else {
+                                    retries = maxRetries; // Give up
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Error verifying session:', e);
+                            retries++;
+                            if (retries < maxRetries) {
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                            }
+                        }
+                    }
+                    
+                    if (!sessionVerified) {
+                        console.error('Failed to verify session after retries');
+                        alert('Unable to verify session. Please log in again.');
+                        window.location.href = 'login_business.html';
+                        return;
+                    }
+
+                    // Step 4: Fetch business profile data (session should be established now)
+                    try {
+                        console.log('Fetching business profile data...');
+                        const response = await fetch('api/data.php?action=business_profile', {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+
+                        if (!response.ok) {
+                            if (response.status === 401) {
+                                console.error('401 Unauthorized - Session not working');
+                                // Try one more time to refresh session
+                                await this.refreshSession();
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                                
+                                // Retry the request
+                                const retryResponse = await fetch('api/data.php?action=business_profile', {
+                                    method: 'GET',
+                                    credentials: 'include'
+                                });
+                                
+                                if (!retryResponse.ok) {
+                                    console.error('401 Unauthorized - Session may have expired');
+                                    alert('Session expired. Please log in again.');
+                                window.location.href = 'login_business.html';
+                                    return;
+                                }
+                                
+                                // Parse the successful retry response
+                                const retryData = await retryResponse.json();
+                                if (retryData.success) {
+                                    this.processBusinessData(retryData);
+                                    return;
+                                }
+                            }
+                            
+                            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                            console.error('Failed to load business data:', errorData);
+                            alert('Failed to load business data: ' + (errorData.error || 'Unknown error'));
+                            return;
+                        }
+
+                        const data = await response.json();
+                        console.log('Business data loaded:', data);
+                        this.processBusinessData(data);
+                    } catch (e) {
+                        console.error('Error loading business data:', e);
+                        alert('Failed to load business data. Please try again.');
+                    }
+                },
+                
+                processBusinessData(data) {
+                    if (!data.success) {
+                        console.error('Business data not successful:', data);
+                        return;
+                    }
+                    
+                    // Set businessId from response - prioritize top-level businessId (must be numeric MySQL ID)
+                    let newBusinessId = null;
+                    
+                    if (data.businessId) {
+                        newBusinessId = parseInt(data.businessId);
+                    } else if (data.business?.id) {
+                        newBusinessId = parseInt(data.business.id);
+                    }
+                    
+                    // Only set if it's a valid numeric ID (MySQL ID), not a Firebase UID
+                    if (newBusinessId && !isNaN(newBusinessId) && newBusinessId > 0) {
+                        this.businessId = newBusinessId;
+                        console.log('Set businessId (MySQL ID):', this.businessId);
+                    } else {
+                        console.error('WARNING: Invalid businessId! Data:', data);
+                        console.error('businessId value:', newBusinessId, 'Type:', typeof newBusinessId);
+                    }
+                    
+                    // Update businessName from API response
+                    this.businessName = data.business.business_name || this.userName || this.businessName || 'Business';
+                    
+                    // Populate profile with all data - use actual values from database
+                            this.profile = {
+                        name: data.business.business_name || '',
+                                category: data.business.category || '',
+                                description: data.business.description || '',
+                                phone: data.business.phone || '',
+                                email: data.business.email || '',
+                                website: data.business.website || '',
+                        address: data.business.address || '',
+                        location: data.locations?.[0]?.address || '',
+                        lat: data.business.lat || null,
+                        lng: data.business.lng || null
+                            };
+
+                            this.certifications = data.certifications || [];
+                            this.ecoPractices = data.practices || [];
+                            this.products = data.products || [];
+                            this.updates = data.updates || [];
+
+                            this.stats = {
+                                profileViews: data.stats?.profileViews || 0,
+                                sustainabilityScore: data.stats?.sustainabilityScore || 0,
+                                certifications: data.certifications?.length || 0
+                            };
+                            
+                            // Update previousAddress to match what we just loaded from server
+                            // This ensures we compare against the latest saved address
+                            this.previousAddress = this.profile.address || '';
+                            console.log('Loaded business data, previousAddress set to:', this.previousAddress);
+                },
+
+                async updateProfile() {
+                    try {
+                        // Refresh session before API call
+                        await this.refreshSession();
+                        
+                        // Prepare profile data including lat/lng
+                        // Convert to float if they're strings
+                        let lat = this.profile.lat;
+                        let lng = this.profile.lng;
+                        
+                        // Try to get from hidden inputs if not in profile
+                        if ((!lat || lat === null) && document.getElementById('address-lat')?.value) {
+                            lat = parseFloat(document.getElementById('address-lat').value);
+                        }
+                        if ((!lng || lng === null) && document.getElementById('address-lng')?.value) {
+                            lng = parseFloat(document.getElementById('address-lng').value);
+                        }
+                        
+                        // Convert strings to numbers if needed
+                        if (lat && typeof lat === 'string') {
+                            lat = parseFloat(lat);
+                        }
+                        if (lng && typeof lng === 'string') {
+                            lng = parseFloat(lng);
+                        }
+                        
+                        // ALWAYS geocode if address has changed or if coordinates are missing/invalid
+                        // Force geocoding when address changes to ensure fresh coordinates
+                        if (this.profile.address && this.profile.address.trim()) {
+                            console.log('=== Geocoding Check ===');
+                            console.log('Current address:', this.profile.address);
+                            console.log('Previous address:', this.previousAddress);
+                            console.log('Current lat before geocoding:', lat);
+                            console.log('Current lng before geocoding:', lng);
+                            console.log('Address changed?', this.profile.address !== this.previousAddress);
+                            
+                            // Always geocode if address changed OR if coordinates are missing/invalid
+                            const shouldGeocode = this.profile.address !== this.previousAddress || 
+                                                  !lat || !lng || 
+                                                  isNaN(lat) || isNaN(lng);
+                            
+                            if (shouldGeocode) {
+                                console.log('Geocoding address:', this.profile.address);
+                                // Clear old coordinates first
+                                lat = null;
+                                lng = null;
+                                
+                                const geocoded = await this.geocodeAddress(this.profile.address);
+                                if (geocoded) {
+                                    lat = geocoded.lat;
+                                    lng = geocoded.lng;
+                                    console.log('✅ Geocoding successful!', { lat, lng });
+                                    
+                                    // Update profile and hidden inputs
+                                    this.profile.lat = lat;
+                                    this.profile.lng = lng;
+                                    const latInput = document.getElementById('address-lat');
+                                    const lngInput = document.getElementById('address-lng');
+                                    if (latInput) latInput.value = lat;
+                                    if (lngInput) lngInput.value = lng;
+                                } else {
+                                    console.error('❌ Geocoding failed');
+                                }
+                            } else {
+                                console.log('Using existing coordinates (address unchanged)');
+                            }
+                        }
+                        
+                        const profileData = {
+                            ...this.profile,
+                            lat: (lat && !isNaN(lat)) ? lat : null,
+                            lng: (lng && !isNaN(lng)) ? lng : null
+                        };
+                        
+                        console.log('Updating profile with data:', {
+                            address: profileData.address,
+                            lat: profileData.lat,
+                            lng: profileData.lng
+                        });
+                        
+                        const response = await fetch('api/data.php?action=update_business_profile', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(profileData)
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            this.profileUpdateMessage = 'Profile updated successfully!';
+                            this.businessName = this.profile.name; // Update display name
+                            setTimeout(() => { this.profileUpdateMessage = ''; }, 3000);
+                            // Reload data to get updated info from server
+                            // processBusinessData will update previousAddress with the server value
+                            await this.loadBusinessData();
+                        } else {
+                            this.profileUpdateMessage = 'Error: ' + (data.error || 'Failed to update profile');
+                            setTimeout(() => { this.profileUpdateMessage = ''; }, 5000);
+                        }
+                    } catch (error) {
+                        console.error('Error updating profile:', error);
+                        this.profileUpdateMessage = 'Network error: Please try again';
+                        setTimeout(() => { this.profileUpdateMessage = ''; }, 5000);
+                    }
+                },
+
+                async addCertification() {
+                    try {
+                        // Refresh session before API call
+                        await this.refreshSession();
+                        
+                        const response = await fetch('api/data.php?action=add_certification', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newCert)
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            this.certifications.push({ 
+                                cert_id: data.certId,
+                                name: this.newCert.name,
+                                code: this.newCert.code,
+                                issued: this.newCert.issued,
+                                expiry: this.newCert.expiry
+                            });
+                            this.newCert = { name: '', code: '', issued: '', expiry: '' };
+                            this.showAddCert = false;
+                            alert('Certification added successfully!');
+                            // Reload data to sync with database
+                            this.loadBusinessData();
+                        } else {
+                            alert('Error adding certification: ' + (data.error || 'Unknown error'));
+                            console.error('Failed to add certification:', data);
+                        }
+                    } catch (error) {
+                        console.error('Error adding certification:', error);
+                        alert('Network error: Please try again.');
+                    }
+                },
+
+                async removeCertification(index) {
+                    if (!confirm('Are you sure?')) return;
+                    const certId = this.certifications[index].cert_id;
+                    try {
+                        const response = await fetch('api/data.php?action=remove_certification', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ certId })
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            this.certifications.splice(index, 1);
+                        }
+                    } catch (error) {
+                        console.error('Error removing certification:', error);
+                    }
+                },
+
+                async addPractice() {
+                    try {
+                        // Refresh session before API call
+                        await this.refreshSession();
+                        
+                        const response = await fetch('api/data.php?action=add_practice', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newPractice)
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            this.ecoPractices.push({ 
+                                practice_id: data.practiceId,
+                                title: this.newPractice.title,
+                                description: this.newPractice.description
+                            });
+                            this.newPractice = { title: '', description: '' };
+                            this.showAddPractice = false;
+                            alert('Eco practice added successfully!');
+                            // Reload data to sync with database
+                            this.loadBusinessData();
+                        } else {
+                            alert('Error adding practice: ' + (data.error || 'Unknown error'));
+                            console.error('Failed to add practice:', data);
+                        }
+                    } catch (error) {
+                        console.error('Error adding practice:', error);
+                        alert('Network error: Please try again.');
+                    }
+                },
+
+                async removePractice(index) {
+                    if (!confirm('Are you sure?')) return;
+                    const practiceId = this.ecoPractices[index].practice_id;
+                    try {
+                        const response = await fetch('api/data.php?action=remove_practice', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ practiceId })
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            this.ecoPractices.splice(index, 1);
+                        }
+                    } catch (error) {
+                        console.error('Error removing practice:', error);
+                    }
+                },
+
+                async addProduct() {
+                    try {
+                        // Refresh session before API call
+                        await this.refreshSession();
+                        
+                        // Add available flag
+                        const productData = {
+                            ...this.newProduct,
+                            available: true // Default to available
+                        };
+                        
+                        const response = await fetch('api/data.php?action=add_product', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(productData)
+                        });
+
+                        const data = await response.json();
+                        console.log('Add product response:', data);
+                        if (data.success) {
+                            this.products.push({ 
+                                product_id: data.productId,
+                                name: this.newProduct.name,
+                                description: this.newProduct.description,
+                                price: this.newProduct.price,
+                                available: true
+                            });
+                            this.newProduct = { name: '', description: '', price: '' };
+                            this.showAddProduct = false;
+                            alert('Product/Service added successfully!');
+                            // Reload data to sync with database
+                            this.loadBusinessData();
+                        } else {
+                            alert('Error adding product: ' + (data.error || 'Unknown error'));
+                            console.error('Failed to add product:', data);
+                        }
+                    } catch (error) {
+                        console.error('Error adding product:', error);
+                        alert('Network error: Please try again.');
+                    }
+                },
+
+                async removeProduct(index) {
+                    if (!confirm('Are you sure?')) return;
+                    const productId = this.products[index].product_id;
+                    try {
+                        const response = await fetch('api/data.php?action=remove_product', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ productId })
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            this.products.splice(index, 1);
+                        }
+                    } catch (error) {
+                        console.error('Error removing product:', error);
+                    }
+                },
+
+                async addUpdate() {
+                    try {
+                        const response = await fetch('api/data.php?action=add_update', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newUpdate)
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            this.updates.unshift({
+                                ...this.newUpdate,
+                                update_id: data.updateId,
+                                created_at: new Date().toISOString()
+                            });
+                            this.newUpdate = { title: '', description: '' };
+                            this.showAddUpdate = false;
+                        }
+                    } catch (error) {
+                        console.error('Error adding update:', error);
+                    }
+                },
+
+                async removeUpdate(index) {
+                    if (!confirm('Are you sure?')) return;
+                    const updateId = this.updates[index].update_id;
+                    try {
+                        const response = await fetch('api/data.php?action=remove_update', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ updateId })
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            this.updates.splice(index, 1);
+                        }
+                    } catch (error) {
+                        console.error('Error removing update:', error);
+                    }
+                },
+
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

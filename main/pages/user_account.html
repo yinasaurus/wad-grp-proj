@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - Green Business Directory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/user_account.css">
+</head>
+<body>
+    <div id="app">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="fas fa-leaf me-2"></i>Green Business Directory
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="directory.html">Directory</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                        <li class="nav-item" v-if="isLoggedIn">
+                            <a class="nav-link" href="messages.html">Messages</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="about.html">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contact.html">Contact</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="auth-block">
+                        <template v-if="!isLoggedIn">
+                            <a href="login.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                            </a>
+                            <a href="register.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                            <div class="dropdown ms-2">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-building me-1"></i>For Businesses
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="register_business.html">
+                                    <i class="fas fa-store me-2"></i>Register Green Business
+                                </a></li>
+                                <li><a class="dropdown-item" href="login_business.html">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Business Sign In
+                                </a></li>
+                            </ul>
+                        </div>
+                        </template>
+                        
+                        <template v-else>
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li v-if="isBusinessPartner">
+                                        <a class="dropdown-item fw-bold" href="partner_dashboard.html">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Partner Dashboard
+                                        </a>
+                                    </li>
+                                    <li v-else>
+                                        <a class="dropdown-item fw-bold" href="user_account.html">
+                                            <i class="fas fa-tachometer-alt me-2"></i>My Dashboard
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li v-if="!isBusinessPartner">
+                                        <a class="dropdown-item" href="user_account.html#interests">
+                                            <i class="fas fa-heart me-2"></i>My Interests
+                                        </a>
+                                    </li>
+                                    <li v-if="!isBusinessPartner">
+                                        <a class="dropdown-item" href="user_account.html#profile">
+                                            <i class="fas fa-cog me-2"></i>Settings
+                                        </a>
+                                    </li>
+                                    <li v-if="!isBusinessPartner"><hr class="dropdown-divider"></li>
+                                    <li v-if="!isBusinessPartner">
+                                        <a class="dropdown-item" href="register_business.html">
+                                            <i class="fas fa-plus me-2"></i>List Your Business
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <button class="btn btn-outline-light btn-sm" @click="logout">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </button>
+                        </template>
+                    </div>
+                    
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <div class="row g-4">
+                <div class="col-lg-3">
+                    <div class="sidebar-nav">
+                        <h5 class="px-3 mb-3 text-secondary text-uppercase small fw-bold">My Account</h5>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: activeTab === 'overview'}" href="#" @click.prevent="activeTab = 'overview'">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Overview
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: activeTab === 'profile'}" href="#" @click.prevent="activeTab = 'profile'">
+                                    <i class="fas fa-user-circle me-2"></i>Profile Details
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: activeTab === 'interests'}" href="#" @click.prevent="activeTab = 'interests'">
+                                    <i class="fas fa-bookmark me-2"></i>Saved Companies
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: activeTab === 'carbon'}" href="#" @click.prevent="activeTab = 'carbon'">
+                                    <i class="fas fa-leaf me-2"></i>Carbon Footprint
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="messages.html">
+                                    <i class="fas fa-envelope me-2"></i>Messages
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-9">
+                    
+                    <div v-if="activeTab === 'overview'">
+                        <h2 class="mb-4">Welcome back, {{ userName }}!</h2>
+                        
+                        <div class="row g-4 mb-4">
+                            <div class="col-lg-12">
+                                <div class="offset-stat-widget">
+                                    <h3 class="mb-0">{{ offsetStats.totalOffset }} kg CO₂</h3>
+                                    <p class="lead mb-0">Total Carbon Offset So Far</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="preferences-card text-center">
+                                    <i class="fas fa-tree fa-3x text-success mb-2"></i>
+                                    <h5>{{ offsetStats.treesEquivalent }} Trees</h5>
+                                    <p class="text-muted small mb-0">Equivalent to planting</p>
+                                </div>
+                            </div>
+                                    <div class="col-md-4">
+                                        <div class="preferences-card text-center">
+                                            <i class="fas fa-car-side fa-3x text-primary mb-2"></i>
+                                            <h5>{{ offsetStats.kmNotDriven.toLocaleString() }} km</h5>
+                                            <p class="text-muted small mb-0">Car Miles Not Driven</p>
+                                        </div>
+                                    </div>
+                        </div>
+
+                        <div class="preferences-card">
+                            <h4 class="mb-3"><i class="fas fa-bookmark me-2 text-warning"></i>Your Saved Companies</h4>
+                            <p class="text-muted">You have saved {{ savedCompanies.length }} companies that match your interests.</p>
+                            <button class="btn btn-primary" @click="activeTab = 'interests'">
+                                View Saved Companies
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="activeTab === 'profile'">
+                        <div class="preferences-card">
+                            <h4 class="mb-4"><i class="fas fa-user-circle me-2 text-primary"></i>Edit Profile Details</h4>
+                            <form @submit.prevent="updateProfile">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Full Name</label>
+                                        <input type="text" class="form-control" v-model="userProfile.name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Email Address</label>
+                                        <input type="email" class="form-control" v-model="userProfile.email" disabled>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Phone Number</label>
+                                        <input type="tel" class="form-control" v-model="userProfile.phone">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Location / City</label>
+                                        <input type="text" class="form-control" v-model="userProfile.location">
+                                    </div>
+                                </div>
+                                <h6 class="mt-4 mb-3">Change Password</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <input type="password" class="form-control" placeholder="Current Password">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="password" class="form-control" placeholder="New Password">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="password" class="form-control" placeholder="Confirm New Password">
+                                    </div>
+                                </div>
+                                <div class="alert alert-success mt-3" v-if="profileMessage">
+                                    <i class="fas fa-check-circle me-2"></i>{{ profileMessage }}
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg mt-4">
+                                    <i class="fas fa-save me-2"></i>Save Profile Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div v-if="activeTab === 'interests'">
+                        <div class="preferences-card mb-3">
+                            <h4 class="mb-3"><i class="fas fa-bookmark me-2 text-primary"></i>Saved Companies</h4>
+                            <p class="text-muted">Companies you're interested in</p>
+                        </div>
+
+                        <div v-if="savedCompanies.length === 0" class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            You haven't saved any companies yet. Browse the directory to add companies to your interests!
+                        </div>
+
+                        <div v-for="company in savedCompanies" :key="company.id" class="company-card" style="cursor: pointer;" @click="viewBusiness(company.id)">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="mb-1">{{ company.name }}</h5>
+                                    <span class="location-badge">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ company.location }}
+                                    </span>
+                                </div>
+                                <button class="btn btn-sm btn-danger" @click.stop="removeCompany(company.id)">
+                                    <i class="fas fa-trash me-1"></i>Remove
+                                </button>
+                            </div>
+                            
+                            <p class="text-muted mt-3 mb-2">{{ company.description }}</p>
+                            
+                            <div class="mt-3">
+                                <strong class="small">Categories:</strong>
+                                <div>
+                                    <span v-for="category in company.categories" :key="category" class="category-badge">
+                                        {{ category }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mt-2">
+                                <strong class="small">Topics:</strong>
+                                <div>
+                                    <span v-for="topic in company.topics" :key="topic" class="category-badge" style="background: #3b82f6;">
+                                        {{ topic }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <small class="text-muted d-block mt-3">Saved on: {{ formatDate(company.savedDate) }}</small>
+                        </div>
+
+                        <div class="preferences-card mt-4">
+                            <h6 class="mb-3"><i class="fas fa-chart-line me-2"></i>Interest Stats</h6>
+                            <p><strong>{{ savedCompanies.length }}</strong> Companies Saved</p>
+                        </div>
+                    </div>
+
+                    <!-- Carbon Footprint Tab -->
+                    <div v-if="activeTab === 'carbon'">
+                        <div class="preferences-card mb-4">
+                            <h4 class="mb-4"><i class="fas fa-leaf me-2 text-success"></i>Your Carbon Footprint Offset</h4>
+                            
+                            <div class="row g-4 mb-4">
+                                <div class="col-lg-12">
+                                    <div class="offset-stat-widget">
+                                        <h2 class="mb-0">{{ offsetStats.totalOffset.toLocaleString() }} kg CO₂</h2>
+                                        <p class="lead mb-0">Total Carbon Offset</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="preferences-card text-center">
+                                        <i class="fas fa-tree fa-3x text-success mb-2"></i>
+                                        <h4>{{ offsetStats.treesEquivalent }}</h4>
+                                        <p class="text-muted small mb-0">Trees Equivalent</p>
+                                        <small class="text-muted">(~21 kg CO₂ per tree/year)</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="preferences-card text-center">
+                                        <i class="fas fa-car-side fa-3x text-primary mb-2"></i>
+                                        <h4>{{ offsetStats.kmNotDriven.toLocaleString() }}</h4>
+                                        <p class="text-muted small mb-0">Kilometers Not Driven</p>
+                                        <small class="text-muted">(~0.4 kg CO₂ per km)</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="preferences-card text-center">
+                                        <i class="fas fa-recycle fa-3x text-info mb-2"></i>
+                                        <h4>{{ carbonHistory.length }}</h4>
+                                        <p class="text-muted small mb-0">Total Actions</p>
+                                        <small class="text-muted">Contributing to offset</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Your carbon offset is calculated based on your interactions with green businesses, including saving companies, writing reviews, and purchasing eco-friendly products.
+                            </div>
+                        </div>
+
+                        <!-- Carbon Offset History -->
+                        <div class="preferences-card">
+                            <h5 class="mb-3"><i class="fas fa-history me-2"></i>Offset History</h5>
+                            
+                            <div v-if="loadingHistory" class="text-center py-4">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-muted mt-2">Loading your carbon offset history...</p>
+                            </div>
+
+                            <div v-else-if="carbonHistory.length === 0" class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                You haven't generated any carbon offsets yet. Start by saving businesses, writing reviews, or interacting with green businesses!
+                            </div>
+
+                            <div v-else class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                            <th>Business</th>
+                                            <th class="text-end">CO₂ Offset</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="item in carbonHistory" :key="item.id">
+                                            <td>{{ formatDate(item.created_at) }}</td>
+                                            <td>
+                                                <span class="badge" :class="{
+                                                    'bg-success': item.source.toLowerCase() === 'visit' || item.source.toLowerCase() === 'purchase',
+                                                    'bg-info': item.source.toLowerCase() === 'engagement',
+                                                    'bg-primary': item.source.toLowerCase() === 'review',
+                                                    'bg-warning': item.source.toLowerCase() === 'save'
+                                                }">
+                                                    {{ item.source }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a v-if="item.business_id" href="#" @click.prevent="viewBusiness(item.business_id)" class="text-decoration-none">
+                                                    {{ item.business_name || 'Unknown Business' }}
+                                                </a>
+                                                <span v-else>{{ item.business_name || 'N/A' }}</span>
+                                                <small v-if="item.product_name" class="text-muted d-block">{{ item.product_name }}</small>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong class="text-success">+{{ item.amount_kg.toFixed(2) }} kg</strong>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-light">
+                                            <td colspan="3" class="text-end fw-bold">Total:</td>
+                                            <td class="text-end fw-bold text-success">{{ offsetStats.totalOffset.toLocaleString() }} kg CO₂</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+        import { authMixin } from './js/auth-mixin.js';
+        const { createApp } = Vue;
+
+        createApp({
+            mixins: [authMixin],
+            data() {
+                return {
+                    activeTab: (window.location.hash.substring(1) || 'overview').toLowerCase(),
+                    profileMessage: '',
+                    dataLoaded: false, // Track if data has been loaded
+                    
+                    offsetStats: {
+                        totalOffset: 0,
+                        treesEquivalent: 0,
+                        kmNotDriven: 0,
+                    },
+                    carbonHistory: [],
+                    loadingHistory: false,
+                    userProfile: {
+                        name: 'John Doe',
+                        email: 'john.doe@example.com',
+                        phone: '+65 9123 4567',
+                        location: 'Central Singapore'
+                    },
+
+                    savedCompanies: [
+                        {
+                            id: 1,
+                            name: 'EcoTech Solutions',
+                            description: 'Sustainable IT solutions provider specializing in renewable energy management systems.',
+                            location: 'Marina Bay',
+                            categories: ['Technology', 'Energy'],
+                            topics: ['Renewable Energy', 'Carbon Neutral'],
+                            savedDate: new Date().toISOString()
+                        },
+                        {
+                            id: 2,
+                            name: 'Green Harvest Cafe',
+                            description: 'Farm-to-table organic restaurant with zero waste practices.',
+                            location: 'Orchard',
+                            categories: ['Food and Beverage'],
+                            topics: ['Zero Waste', 'Organic Products', 'Plant-Based'],
+                            savedDate: new Date(Date.now() - 86400000).toISOString()
+                        }
+                    ]
+                }
+            },
+            mounted() {
+                // Handle hash navigation (for #interests, #profile links)
+                const hash = window.location.hash.substring(1).toLowerCase();
+                // Map 'settings' to 'profile' for backward compatibility
+                const normalizedHash = hash === 'settings' ? 'profile' : hash;
+                if (normalizedHash && ['overview', 'profile', 'interests', 'carbon'].includes(normalizedHash)) {
+                    this.activeTab = normalizedHash;
+                }
+                
+                // Also listen for hash changes
+                window.addEventListener('hashchange', () => {
+                    const newHash = window.location.hash.substring(1).toLowerCase();
+                    const normalized = newHash === 'settings' ? 'profile' : newHash;
+                    if (normalized && ['overview', 'profile', 'interests', 'carbon'].includes(normalized)) {
+                        this.activeTab = normalized;
+                    }
+                });
+                
+                // Wait for auth to initialize
+                this.$nextTick(() => {
+                    // Give authMixin time to initialize
+                    setTimeout(() => {
+                        if (this.isLoggedIn) {
+                            // If already logged in, load data
+                            this.loadUserData();
+                            this.dataLoaded = true;
+                        } else {
+                            // Wait a bit more for auth to initialize
+                            setTimeout(() => {
+                                if (!this.isLoggedIn) {
+                                    // Still not logged in after waiting, redirect
+                                    window.location.href = 'login.html';
+                                }
+                            }, 2000);
+                        }
+                    }, 500);
+                });
+            },
+            watch: {
+                activeTab(newTab) {
+                    if (newTab === 'carbon') {
+                        this.fetchCarbonOffsetHistory();
+                    } else if (newTab === 'overview') {
+                        this.fetchCarbonOffsetStats();
+                    }
+                },
+                isLoggedIn(newVal) {
+                    // When logged in state changes to true, load data
+                    if (newVal && !this.dataLoaded) {
+                        this.loadUserData();
+                        this.dataLoaded = true;
+                    } else if (!newVal && this.dataLoaded) {
+                        // If logged out, redirect
+                        window.location.href = 'login.html';
+                    }
+                }
+            },
+            methods: {
+                loadUserData() {
+                    // Load all user-related data
+                    this.fetchUserData();
+                    this.fetchDashboardData();
+                    this.fetchCarbonOffsetStats();
+                    if (this.activeTab === 'carbon') {
+                        this.fetchCarbonOffsetHistory();
+                    }
+                },
+                
+                async fetchUserData() {
+                    // Auth mixin handles userName, but we also need profile data
+                    if (!this.isLoggedIn) {
+                        return; // Don't redirect here, let checkAuthAndLoadData handle it
+                    }
+                    this.userProfile.name = this.userName || 'Guest';
+                    this.userProfile.email = this.userEmail || '';
+                },
+
+                async fetchDashboardData() {
+                    try {
+                        // Try to fetch saved companies from API
+                        const savedResponse = await fetch('api/data.php?action=get_saved_businesses', {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+
+                        if (savedResponse.ok) {
+                            const savedData = await savedResponse.json();
+                            if (savedData.success) {
+                                this.savedCompanies = savedData.savedCompanies.map(company => ({
+                                    ...company,
+                                    savedDate: company.savedDate || new Date().toISOString()
+                                }));
+                            }
+                        }
+
+                        // Try to fetch dashboard data if API exists
+                        try {
+                            const response = await fetch('api/get_user_dashboard.php', {
+                                method: 'GET',
+                                credentials: 'include'
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.success) {
+                                    this.userProfile = data.user || this.userProfile;
+                                    this.userName = data.user?.name || this.userName;
+                                    // Merge saved companies if provided
+                                    if (data.savedCompanies) {
+                                        this.savedCompanies = data.savedCompanies.map(company => ({
+                                            ...company,
+                                            savedDate: new Date(company.savedDate).toISOString()
+                                        }));
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            // Dashboard API might not exist, that's ok
+                            console.log('Dashboard API not available, using saved companies only');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching dashboard data:', error);
+                    }
+                },
+
+                async fetchCarbonOffsetStats() {
+                    try {
+                        const response = await fetch('api/data.php?action=get_carbon_offset_stats', {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.success) {
+                                this.offsetStats = {
+                                    totalOffset: data.totalOffset || 0,
+                                    treesEquivalent: data.treesEquivalent || 0,
+                                    kmNotDriven: data.kmNotDriven || 0
+                                };
+                            }
+                        } else if (response.status === 401) {
+                            // User not logged in via PHP session (might be Firebase)
+                            console.log('Not authenticated via PHP session for carbon offset');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching carbon offset stats:', error);
+                    }
+                },
+
+                async fetchCarbonOffsetHistory() {
+                    this.loadingHistory = true;
+                    try {
+                        const response = await fetch('api/data.php?action=get_carbon_offset_history', {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.success) {
+                                this.carbonHistory = data.history || [];
+                            }
+                        } else if (response.status === 401) {
+                            console.log('Not authenticated via PHP session for carbon history');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching carbon offset history:', error);
+                    } finally {
+                        this.loadingHistory = false;
+                    }
+                },
+
+                // logout is handled by authMixin
+
+                async updateProfile() {
+                    this.profileMessage = 'Profile updated successfully!';
+                    this.userName = this.userProfile.name;
+                    sessionStorage.setItem('currentUser', JSON.stringify({
+                        name: this.userProfile.name,
+                        email: this.userProfile.email
+                    }));
+                    setTimeout(() => { this.profileMessage = ''; }, 3000);
+                },
+
+                async removeCompany(companyId) {
+                    if (!confirm('Remove this company from your favorites?')) return;
+                    
+                    try {
+                        const response = await fetch('api/data.php?action=remove_business', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                                business_id: companyId
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            this.savedCompanies = this.savedCompanies.filter(c => c.id !== companyId);
+                            alert('Company removed from your favorites!');
+                        } else {
+                            alert(data.error || 'Failed to remove company');
+                        }
+                    } catch (error) {
+                        console.error('Error removing company:', error);
+                        alert('Error removing company. Please try again.');
+                    }
+                },
+
+                viewBusiness(companyId) {
+                    window.location.href = `business_profile.html?id=${companyId}`;
+                },
+
+                formatDate(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-SG', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+    <script>
+        // Handle hash navigation on page load and when hash changes
+        function handleHashNavigation() {
+            const hash = window.location.hash.substring(1).toLowerCase();
+            if (hash && ['overview', 'profile', 'interests', 'carbon'].includes(hash)) {
+                // Get Vue app instance
+                const appEl = document.querySelector('#app');
+                if (appEl && appEl.__vueParentComponent) {
+                    const appInstance = appEl.__vueParentComponent.ctx;
+                    if (appInstance && appInstance.activeTab !== undefined) {
+                        appInstance.activeTab = hash;
+                    }
+                } else {
+                    // Fallback: try to find Vue app via Vue devtools or global
+                    const vueApp = window.vueApp || appEl?._vnode?.ctx;
+                    if (vueApp && vueApp.activeTab !== undefined) {
+                        vueApp.activeTab = hash;
+                    }
+                }
+            }
+        }
+        
+        // Handle hash change events
+        window.addEventListener('hashchange', handleHashNavigation);
+        
+        // Handle initial hash on page load (after Vue mounts)
+        window.addEventListener('load', () => {
+            setTimeout(handleHashNavigation, 100);
+        });
+    </script>
+</body>
+</html>

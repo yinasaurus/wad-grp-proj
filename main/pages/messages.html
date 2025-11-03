@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - Green Business Directory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/messages.css">
+</head>
+<body>
+    <div id="app">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="fas fa-leaf me-2"></i>Green Business Directory
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="directory.html">Directory</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                        <li class="nav-item" v-if="isLoggedIn">
+                            <a class="nav-link active">Messages</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="about.html">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contact.html">Contact</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="auth-block">
+                        
+                        <template v-if="!isLoggedIn">
+                            <a href="login.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                            </a>
+                            <a href="register.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                            <div class="dropdown ms-2" v-if="!isLoggedIn || !isBusinessPartner">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-building me-1"></i>For Businesses
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="register_business.html">
+                                    <i class="fas fa-store me-2"></i>Register Green Business
+                                </a></li>
+                                <li><a class="dropdown-item" href="login_business.html">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Business Sign In
+                                </a></li>
+                            </ul>
+                        </div>
+                        </template>
+                        
+                        <template v-else>
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li v-if="isBusinessPartner">
+                                        <a class="dropdown-item fw-bold" href="partner_dashboard.html">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Partner Dashboard
+                                        </a>
+                                    </li>
+                                    <li v-else>
+                                        <a class="dropdown-item fw-bold" href="user_account.html">
+                                        <i class="fas fa-tachometer-alt me-2"></i>My Dashboard
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li v-if="!isBusinessPartner">
+                                        <a class="dropdown-item" href="user_account.html#interests">
+                                        <i class="fas fa-heart me-2"></i>My Interests
+                                        </a>
+                                    </li>
+                                    <li v-if="!isBusinessPartner">
+                                        <a class="dropdown-item" href="user_account.html#profile">
+                                        <i class="fas fa-cog me-2"></i>Settings
+                                        </a>
+                                    </li>
+                                    <li v-if="!isBusinessPartner"><hr class="dropdown-divider"></li>
+                                    <li v-if="!isBusinessPartner">
+                                        <a class="dropdown-item" href="register_business.html">
+                                        <i class="fas fa-plus me-2"></i>List Your Business
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <button class="btn btn-outline-light btn-sm" @click="logout">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </button>
+                            
+                        </template>
+                    </div>
+                    
+                </div>
+            </div>
+        </nav>
+
+    <div class="messaging-container">
+        <template v-if="!isLoggedIn">
+            <div class="container text-center py-5">
+                <h2 class="mb-4">Please log in to view messages</h2>
+                <a href="login.html" class="btn btn-success btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </a>
+            </div>
+        </template>
+
+        <template v-else-if="isBusinessPartner">
+            <div class="container text-center py-5">
+                <h2 class="mb-4">Business accounts use a different messaging page</h2>
+                <a href="messages_business.html" class="btn btn-success btn-lg">
+                    <i class="fas fa-comments me-2"></i>Go to Business Messages
+                </a>
+            </div>
+        </template>
+
+        <template v-else-if="!currentUserId && !loadingConversations">
+            <div class="text-center p-5">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Initializing messages...</p>
+            </div>
+        </template>
+        
+        <template v-else-if="loadingConversations && currentUserId">
+            <div class="text-center p-5">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading conversations...</span>
+                </div>
+                <p class="mt-3">Loading conversations...</p>
+            </div>
+        </template>
+
+        <template v-else-if="currentUserId && !loadingConversations">
+            <div class="messaging-wrapper">
+                <!-- Conversations Sidebar -->
+                <div class="conversations-sidebar" :class="{'hidden': showChat}">
+                    <div class="conversations-header">
+                        <h3><i class="fas fa-comments me-2"></i>Messages</h3>
+                        <div class="search-box">
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                placeholder="Search conversations..."
+                                v-model="searchQuery"
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="conversations-list">
+                        <div v-if="loadingConversations" class="text-center p-4">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div v-else-if="filteredConversations.length === 0" class="text-center p-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p>No conversations yet</p>
+                        </div>
+                        <div 
+                            v-else
+                            v-for="conv in filteredConversations" 
+                            :key="conv.id"
+                            class="conversation-item"
+                            :class="{'active': selectedConversation && selectedConversation.id === conv.id}"
+                            @click="selectConversation(conv)"
+                        >
+                            <div class="conversation-avatar">
+                                {{ getInitials(conv.businessName) }}
+                            </div>
+                            <div class="conversation-content">
+                                <div class="conversation-top">
+                                    <span class="conversation-name">{{ conv.businessName }}</span>
+                                    <span class="conversation-time">{{ formatTime(conv.lastMessageTime) }}</span>
+                                </div>
+                                <div class="conversation-preview">
+                                    <span v-if="conv.unread > 0" class="unread-badge">{{ conv.unread }}</span>
+                                    {{ conv.lastMessage }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="chat-area" :class="{'mobile-show': showChat}">
+                    <div v-if="!selectedConversation" class="empty-state">
+                        <i class="fas fa-comments"></i>
+                        <h3>Select a conversation</h3>
+                        <p>Choose a business from the list to start messaging</p>
+                    </div>
+
+                    <template v-else>
+                        <!-- Chat Header -->
+                        <div class="chat-header">
+                            <div class="chat-header-left">
+                                <button class="btn btn-sm d-md-none" @click="backToList">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <div class="chat-avatar">
+                                    {{ getInitials(selectedConversation.businessName) }}
+                                </div>
+                                <div class="chat-info">
+                                    <h4>{{ selectedConversation.businessName }}</h4>
+                                    <span class="status" :class="{'online': selectedConversation.online}">
+                                        {{ selectedConversation.online ? 'Online' : 'Offline' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="chat-actions">
+                                <button title="View Business Profile" @click="viewBusinessProfile">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Messages Container -->
+                        <div class="messages-container" ref="messagesContainer">
+                            <div v-if="loadingMessages" class="text-center p-4">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Loading messages...</span>
+                                </div>
+                            </div>
+                            <template v-else-if="messages.length === 0">
+                                <div class="text-center p-5 text-muted">
+                                    <i class="fas fa-comments fa-3x mb-3"></i>
+                                    <p>No messages yet. Start the conversation!</p>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <div v-for="(group, date) in groupedMessages" :key="date">
+                                    <div class="message-date">
+                                        <span>{{ date }}</span>
+                                    </div>
+                                    
+                                    <div v-for="msg in group" :key="msg.id" class="message" :class="msg.sent ? 'sent' : 'received'">
+                                        <div class="message-bubble">
+                                            <div class="message-text">{{ msg.text }}</div>
+                                            <div class="message-time">{{ msg.time }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Message Input -->
+                        <div class="message-input-area">
+                            <div class="message-input-wrapper">
+                                <textarea 
+                                    class="message-input" 
+                                    placeholder="Type your message..."
+                                    v-model="newMessage"
+                                    @keydown.enter.exact.prevent="sendMessage"
+                                    @keydown.shift.enter.prevent
+                                    rows="1"
+                                ></textarea>
+                                <button 
+                                    class="send-button" 
+                                    @click="sendMessage"
+                                    :disabled="!newMessage.trim() || sendingMessage || !selectedConversation"
+                                    title="Send message"
+                                >
+                                    <i v-if="!sendingMessage" class="fas fa-paper-plane"></i>
+                                    <i v-else class="fas fa-spinner fa-spin"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+        </div>
+    </div> <!-- Close #app div -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+    import { authMixin } from './js/auth-mixin.js';
+    import { auth, db } from './js/firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+    import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+    const { createApp } = Vue;
+
+    createApp({
+        mixins: [authMixin],
+        data() {
+            return {
+                currentUserId: null,
+                searchQuery: '',
+                selectedConversation: null,
+                newMessage: '',
+                showChat: false,
+                conversations: [],
+                messages: [],
+                loadingConversations: true,
+                loadingMessages: false,
+                sendingMessage: false
+            };
+        },
+        computed: {
+            filteredConversations() {
+                if (!this.searchQuery) return this.conversations;
+                return this.conversations.filter(conv => 
+                    conv.businessName.toLowerCase().includes(this.searchQuery.toLowerCase())
+                );
+            },
+            groupedMessages() {
+                if (this.messages.length === 0) return {};
+                
+                const groups = {};
+                this.messages.forEach(msg => {
+                    const date = this.formatDate(msg.timestamp);
+                    if (!groups[date]) {
+                        groups[date] = [];
+                    }
+                    groups[date].push(msg);
+                });
+                return groups;
+            }
+            // Note: isBusinessPartner is already defined in authMixin, no need to redefine it
+        },
+        watch: {
+            isLoggedIn(newVal) {
+                if (newVal) {
+                    // Wait for auth to fully initialize
+                    this.$nextTick(() => {
+                        if (auth.currentUser) {
+                            this.currentUserId = auth.currentUser.uid;
+                            this.loadUserData(auth.currentUser.uid);
+                            
+                            // Check for business_id in URL and store in sessionStorage
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const businessId = urlParams.get('business_id');
+                            if (businessId) {
+                                sessionStorage.setItem('openConversation', businessId);
+                            }
+                            
+                    this.loadConversations();
+                } else {
+                            // Wait a bit for auth.currentUser to be available
+                            setTimeout(() => {
+                                if (auth.currentUser) {
+                                    this.currentUserId = auth.currentUser.uid;
+                                    this.loadUserData(auth.currentUser.uid);
+                                    
+                                    const urlParams = new URLSearchParams(window.location.search);
+                                    const businessId = urlParams.get('business_id');
+                                    if (businessId) {
+                                        sessionStorage.setItem('openConversation', businessId);
+                                    }
+                                    
+                                    this.loadConversations();
+                                }
+                            }, 500);
+                        }
+                    });
+                } else {
+                    this.currentUserId = null;
+                }
+            }
+        },
+        async mounted() {
+            // Wait for Firebase to initialize
+            const { firebasePromise } = await import('./js/firebase-config.js');
+            await firebasePromise;
+            
+            // Check for business_id in URL and store in sessionStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const businessId = urlParams.get('business_id');
+            if (businessId) {
+                console.log('Business ID found in URL:', businessId);
+                sessionStorage.setItem('openConversation', businessId);
+            }
+            
+            // Auth state is handled by authMixin
+            // Wait for auth to initialize with retry mechanism
+            this.$nextTick(() => {
+                const checkAuthAndLoad = () => {
+                    if (this.isLoggedIn && auth && auth.currentUser) {
+                        this.currentUserId = auth.currentUser.uid;
+                        this.loadUserData(auth.currentUser.uid);
+                        this.loadConversations();
+                        console.log('Auth ready, loading conversations. Business ID to open:', businessId);
+                    } else {
+                        // Keep checking every 200ms for up to 5 seconds
+                        let attempts = 0;
+                        const maxAttempts = 25;
+                        const checkInterval = setInterval(() => {
+                            attempts++;
+                            if (this.isLoggedIn && auth && auth.currentUser) {
+                                clearInterval(checkInterval);
+                                this.currentUserId = auth.currentUser.uid;
+                                this.loadUserData(auth.currentUser.uid);
+                                this.loadConversations();
+                                console.log('Auth ready after retry, loading conversations');
+                            } else if (attempts >= maxAttempts) {
+                                clearInterval(checkInterval);
+                                if (businessId) {
+                                    console.log('Auth not ready after max attempts, but business_id is set:', businessId);
+                                }
+                            }
+                        }, 200);
+                    }
+                };
+                
+                setTimeout(checkAuthAndLoad, 500);
+            });
+        },
+        methods: {
+            async loadUserData(uid) {
+                try {
+                    let userDoc = await getDoc(doc(db, "users", uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        this.userName = data.name || 'User';
+                        return;
+                    }
+                    
+                    userDoc = await getDoc(doc(db, "businesses", uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        this.userName = data.name || data.businessName || 'Business';
+                    }
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                }
+            },
+            async loadConversations() {
+                if (!this.currentUserId) return;
+                
+                this.loadingConversations = true;
+                
+                try {
+                    // Get MySQL user_id from session
+                    const sessionResp = await fetch('api/bridge.php?action=get_user', {
+                        credentials: 'include'
+                    });
+                    let sessionData = null;
+                    if (sessionResp.ok) {
+                        sessionData = await sessionResp.json();
+                    }
+                    
+                    if (!sessionData || !sessionData.success) {
+                        console.error('Failed to get session data. Status:', sessionResp.status);
+                        console.error('Session response:', sessionData);
+                        // Don't return immediately - try with currentUserId as fallback
+                        if (sessionResp.status === 401) {
+                            alert('Session expired. Please log in again.');
+                            window.location.href = 'login.html';
+                        this.loadingConversations = false;
+                        return;
+                        }
+                        // Continue with fallback
+                    }
+                    
+                    // Use MySQL user_id if available, otherwise use Firebase UID as fallback
+                    const mysqlUserId = (sessionData && sessionData.success && sessionData.user && sessionData.user.userId)
+                        ? String(sessionData.user.userId)
+                        : (this.currentUserId || null);
+                    
+                    if (!mysqlUserId) {
+                        console.error('No user ID available for loading conversations');
+                        this.loadingConversations = false;
+                        return;
+                    }
+                    
+                    const conversationsRef = collection(db, "conversations");
+                    // Remove orderBy to avoid requiring composite index
+                    // We'll sort client-side instead
+                    const q = query(
+                        conversationsRef,
+                        where("participants", "array-contains", mysqlUserId)
+                    );
+                    
+                    // Set up timeout to prevent infinite loading
+                    const timeoutId = setTimeout(() => {
+                        if (this.loadingConversations) {
+                            console.warn('Conversations loading timeout - showing empty state');
+                            console.warn('MySQL User ID:', mysqlUserId);
+                            console.warn('Current User ID:', this.currentUserId);
+                            this.conversations = [];
+                            this.loadingConversations = false;
+                        }
+                    }, 8000); // 8 second timeout (reduced from 10)
+                    
+                    console.log('Setting up Firestore listener with mysqlUserId:', mysqlUserId);
+                    
+                    // Set up the snapshot listener with better error handling
+                    try {
+                        const unsubscribe = onSnapshot(q, 
+                            async (snapshot) => {
+                                clearTimeout(timeoutId);
+                                console.log('Firestore snapshot received, documents:', snapshot.size);
+                                
+                        const conversationsList = [];
+                                const businessIds = [];
+                                
+                                // First pass: collect all business IDs
+                                snapshot.forEach((docSnap) => {
+                            const data = docSnap.data();
+                            const otherParticipantId = data.participants.find(id => id !== mysqlUserId);
+                                    if (otherParticipantId && !businessIds.includes(otherParticipantId)) {
+                                        businessIds.push(otherParticipantId);
+                                    }
+                                });
+                                
+                                console.log('Found business IDs:', businessIds);
+                                
+                                // Batch fetch business names
+                                const businessNames = await this.getBusinessNamesBatch(businessIds);
+                                
+                                // Second pass: build conversations list
+                                snapshot.forEach((docSnap) => {
+                                    const data = docSnap.data();
+                                    const otherParticipantId = data.participants.find(id => id !== mysqlUserId);
+                                    
+                            conversationsList.push({
+                                id: docSnap.id,
+                                businessId: otherParticipantId,
+                                        businessName: businessNames[otherParticipantId] || 'Business',
+                                lastMessage: data.lastMessage || '',
+                                lastMessageTime: data.lastMessageTime?.toDate() || new Date(),
+                                unread: data.unreadCounts?.[mysqlUserId] || 0,
+                                online: false,
+                                participants: data.participants
+                            });
+                                });
+                                
+                                // Sort conversations by lastMessageTime client-side
+                                conversationsList.sort((a, b) => {
+                                    const timeA = a.lastMessageTime instanceof Date ? a.lastMessageTime : (a.lastMessageTime?.toDate ? a.lastMessageTime.toDate() : new Date(0));
+                                    const timeB = b.lastMessageTime instanceof Date ? b.lastMessageTime : (b.lastMessageTime?.toDate ? b.lastMessageTime.toDate() : new Date(0));
+                                    return timeB - timeA; // Descending order (newest first)
+                                });
+                                
+                        this.conversations = conversationsList;
+                        this.loadingConversations = false;
+                                console.log('Conversations loaded:', conversationsList.length);
+                        
+                        this.autoOpenConversation();
+                            }, 
+                            (error) => {
+                                clearTimeout(timeoutId);
+                                console.error('Firestore snapshot error:', error);
+                                console.error('Error code:', error.code);
+                                console.error('Error message:', error.message);
+                                
+                                // If it's a permissions error, user might not have conversations yet
+                                if (error.code === 'permission-denied') {
+                                    console.warn('Permission denied - user may not have conversations yet');
+                                    this.conversations = [];
+                                    this.loadingConversations = false;
+                                } else {
+                                    this.loadingConversations = false;
+                                    this.conversations = []; // Show empty state instead of loading forever
+                                }
+                            }
+                        );
+                    } catch (setupError) {
+                        clearTimeout(timeoutId);
+                        console.error('Error setting up Firestore listener:', setupError);
+                        this.loadingConversations = false;
+                        this.conversations = [];
+                    }
+                } catch (error) {
+                    console.error('Error loading conversations:', error);
+                    this.loadingConversations = false;
+                    this.conversations = []; // Show empty state instead of infinite loading
+                }
+            },
+
+            async getBusinessNamesBatch(businessIds) {
+                const names = {};
+                if (!businessIds || businessIds.length === 0) return names;
+                
+                try {
+                    // Batch fetch from API
+                    const response = await fetch('api/data.php?action=get_business_names_batch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ business_ids: businessIds })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.names) {
+                            return data.names;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error batch fetching business names:', error);
+                }
+                
+                // Fallback: fetch individually (slower)
+                for (const businessId of businessIds) {
+                    try {
+                        const name = await this.getBusinessName(businessId);
+                        names[businessId] = name || 'Business';
+                    } catch (error) {
+                        names[businessId] = 'Business';
+                    }
+                }
+                
+                return names;
+            },
+
+            async getBusinessName(mysqlUserId) {
+                try {
+                    // Get from MySQL database using user_id
+                    const response = await fetch(`api/data.php?action=get_user_name&user_id=${mysqlUserId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            return data.name;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error getting business name:', error);
+                }
+                return 'User';
+            },
+            async selectConversation(conv) {
+                console.log('Selecting conversation:', conv);
+                this.selectedConversation = conv;
+                conv.unread = 0;
+                this.showChat = true;
+                
+                // Load messages for this conversation
+                if (conv.id) {
+                this.loadMessages(conv.id);
+                } else {
+                    console.error('Conversation has no ID:', conv);
+                }
+                
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+            },
+            async loadMessages(conversationId) {
+                if (!conversationId) return;
+                
+                this.loadingMessages = true;
+                this.messages = [];
+                
+                try {
+                    // Get MySQL user ID first to determine message ownership
+                    const sessionResp = await fetch('api/bridge.php?action=get_user', {
+                        credentials: 'include'
+                    });
+                    let sessionData = null;
+                    if (sessionResp.ok) {
+                        sessionData = await sessionResp.json();
+                    }
+                    
+                    const mysqlUserId = (sessionData && sessionData.success && sessionData.user && sessionData.user.userId)
+                        ? String(sessionData.user.userId)
+                        : null;
+                    
+                    const messagesRef = collection(db, "conversations", conversationId, "messages");
+                    const q = query(messagesRef, orderBy("timestamp", "asc"));
+                    
+                    onSnapshot(q, (snapshot) => {
+                        this.messages = [];
+                        snapshot.forEach((docSnap) => {
+                            const data = docSnap.data();
+                            // Use MySQL user ID to determine if message was sent by current user
+                            const isSent = mysqlUserId && data.senderId === mysqlUserId;
+                            this.messages.push({
+                                id: docSnap.id,
+                                text: data.text,
+                                senderId: data.senderId,
+                                sent: isSent,
+                                timestamp: data.timestamp?.toDate() || new Date(),
+                                time: this.formatTime(data.timestamp?.toDate() || new Date())
+                            });
+                        });
+                        this.loadingMessages = false;
+                        this.$nextTick(() => {
+                            this.scrollToBottom();
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                    this.loadingMessages = false;
+                }
+            },
+            async sendMessage() {
+                if (!this.newMessage.trim() || !this.selectedConversation || this.sendingMessage) return;
+                
+                // Get MySQL user ID for senderId (conversations use MySQL IDs)
+                const sessionResp = await fetch('api/bridge.php?action=get_user', {
+                    credentials: 'include'
+                });
+                let sessionData = null;
+                if (sessionResp.ok) {
+                    sessionData = await sessionResp.json();
+                }
+                
+                const mysqlUserId = (sessionData && sessionData.success && sessionData.user && sessionData.user.userId)
+                    ? String(sessionData.user.userId)
+                    : null;
+                
+                if (!mysqlUserId) {
+                    console.error('Could not get MySQL user ID for sending message');
+                    alert('Error: Could not identify user. Please refresh the page.');
+                    return;
+                }
+                
+                this.sendingMessage = true;
+                
+                try {
+                    const conversationId = this.selectedConversation.id;
+                    const messageText = this.newMessage.trim();
+                    
+                    const messagesRef = collection(db, "conversations", conversationId, "messages");
+                    await addDoc(messagesRef, {
+                        text: messageText,
+                        senderId: mysqlUserId, // Use MySQL user ID, not Firebase UID
+                        timestamp: serverTimestamp()
+                    });
+                    
+                    const conversationRef = doc(db, "conversations", conversationId);
+                    await setDoc(conversationRef, {
+                        lastMessage: messageText,
+                        lastMessageTime: serverTimestamp(),
+                        participants: this.selectedConversation.participants || [mysqlUserId, this.selectedConversation.businessId]
+                    }, { merge: true });
+                    
+                    this.newMessage = '';
+                    this.$nextTick(() => {
+                        this.scrollToBottom();
+                    });
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    alert('Error sending message: ' + (error.message || 'Please try again.'));
+                } finally {
+                    this.sendingMessage = false;
+                }
+            },
+            async createConversation(businessId) {
+                if (!businessId) return;
+                
+                // Get MySQL user ID for current user
+                const sessionResp = await fetch('api/bridge.php?action=get_user', {
+                    credentials: 'include'
+                });
+                let sessionData = null;
+                if (sessionResp.ok) {
+                    sessionData = await sessionResp.json();
+                }
+                
+                const mysqlUserId = (sessionData && sessionData.success && sessionData.user && sessionData.user.userId)
+                    ? String(sessionData.user.userId)
+                    : null;
+                
+                if (!mysqlUserId) {
+                    console.error('Could not get MySQL user ID for creating conversation');
+                    throw new Error('Could not identify user');
+                }
+                
+                try {
+                    const conversationsRef = collection(db, "conversations");
+                    const q = query(
+                        conversationsRef,
+                        where("participants", "array-contains", mysqlUserId)
+                    );
+                    
+                    const snapshot = await getDocs(q);
+                    let existingConv = null;
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        if (data.participants.includes(businessId)) {
+                            existingConv = docSnap.id;
+                        }
+                    });
+                    
+                    if (existingConv) {
+                        return existingConv;
+                    }
+                    
+                    const newConv = await addDoc(conversationsRef, {
+                        participants: [mysqlUserId, businessId],
+                        lastMessage: '',
+                        lastMessageTime: serverTimestamp(),
+                        unreadCounts: {
+                            [mysqlUserId]: 0,
+                            [businessId]: 0
+                        }
+                    });
+                    
+                    return newConv.id;
+                } catch (error) {
+                    console.error('Error creating conversation:', error);
+                    throw error;
+                }
+            },
+            backToList() {
+                this.showChat = false;
+            },
+            viewBusinessProfile() {
+                if (this.selectedConversation && this.selectedConversation.businessId) {
+                    window.location.href = `business_profile.html?id=${this.selectedConversation.businessId}`;
+                }
+            },
+            scrollToBottom() {
+                const container = this.$refs.messagesContainer;
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            },
+            getInitials(name) {
+                if (!name) return '?';
+                const parts = name.split(' ');
+                if (parts.length > 1) {
+                    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                }
+                return name[0].toUpperCase();
+            },
+            formatTime(date) {
+                if (!date) return '';
+                const d = date instanceof Date ? date : date.toDate();
+                const now = new Date();
+                const diff = Math.floor((now - d) / 1000);
+                
+                if (diff < 60) return 'Just now';
+                if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+                if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            },
+            formatDate(date) {
+                if (!date) return '';
+                const d = date instanceof Date ? date : date.toDate();
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (d.toDateString() === today.toDateString()) return 'Today';
+                if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+                return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            },
+            async autoOpenConversation() {
+                const businessIdToOpen = sessionStorage.getItem('openConversation');
+                if (businessIdToOpen && this.currentUserId) {
+                    console.log('Auto-opening conversation for business ID:', businessIdToOpen);
+                    sessionStorage.removeItem('openConversation');
+                    
+                    try {
+                        // First, convert business ID to user ID (conversations use user IDs)
+                        const businessUserId = await this.getBusinessUserId(businessIdToOpen);
+                        
+                        if (!businessUserId) {
+                            console.error('Could not find user ID for business:', businessIdToOpen);
+                            alert('Could not find business user. Please try again.');
+                            return;
+                        }
+                        
+                        console.log('Business user ID:', businessUserId);
+                        
+                        // Get MySQL user ID for current user
+                        const sessionResp = await fetch('api/bridge.php?action=get_user', {
+                            credentials: 'include'
+                        });
+                        let sessionData = null;
+                        if (sessionResp.ok) {
+                            sessionData = await sessionResp.json();
+                        }
+                        
+                        const mysqlUserId = (sessionData && sessionData.success && sessionData.user && sessionData.user.userId)
+                            ? String(sessionData.user.userId)
+                            : null;
+                        
+                        if (!mysqlUserId) {
+                            console.error('Could not get MySQL user ID for current user');
+                            alert('Could not identify user. Please refresh the page.');
+                            return;
+                        }
+                        
+                        console.log('MySQL user ID:', mysqlUserId);
+                        console.log('Current conversations:', this.conversations);
+                        
+                        // Find conversation by business user ID
+                        let conversation = this.conversations.find(c => c.businessId === businessUserId);
+                        
+                        if (!conversation) {
+                            console.log('No existing conversation found, creating new one...');
+                            // Create conversation using the business user ID
+                            const conversationId = await this.createConversation(businessUserId);
+                            console.log('Created conversation ID:', conversationId);
+                            
+                            const businessName = await this.getBusinessName(businessUserId);
+                            console.log('Business name:', businessName);
+                            
+                            conversation = {
+                                id: conversationId,
+                                businessId: businessUserId,
+                                businessName: businessName || 'Business',
+                                lastMessage: '',
+                                lastMessageTime: new Date(),
+                                unread: 0,
+                                online: false,
+                                participants: [mysqlUserId, businessUserId]
+                            };
+                            this.conversations.unshift(conversation);
+                            console.log('Added new conversation to list');
+                        }
+                        
+                        console.log('Selecting conversation:', conversation);
+                        this.selectConversation(conversation);
+                    } catch (error) {
+                        console.error('Error auto-opening conversation:', error);
+                        alert('Error opening conversation: ' + (error.message || 'Please try again.'));
+                    }
+                }
+            },
+            async getBusinessUserId(businessId) {
+                try {
+                    console.log('Fetching user ID for business ID:', businessId);
+                    const response = await fetch(`api/data.php?action=get_business_user_id&business_id=${businessId}`, {
+                        credentials: 'include'
+                    });
+                    
+                    console.log('get_business_user_id response status:', response.status);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('get_business_user_id response data:', data);
+                        if (data.success && data.user_id) {
+                            console.log('Found user ID for business:', data.user_id);
+                            return String(data.user_id);
+                        } else {
+                            console.error('API returned success but no user_id:', data);
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        console.error('get_business_user_id API error:', response.status, errorText);
+                        try {
+                            const errorData = JSON.parse(errorText);
+                            console.error('Error details:', errorData);
+                        } catch (e) {
+                            console.error('Could not parse error response');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error getting business user ID:', error);
+                    console.error('Error stack:', error.stack);
+                }
+                return null;
+            }
+        },
+        watch: {
+            isLoggedIn(newVal) {
+                // When user logs in, check if we need to auto-open conversation
+                if (newVal && this.currentUserId) {
+                    const businessIdToOpen = sessionStorage.getItem('openConversation');
+                    if (businessIdToOpen) {
+                        console.log('User logged in, will auto-open conversation for:', businessIdToOpen);
+                        // Wait a bit for conversations to load, then try to open
+                        setTimeout(() => {
+                            this.autoOpenConversation();
+                        }, 1000);
+                    }
+                }
+            },
+            conversations: {
+                handler(newVal, oldVal) {
+                    // Only auto-open if we have conversations and there's a business_id to open
+                    const businessIdToOpen = sessionStorage.getItem('openConversation');
+                    if (businessIdToOpen && newVal.length > 0 && this.currentUserId && this.isLoggedIn) {
+                        console.log('Conversations loaded, auto-opening conversation for:', businessIdToOpen);
+                        this.$nextTick(() => {
+                            this.autoOpenConversation();
+                        });
+                    }
+                },
+                immediate: false
+            },
+            loadingConversations(newVal) {
+                // When conversations finish loading (whether empty or not), check if we need to auto-open
+                if (!newVal && this.isLoggedIn && this.currentUserId) {
+                    const businessIdToOpen = sessionStorage.getItem('openConversation');
+                    if (businessIdToOpen) {
+                        console.log('Conversations finished loading, will try to auto-open conversation for:', businessIdToOpen);
+                        // Wait a bit for everything to settle, then auto-open
+                        setTimeout(() => {
+                            this.autoOpenConversation();
+                        }, 800);
+                    }
+                }
+            },
+            currentUserId(newVal) {
+                // When currentUserId is set, check if we need to auto-open
+                if (newVal && this.isLoggedIn) {
+                    const businessIdToOpen = sessionStorage.getItem('openConversation');
+                    if (businessIdToOpen) {
+                        console.log('Current user ID set, will auto-open conversation for:', businessIdToOpen);
+                        setTimeout(() => {
+                            this.autoOpenConversation();
+                        }, 1000);
+                    }
+                }
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
