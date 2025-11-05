@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Forum - Green Business Directory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/forum.css">
+</head>
+<body>
+    <div id="app">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="fas fa-leaf me-2"></i>Green Business Directory
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="directory.html">Directory</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+                        <li class="nav-item" v-if="isLoggedIn">
+                            <a class="nav-link" href="messages.html">Messages</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="about.html">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contact.html">Contact</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="auth-block">
+                        
+                        <template v-if="!isLoggedIn">
+                            <a href="login.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                            </a>
+                            <a href="register.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                            <div class="dropdown ms-2" v-if="!isLoggedIn || !isBusinessPartner">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-building me-1"></i>For Businesses
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="register_business.html">
+                                    <i class="fas fa-store me-2"></i>Register Green Business
+                                </a></li>
+                                <li><a class="dropdown-item" href="login_business.html">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Business Sign In
+                                </a></li>
+                            </ul>
+                        </div>
+                        </template>
+                        
+                        <template v-else>
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li v-if="isBusinessPartner">
+                                        <a class="dropdown-item fw-bold" href="partner_dashboard.html">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Partner Dashboard
+                                        </a>
+                                    </li>
+                                    <li v-else>
+                                        <a class="dropdown-item fw-bold" href="user_account.html">
+                                            <i class="fas fa-tachometer-alt me-2"></i>My Dashboard
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li v-if="!isBusinessPartner">
+                                        <a class="dropdown-item" href="user_account.html#interests">
+                                            <i class="fas fa-heart me-2"></i>My Interests
+                                        </a>
+                                    </li>
+                                    <li v-if="!isBusinessPartner">
+                                        <a class="dropdown-item" href="user_account.html#profile">
+                                            <i class="fas fa-cog me-2"></i>Settings
+                                        </a>
+                                    </li>
+                                    <li v-if="!isBusinessPartner"><hr class="dropdown-divider"></li>
+                                    <li v-if="!isBusinessPartner">
+                                        <a class="dropdown-item" href="register_business.html">
+                                            <i class="fas fa-plus me-2"></i>List Your Business
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <button class="btn btn-outline-light btn-sm" @click="logout">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </button>
+                            
+                        </template>
+                    </div>
+                    
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container text-center">
+            <h1><i class="fas fa-comments me-3"></i>Community Forum</h1>
+            <p class="lead">Connect, share ideas, and discuss sustainability with our green community</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mb-5">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Search posts..." id="searchInput">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="categoryFilter">
+                        <option value="all">All Categories</option>
+                        <option value="General Discussion">General Discussion</option>
+                        <option value="Sustainability Tips">Sustainability Tips</option>
+                        <option value="Business Spotlight">Business Spotlight</option>
+                        <option value="Q&A">Q&A</option>
+                        <option value="Events">Events</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="sortSelect">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="most_liked">Most Liked</option>
+                        <option value="most_comments">Most Comments</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Container -->
+        <div id="postsContainer">
+            <div class="loading-spinner">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading posts...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Post Button -->
+    <button class="new-post-btn" id="newPostBtn" data-bs-toggle="modal" data-bs-target="#newPostModal">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- New/Edit Post Modal -->
+    <div class="modal fade" id="newPostModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-edit me-2"></i>Create New Post
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="postForm">
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" id="postCategory" required>
+                                <option value="">Select a category</option>
+                                <option value="General Discussion">General Discussion</option>
+                                <option value="Sustainability Tips">Sustainability Tips</option>
+                                <option value="Business Spotlight">Business Spotlight</option>
+                                <option value="Q&A">Q&A</option>
+                                <option value="Events">Events</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" id="postTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Content</label>
+                            <textarea class="form-control" rows="4" id="postContent" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Image (optional)</label>
+                            <input type="file" class="form-control" id="postImage" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp">
+                            <small class="text-muted d-block mt-1">Maximum file size: 5MB. Supported formats: JPG, PNG, GIF, WEBP</small>
+                            <img id="imagePreview" class="image-preview mt-2" style="display: none;" alt="Preview">
+                            <button type="button" class="btn btn-sm btn-danger mt-2" id="removeImageBtn" style="display: none;" onclick="removeImage()">
+                                <i class="fas fa-times me-1"></i>Remove Image
+                            </button>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i><span id="submitBtnText">Post</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal (for viewing full-size images) -->
+    <div class="modal fade" id="imageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-0">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-0">
+                    <img id="modalImage" src="" alt="Full size image" class="img-fluid" style="max-height: 80vh; object-fit: contain;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Comment Modal -->
+    <div class="modal fade" id="editCommentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Comment</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCommentForm">
+                        <div class="mb-3">
+                            <label class="form-label">Comment</label>
+                            <textarea class="form-control" rows="3" id="editCommentText" required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+        const { createApp } = Vue;
+        
+        // Mount Vue app for navigation - using MySQL session instead of Firebase
+        const app = createApp({
+            data() {
+                return {
+                    isLoggedIn: false,
+                    userName: '',
+                    userType: '',
+                    authInitialized: false
+                };
+            },
+            async mounted() {
+                await this.checkAuth();
+            },
+            methods: {
+                async checkAuth() {
+                    try {
+                        const resp = await fetch('api/auth.php?action=check', {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+                        
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            if (data.loggedIn) {
+                                this.isLoggedIn = true;
+                                this.userType = data.userType || 'consumer';
+                                
+                                // Get user name
+                                const userResp = await fetch('api/bridge.php?action=get_user', {
+                                    method: 'GET',
+                                    credentials: 'include'
+                                });
+                                
+                                if (userResp.ok) {
+                                    const userData = await userResp.json();
+                                    if (userData.success) {
+                                        this.userName = userData.user.name || (userData.user.email ? userData.user.email.split('@')[0] : 'User');
+                                    }
+                                }
+                            } else {
+                                this.isLoggedIn = false;
+                                this.userName = '';
+                                this.userType = '';
+                            }
+                        }
+                        this.authInitialized = true;
+                    } catch (error) {
+                        console.error('Error checking auth:', error);
+                        this.authInitialized = true;
+                    }
+                },
+                async logout() {
+                    try {
+                        await fetch('api/auth.php?action=logout', {
+                            method: 'POST',
+                            credentials: 'include'
+                        });
+                        this.isLoggedIn = false;
+                        this.userName = '';
+                        this.userType = '';
+                        window.location.reload();
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        window.location.reload();
+                    }
+                }
+            },
+            computed: {
+                isBusinessPartner() {
+                    return this.userType === 'business';
+                }
+            }
+        });
+        
+        app.mount('#app');
+        
+        // Make it available globally for logout function
+        window.vueApp = app;
+    </script>
+    <script>
+        // ====== CONFIGURATION ======
+        // Your friend should update this to point to the backend API folder
+        const API_BASE_URL = 'api/forums'; // Forum API path for InfinityFree
+        
+        // Global state
+        let currentUser = null;
+        let posts = [];
+        let editingPostId = null;
+        let editingCommentId = null;
+        let editingCommentPostId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            setupEventListeners();
+            // Load posts immediately without waiting for auth
+            loadPosts();
+            // Check login status in parallel (doesn't block posts loading)
+            checkLoginStatus().then(() => {
+                // Reload posts after auth check to get user_liked status
+                if (currentUser) {
+                    loadPosts();
+                }
+            });
+        });
+
+        async function checkLoginStatus() {
+            try {
+                // Check PHP session status using MySQL-based authentication
+                const resp = await fetch('api/auth.php?action=check', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (!resp.ok) {
+                    throw new Error('Failed to check session status');
+                }
+                
+                        const data = await resp.json();
+                        
+                if (data.loggedIn) {
+                    // Get full user info
+                    const userResp = await fetch('api/bridge.php?action=get_user', {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    
+                    if (userResp.ok) {
+                        const userData = await userResp.json();
+                        if (userData.success) {
+                                        currentUser = {
+                                id: userData.user.userId,
+                                name: userData.user.name || userData.user.email.split('@')[0],
+                                email: userData.user.email || '',
+                                userType: userData.user.userType || 'consumer'
+                            };
+                            
+                            // Show new post button if user is logged in
+                            const newPostBtn = document.getElementById('newPostBtn');
+                            if (newPostBtn) {
+                                newPostBtn.classList.add('show');
+                            }
+                        } else {
+                            currentUser = null;
+                            // Hide new post button
+                            const newPostBtn = document.getElementById('newPostBtn');
+                            if (newPostBtn) {
+                                newPostBtn.classList.remove('show');
+                            }
+                        }
+                    } else {
+                        currentUser = null;
+                        // Hide new post button
+                        const newPostBtn = document.getElementById('newPostBtn');
+                        if (newPostBtn) {
+                            newPostBtn.classList.remove('show');
+                        }
+                    }
+                } else {
+                    currentUser = null;
+                    // Hide new post button
+                    const newPostBtn = document.getElementById('newPostBtn');
+                    if (newPostBtn) {
+                        newPostBtn.classList.remove('show');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking login:', error);
+                currentUser = null;
+                // Hide new post button on error
+                const newPostBtn = document.getElementById('newPostBtn');
+                if (newPostBtn) {
+                    newPostBtn.classList.remove('show');
+                }
+            }
+        }
+
+        async function logout() {
+            try {
+                // Clear PHP session (MySQL-based)
+                await fetch('api/auth.php?action=logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                currentUser = null;
+                window.location.reload();
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.reload();
+            }
+        }
+
+        // ====== API CALLS ======
+        
+        async function loadPosts() {
+            const postsContainer = document.getElementById('postsContainer');
+            const loadingSpinner = postsContainer.querySelector('.loading-spinner');
+            
+            try {
+                // Show loading state
+                if (loadingSpinner) {
+                    loadingSpinner.style.display = 'block';
+                }
+                
+                console.log('Loading posts...');
+                const startTime = Date.now();
+                const response = await axios.get(`${API_BASE_URL}/get_posts.php`, {
+                    params: {
+                        user_id: currentUser ? currentUser.id : null
+                    },
+                    timeout: 15000 // Increased timeout for slow servers
+                });
+                console.log(`Posts loaded in ${Date.now() - startTime}ms`);
+                
+                console.log('Posts response:', response.data);
+                
+                if (response.data.success) {
+                    // Handle both array and object formats
+                    if (Array.isArray(response.data.posts)) {
+                        posts = response.data.posts;
+                    } else if (response.data.posts && typeof response.data.posts === 'object') {
+                        posts = Object.values(response.data.posts);
+                    } else {
+                        posts = [];
+                    }
+                    console.log('Cleaned posts:', posts);
+                    console.log('Posts count:', posts.length);
+                    
+                    // Hide loading spinner
+                    if (loadingSpinner) {
+                        loadingSpinner.style.display = 'none';
+                    }
+                    
+                    renderPosts();
+                } else {
+                    console.error('Failed to load posts:', response.data.message);
+                    if (loadingSpinner) {
+                        loadingSpinner.style.display = 'none';
+                    }
+                    showNoPostsMessage();
+                }
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                console.error('Error details:', error.response?.data || error.message);
+                
+                // Hide loading spinner
+                if (loadingSpinner) {
+                    loadingSpinner.style.display = 'none';
+                }
+                
+                // Show error message
+                const postsContainer = document.getElementById('postsContainer');
+                postsContainer.innerHTML = `
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Error loading posts:</strong> ${error.message || 'Please try refreshing the page'}
+                    </div>
+                `;
+            }
+        }
+
+        async function submitPost() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Posting...';
+
+            try {
+                const formData = new FormData();
+                formData.append('user_id', currentUser.id);
+                formData.append('category', document.getElementById('postCategory').value);
+                formData.append('title', document.getElementById('postTitle').value);
+                formData.append('content', document.getElementById('postContent').value);
+                
+                const imageFile = document.getElementById('postImage').files[0];
+                const preview = document.getElementById('imagePreview');
+                const originalImage = preview.dataset.originalImage;
+                const imageRemoved = preview.dataset.imageRemoved === '1';
+                
+                // Check if editing and image was removed
+                if (editingPostId && originalImage && imageRemoved && !imageFile) {
+                    // Image was removed - send flag to delete it
+                    formData.append('remove_image', '1');
+                } else if (imageFile) {
+                    // Validate file size (5MB limit)
+                    const maxSize = 5 * 1024 * 1024; // 5MB
+                    if (imageFile.size > maxSize) {
+                        alert('Image size too large. Maximum size is 5MB');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i><span id="submitBtnText">Post</span>';
+                        return;
+                    }
+                    formData.append('image', imageFile);
+                }
+
+                // Set headers for file upload (axios will handle FormData automatically)
+                const config = {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    timeout: 30000 // 30 seconds for large files
+                };
+
+                if (editingPostId) {
+                    formData.append('post_id', editingPostId);
+                    var response = await axios.post(`${API_BASE_URL}/update_post.php`, formData, config);
+                } else {
+                    var response = await axios.post(`${API_BASE_URL}/create_post.php`, formData, config);
+                }
+
+                if (response.data.success) {
+                    document.getElementById('postForm').reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('newPostModal'));
+                    modal.hide();
+                    editingPostId = null;
+                    
+                    await loadPosts();
+                } else {
+                    alert('Failed to save post: ' + response.data.message);
+                }
+            } catch (error) {
+                console.error('Error submitting post:', error);
+                alert('Error submitting post. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i><span id="submitBtnText">Post</span>';
+            }
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('Are you sure you want to delete this post?')) return;
+
+            try {
+                const response = await axios.post(`${API_BASE_URL}/delete_post.php`, {
+                    post_id: postId,
+                    user_id: currentUser.id
+                });
+
+                if (response.data.success) {
+                    await loadPosts();
+                } else {
+                    alert('Failed to delete post: ' + response.data.message);
+                }
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                alert('Error deleting post. Please try again.');
+            }
+        }
+
+        async function toggleLike(postId) {
+            if (!currentUser) {
+                alert('Please sign in to like posts');
+                return;
+            }
+
+            try {
+                const response = await axios.post(`${API_BASE_URL}/toggle_like.php`, {
+                    post_id: postId,
+                    user_id: currentUser.id
+                });
+
+                if (response.data.success) {
+                    // Update local data
+                    const post = posts.find(p => p.id === postId);
+                    if (post) {
+                        post.user_liked = response.data.liked;
+                        post.likes_count = response.data.likes_count;
+                        renderPosts();
+                    }
+                }
+            } catch (error) {
+                console.error('Error toggling like:', error);
+            }
+        }
+
+        async function loadComments(postId) {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/get_comments.php`, {
+                    params: { post_id: postId }
+                });
+
+                if (response.data.success) {
+                    const post = posts.find(p => p.id === postId);
+                    if (post) {
+                        post.comments = response.data.comments;
+                        renderPosts();
+                        // Reopen comments
+                        setTimeout(() => {
+                            document.getElementById(`comments-${postId}`).classList.add('show');
+                        }, 100);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading comments:', error);
+            }
+        }
+
+        async function addComment(postId) {
+            const input = document.getElementById(`comment-input-${postId}`);
+            const content = input.value.trim();
+            
+            if (!content) return;
+
+            try {
+                const response = await axios.post(`${API_BASE_URL}/add_comment.php`, {
+                    post_id: postId,
+                    user_id: currentUser.id,
+                    content: content
+                });
+
+                if (response.data.success) {
+                    input.value = '';
+                    await loadComments(postId);
+                } else {
+                    alert('Failed to add comment: ' + response.data.message);
+                }
+            } catch (error) {
+                console.error('Error adding comment:', error);
+                alert('Error adding comment. Please try again.');
+            }
+        }
+
+        async function updateComment() {
+            try {
+                const response = await axios.post(`${API_BASE_URL}/update_comment.php`, {
+                    comment_id: editingCommentId,
+                    user_id: currentUser.id,
+                    content: document.getElementById('editCommentText').value
+                });
+
+                if (response.data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editCommentModal'));
+                    modal.hide();
+                    
+                    editingCommentId = null;
+                    const postId = editingCommentPostId;
+                    editingCommentPostId = null;
+                    
+                    await loadComments(postId);
+                } else {
+                    alert('Failed to update comment: ' + response.data.message);
+                }
+            } catch (error) {
+                console.error('Error updating comment:', error);
+                alert('Error updating comment. Please try again.');
+            }
+        }
+
+        async function deleteComment(commentId, postId) {
+            if (!confirm('Are you sure you want to delete this comment?')) return;
+
+            try {
+                const response = await axios.post(`${API_BASE_URL}/delete_comment.php`, {
+                    comment_id: commentId,
+                    user_id: currentUser.id
+                });
+
+                if (response.data.success) {
+                    await loadComments(postId);
+                } else {
+                    alert('Failed to delete comment: ' + response.data.message);
+                }
+            } catch (error) {
+                console.error('Error deleting comment:', error);
+                alert('Error deleting comment. Please try again.');
+            }
+        }
+
+        // ====== RENDERING ======
+
+        function getFilteredAndSortedPosts() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const sortBy = document.getElementById('sortSelect').value;
+
+            let filtered = posts;
+
+            console.log('getFilteredAndSortedPosts: renderPosts called, posts:', posts); // Add this
+
+            if (category !== 'all') {
+                filtered = filtered.filter(post => post.category === category);
+            }
+
+            if (searchQuery) {
+                filtered = filtered.filter(post => 
+                    post.title.toLowerCase().includes(searchQuery) ||
+                    post.content.toLowerCase().includes(searchQuery) ||
+                    post.author_name.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            filtered = [...filtered].sort((a, b) => {
+                switch(sortBy) {
+                    case 'newest':
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    case 'oldest':
+                        return new Date(a.created_at) - new Date(b.created_at);
+                    case 'most_liked':
+                        return b.likes_count - a.likes_count;
+                    case 'most_comments':
+                        return b.comments_count - a.comments_count;
+                    default:
+                        return 0;
+                }
+            });
+
+            return filtered;
+        }
+
+        function renderPosts() {
+            console.log('renderPosts: renderPosts called, posts:', posts); // Add this
+            console.log('renderPosts: filtered posts:', getFilteredAndSortedPosts()); // Add this  
+
+            const container = document.getElementById('postsContainer');
+            const filteredPosts = getFilteredAndSortedPosts();
+
+            if (filteredPosts.length === 0) {
+                showNoPostsMessage();
+                return;
+            }
+
+            container.innerHTML = filteredPosts.map(post => `
+                <div class="forum-card" style="position: relative;" data-post-id="${post.id}">
+                    ${currentUser && post.user_id === currentUser.id ? `
+                    <div class="post-options">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" onclick="editPost(${post.id})">
+                                    <i class="fas fa-edit me-2"></i>Edit
+                                </a></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="deletePost(${post.id})">
+                                    <i class="fas fa-trash me-2"></i>Delete
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="post-header">
+                        <div class="user-avatar">${getInitials(post.author_name)}</div>
+                        <div class="post-meta">
+                            <div class="post-author">${post.author_name}</div>
+                            <div class="post-time">
+                                <i class="far fa-clock me-1"></i>${formatTime(post.created_at)}
+                                ${post.edited ? '<span class="text-muted ms-2">(edited)</span>' : ''}
+                            </div>
+                        </div>
+                        <span class="category-badge">${post.category}</span>
+                    </div>
+
+                    <div class="post-content">
+                        <h5 class="mb-3">${post.title}</h5>
+                        <p class="mb-0">${post.content}</p>
+                        ${post.image_url ? `
+                            <div class="post-image-container mt-3">
+                                <img src="${post.image_url}" class="post-image" alt="Post image" onclick="openImageModal('${post.image_url}')" style="cursor: pointer;" title="Click to view full size">
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="post-actions">
+                        <button class="action-btn ${post.user_liked ? 'active' : ''}" onclick="toggleLike(${post.id})">
+                            <i class="${post.user_liked ? 'fas' : 'far'} fa-heart me-1"></i>${post.likes_count}
+                        </button>
+                        <button class="action-btn" onclick="toggleComments(${post.id})">
+                            <i class="far fa-comment me-1"></i>${post.comments_count}
+                        </button>
+                    </div>
+
+                    <div class="comment-section" id="comments-${post.id}">
+                        ${renderComments(post)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderComments(post) {
+            if (!post.comments) post.comments = [];
+            
+            let html = '';
+            
+            post.comments.forEach(comment => {
+                html += `
+                    <div class="comment-item">
+                        ${currentUser && comment.user_id === currentUser.id ? `
+                        <div class="comment-actions">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#" onclick="editComment(${comment.id}, ${post.id})">
+                                        <i class="fas fa-edit me-2"></i>Edit
+                                    </a></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteComment(${comment.id}, ${post.id})">
+                                        <i class="fas fa-trash me-2"></i>Delete
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="comment-header">
+                            <div class="comment-avatar">${getInitials(comment.author_name)}</div>
+                            <div>
+                                <div class="fw-semibold" style="color: var(--primary-green);">${comment.author_name}</div>
+                                <div class="small text-muted">
+                                    ${formatTime(comment.created_at)}
+                                    ${comment.edited ? '(edited)' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mb-0">${comment.content}</p>
+                    </div>
+                `;
+            });
+
+            if (currentUser) {
+                html += `
+                    <div class="mt-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Write a comment..." id="comment-input-${post.id}" onkeydown="if(event.key === 'Enter') { addComment(${post.id}); }">
+                            <button class="btn btn-primary" onclick="addComment(${post.id})">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="mt-3 text-center">
+                        <small class="text-muted">
+                            <a href="login.html">Sign in</a> to comment
+                        </small>
+                    </div>
+                `;
+            }
+
+            return html;
+        }
+
+        function showNoPostsMessage() {
+            // Hide loading spinner if still visible
+            const postsContainer = document.getElementById('postsContainer');
+            const loadingSpinner = postsContainer.querySelector('.loading-spinner');
+            if (loadingSpinner) {
+                loadingSpinner.style.display = 'none';
+            }
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No posts found</h5>
+                    ${currentUser ? '<button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#newPostModal"><i class="fas fa-plus me-2"></i>Create First Post</button>' : ''}
+                </div>
+            `;
+        }
+
+        // ====== UI HELPERS ======
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', renderPosts);
+            document.getElementById('categoryFilter').addEventListener('change', renderPosts);
+            document.getElementById('sortSelect').addEventListener('change', renderPosts);
+            
+            document.getElementById('postForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitPost();
+            });
+
+            document.getElementById('postImage').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const preview = document.getElementById('imagePreview');
+                const removeBtn = document.getElementById('removeImageBtn');
+                
+                if (!file) {
+                    preview.style.display = 'none';
+                    removeBtn.style.display = 'none';
+                    return;
+                }
+                
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Invalid file type. Please select an image (JPG, PNG, GIF, or WEBP)');
+                    e.target.value = ''; // Clear the input
+                    preview.style.display = 'none';
+                    removeBtn.style.display = 'none';
+                    return;
+                }
+                
+                // Validate file size (5MB)
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    alert('Image size too large. Maximum size is 5MB');
+                    e.target.value = ''; // Clear the input
+                    preview.style.display = 'none';
+                    removeBtn.style.display = 'none';
+                    preview.dataset.imageRemoved = '0';
+                    return;
+                }
+                
+                // Reset image removal flag when new image is selected
+                preview.dataset.imageRemoved = '0';
+                
+                // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        preview.src = event.target.result;
+                        preview.style.display = 'block';
+                    removeBtn.style.display = 'block';
+                };
+                reader.onerror = function() {
+                    alert('Error reading image file');
+                    preview.style.display = 'none';
+                    removeBtn.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+            });
+            
+            // Function to remove selected image
+            window.removeImage = function() {
+                document.getElementById('postImage').value = '';
+                const preview = document.getElementById('imagePreview');
+                const originalImage = preview.dataset.originalImage;
+                // Mark that image was removed (but keep originalImage for detection)
+                preview.style.display = 'none';
+                preview.src = '';
+                preview.dataset.imageRemoved = '1';
+                document.getElementById('removeImageBtn').style.display = 'none';
+            };
+
+            document.getElementById('editCommentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateComment();
+            });
+        }
+
+        function editPost(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+
+            editingPostId = postId;
+            document.getElementById('postCategory').value = post.category;
+            document.getElementById('postTitle').value = post.title;
+            document.getElementById('postContent').value = post.content;
+            
+            // Reset image input
+            document.getElementById('postImage').value = '';
+            
+                const preview = document.getElementById('imagePreview');
+            const removeBtn = document.getElementById('removeImageBtn');
+            
+            if (post.image_url) {
+                preview.src = post.image_url;
+                preview.style.display = 'block';
+                removeBtn.style.display = 'block';
+                // Store original image URL to detect if it was removed
+                preview.dataset.originalImage = post.image_url;
+                preview.dataset.imageRemoved = '0';
+            } else {
+                preview.style.display = 'none';
+                removeBtn.style.display = 'none';
+                preview.dataset.originalImage = '';
+                preview.dataset.imageRemoved = '0';
+            }
+
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Post';
+            document.getElementById('submitBtnText').textContent = 'Update';
+
+            const modal = new bootstrap.Modal(document.getElementById('newPostModal'));
+            modal.show();
+        }
+
+        function toggleComments(postId) {
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            const post = posts.find(p => p.id === postId);
+            
+            if (commentsSection.classList.contains('show')) {
+                commentsSection.classList.remove('show');
+            } else {
+                // Load comments if not loaded yet
+                if (!post.comments || post.comments.length === 0) {
+                    loadComments(postId);
+                } else {
+                    commentsSection.classList.add('show');
+                }
+            }
+        }
+
+        function editComment(commentId, postId) {
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+
+            const comment = post.comments.find(c => c.id === commentId);
+            if (!comment) return;
+
+            editingCommentId = commentId;
+            editingCommentPostId = postId;
+            document.getElementById('editCommentText').value = comment.content;
+
+            const modal = new bootstrap.Modal(document.getElementById('editCommentModal'));
+            modal.show();
+        }
+
+        function getInitials(name) {
+            if (!name || typeof name !== 'string') {
+                return 'Default'; // Return a fallback character
+            } else if (name.includes(" ")) {
+                return name.split(' ').map(n => n[0]).join('').toUpperCase();
+            } else {
+                return name[0].toUpperCase();
+            }
+        }
+
+        function formatTime(timestamp) {
+            if (!timestamp) return 'Unknown';
+            
+            // Handle MySQL datetime strings (e.g., "2024-01-15 10:30:00")
+            let date;
+            if (typeof timestamp === 'string') {
+                // MySQL datetime format: "YYYY-MM-DD HH:MM:SS"
+                let normalized = timestamp.trim();
+                
+                // Check if date is in 2025 when we're in 2024 - auto-fix year
+                const currentYear = new Date().getFullYear();
+                if (currentYear === 2024) {
+                    // If timestamp starts with 2025, replace with 2024
+                    if (normalized.startsWith('2025-')) {
+                        normalized = normalized.replace('2025-', '2024-');
+                        console.log('Auto-corrected year from 2025 to 2024:', timestamp, '->', normalized);
+                    }
+                }
+                
+                // If it's MySQL format with space, replace with T for ISO parsing
+                if (normalized.includes(' ') && !normalized.includes('T')) {
+                    normalized = normalized.replace(' ', 'T');
+                }
+                
+                // Parse as local time (MySQL datetime is stored without timezone)
+                date = new Date(normalized);
+            } else if (timestamp instanceof Date) {
+                date = timestamp;
+            } else {
+                date = new Date(timestamp);
+            }
+            
+            // Check if date is valid
+            if (isNaN(date.getTime())) {
+                console.error('Invalid timestamp:', timestamp);
+                return 'Unknown';
+            }
+            
+            const now = new Date();
+            // Calculate difference in milliseconds, then convert to seconds
+            const diffMs = now.getTime() - date.getTime();
+            let diff = Math.floor(diffMs / 1000); // difference in seconds
+
+            // Handle future dates (might be due to timezone issues or wrong dates)
+            if (diff < 0) {
+                // If date is in the future, check if it's a year off (common DB issue)
+                const yearDiff = now.getFullYear() - date.getFullYear();
+                // If date is exactly 1 year ahead (yearDiff === -1), adjust it
+                if (yearDiff === -1 && Math.abs(diff) < 400 * 24 * 3600) { // Within ~400 days
+                    // Likely a year off - adjust by subtracting a year
+                    date.setFullYear(date.getFullYear() - 1);
+                    diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+                    console.log('Adjusted year, new diff:', diff, 'seconds =', Math.floor(diff / 3600), 'hours');
+                } else {
+                    // If the date is very far in the future but not a year off, just show "Just now"
+                    console.log('Future date detected but not adjusting. Year diff:', yearDiff, 'Time diff:', diff);
+                    return 'Just now'; // Future dates show as "Just now"
+                }
+            }
+
+            return formatTimeFromDiff(diff);
+        }
+        
+        function formatTimeFromDiff(diff) {
+            if (diff < 0) return 'Just now';
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) {
+                const mins = Math.floor(diff / 60);
+                return mins + ' minute' + (mins !== 1 ? 's' : '') + ' ago';
+            }
+            if (diff < 86400) {
+                const hours = Math.floor(diff / 3600);
+                return hours + ' hour' + (hours !== 1 ? 's' : '') + ' ago';
+            }
+            if (diff < 604800) {
+                const days = Math.floor(diff / 86400);
+                return days + ' day' + (days !== 1 ? 's' : '') + ' ago';
+            }
+            if (diff < 2592000) {
+                const weeks = Math.floor(diff / 604800);
+                return weeks + ' week' + (weeks !== 1 ? 's' : '') + ' ago';
+            }
+            if (diff < 31536000) {
+                const months = Math.floor(diff / 2592000);
+                return months + ' month' + (months !== 1 ? 's' : '') + ' ago';
+            }
+            
+            const years = Math.floor(diff / 31536000);
+            return years + ' year' + (years !== 1 ? 's' : '') + ' ago';
+        }
+
+        // Function to open image in modal
+        function openImageModal(imageUrl) {
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            document.getElementById('modalImage').src = imageUrl;
+            modal.show();
+        }
+
+        // Reset modal when opening new post
+        document.getElementById('newPostModal').addEventListener('show.bs.modal', function() {
+            if (!editingPostId) {
+                document.getElementById('postForm').reset();
+                const preview = document.getElementById('imagePreview');
+                preview.style.display = 'none';
+                preview.src = '';
+                preview.dataset.originalImage = '';
+                preview.dataset.imageRemoved = '0';
+                document.getElementById('removeImageBtn').style.display = 'none';
+                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Create New Post';
+                document.getElementById('submitBtnText').textContent = 'Post';
+            }
+        });
+
+        // Reset editing ID when modal closes
+        document.getElementById('newPostModal').addEventListener('hidden.bs.modal', function() {
+            editingPostId = null;
+            const preview = document.getElementById('imagePreview');
+            preview.dataset.originalImage = '';
+            preview.dataset.imageRemoved = '0';
+        });
+    </script>
+    <script>
+        // Set active nav link based on current page
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const linkHref = link.getAttribute('href');
+                if (linkHref && (linkHref === currentPage || (currentPage === '' && linkHref === 'index.html'))) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
