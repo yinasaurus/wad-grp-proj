@@ -4,10 +4,10 @@
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
-$host = 'sql113.infinityfree.com';          // Your database host
-$user = 'if0_40329348';               // Your database user (default for XAMPP)
-$password = '4N4K48tfL4k3';               // Your database password (empty for XAMPP default)
-$database = 'if0_40329348_greenbiz'; // Your database name
+$host = 'localhost';          // Your database host
+$user = 'root';               // Your database user (default for XAMPP)
+$password = 'root';               // Your database password (empty for XAMPP default)
+$database = 'business_directory'; // Your database name
 
 // Create connection
 $conn = new mysqli($host, $user, $password, $database);
