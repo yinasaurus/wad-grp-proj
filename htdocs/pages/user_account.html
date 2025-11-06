@@ -282,8 +282,8 @@
 
                             <div class="mt-2">
                                 <strong class="small">Topics:</strong>
-                                <div>
-                                    <span v-for="topic in company.topics" :key="topic" class="category-badge" style="background: #3b82f6;">
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                                    <span v-for="topic in company.topics" :key="topic" class="category-badge" style="background: #3b82f6; display: block; width: fit-content;">
                                         {{ topic }}
                                     </span>
                                 </div>
@@ -424,6 +424,7 @@
                 },
                 
                 async fetchUserData() {
+                    // Auth mixin handles userName, but we also need profile data
                     if (!this.isLoggedIn) {
                         return;
                     }
@@ -440,6 +441,7 @@
                                 this.userProfile.name = data.user.name || this.userProfile.name;
                                 this.userProfile.email = data.user.email || this.userProfile.email;
                                 this.userProfile.phone = data.user.phone || '';
+                                // Only set location if it's not null/undefined and not an email
                                 const locationValue = data.user.location;
                                 if (locationValue && !locationValue.includes('@')) {
                                     this.userProfile.location = locationValue;
@@ -482,6 +484,7 @@
                                 if (data.success && data.user) {
                                     this.userProfile.name = data.user.name || this.userProfile.name;
                                     this.userProfile.phone = data.user.phone || '';
+                                    // Only set location if it's not null/undefined and not an email
                                     const locationValue = data.user.location;
                                     if (locationValue && !locationValue.includes('@')) {
                                         this.userProfile.location = locationValue;
@@ -596,6 +599,7 @@
                         appInstance.activeTab = hash;
                     }
                 } else {
+                    // Fallback: try to find Vue app via Vue devtools or global
                     const vueApp = window.vueApp || appEl?._vnode?.ctx;
                     if (vueApp && vueApp.activeTab !== undefined) {
                         vueApp.activeTab = hash;
@@ -604,8 +608,10 @@
             }
         }
         
+        // Handle hash change events
         window.addEventListener('hashchange', handleHashNavigation);
         
+        // Handle initial hash on page load (after Vue mounts)
         window.addEventListener('load', () => {
             setTimeout(handleHashNavigation, 100);
         });
