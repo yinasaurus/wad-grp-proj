@@ -1,0 +1,223 @@
+
+.events-calendar-view {
+    margin-bottom: 2rem;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #ddd;
+    border: 1px solid #ddd;
+}
+
+.calendar-weekdays {
+    display: contents;
+}
+
+.calendar-day-header {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: bold;
+    color: #2d5016;
+}
+
+.calendar-days {
+    display: contents;
+}
+
+.calendar-day {
+    background: white;
+    min-height: 100px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-day:hover {
+    background: #f0f8f0;
+    transform: scale(1.02);
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.calendar-day.other-month {
+    background: #f8f9fa;
+    color: #adb5bd;
+}
+
+.calendar-day.today {
+    background: #e8f5e9;
+    border: 2px solid #7cb342;
+}
+
+.calendar-day.has-events {
+    background: #f1f8e9;
+}
+
+.calendar-day.has-events .day-number {
+    font-weight: bold;
+    color: #2d5016;
+}
+
+.day-number {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.event-indicator {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+}
+
+.event-card {
+    border: 1px solid #dee2e6;
+    border-bottom: none !important;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    transition: all 0.2s ease;
+    box-shadow: none !important;
+}
+
+.event-card:not(:last-child) {
+    border-bottom: none !important;
+    margin-bottom: 1rem;
+}
+
+.event-card small {
+    border-bottom: none !important;
+    text-decoration: none !important;
+}
+
+.event-card .badge {
+    border-bottom: none !important;
+    text-decoration: none !important;
+}
+
+.card-body .event-card {
+    border-bottom: none !important;
+}
+
+.card-body {
+    border-bottom: none !important;
+}
+
+.card-body .event-card:last-child {
+    border-bottom: none !important;
+}
+
+.event-card .text-muted {
+    border-bottom: none !important;
+    text-decoration: none !important;
+}
+
+.event-card .badge.bg-primary,
+.card .badge.bg-primary,
+.badge.bg-primary {
+    display: none !important;
+}
+
+.event-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.event-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.event-meta {
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.event-meta div {
+    margin-bottom: 0.5rem;
+}
+
+.event-meta i {
+    width: 20px;
+    text-align: center;
+}
+@media (max-width: 768px) {
+    .calendar-day {
+        min-height: 60px;
+        padding: 0.25rem;
+    }
+    
+    .day-number {
+        font-size: 0.9rem;
+    }
+    
+    .event-indicator .badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .calendar-day {
+        min-height: 50px;
+        padding: 0.2rem;
+    }
+    
+    .day-number {
+        font-size: 0.8rem;
+    }
+    
+    .event-indicator .badge {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.3rem;
+    }
+    
+    .event-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .event-card h5 {
+        font-size: 1.1rem;
+    }
+    
+    .event-card p {
+        font-size: 0.9rem;
+    }
+    
+    .event-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .event-actions .btn {
+        width: 100%;
+        font-size: 0.85rem;
+    }
+    
+    .modal-dialog.modal-lg {
+        max-width: 95%;
+        margin: 10px auto;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .form-label {
+        font-size: 0.9rem;
+    }
+    
+    .form-control, textarea.form-control {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+}
+

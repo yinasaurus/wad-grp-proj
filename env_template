@@ -1,0 +1,44 @@
+# ============================================
+# GoGreenHub Environment Configuration Template
+# ============================================
+# INSTRUCTIONS:
+# 1. Copy this file and rename it to .env
+# 2. Replace all placeholder values with your actual credentials
+# 3. Never commit the .env file to version control
+# ============================================
+
+# Database Configuration
+# For local development (WAMP/XAMPP):
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=greenbiz
+
+# For InfinityFree hosting:
+# DB_HOST=sql113.infinityfree.com
+# DB_USER=if0_40329348
+# DB_PASSWORD=your_database_password_here
+# DB_NAME=if0_40329348_greenbiz
+
+# For other cloud hosting:
+# DB_HOST=your_database_host_here
+# DB_USER=your_database_username_here
+# DB_PASSWORD=your_database_password_here
+# DB_NAME=your_database_name_here
+
+# ============================================
+# Google Maps API Configuration
+# ============================================
+# IMPORTANT: You MUST obtain your own Google Maps API key
+# This is a security requirement - do not use placeholder values in production
+# 
+# Steps to get your API key:
+# 1. Go to: https://console.cloud.google.com/
+# 2. Create a new project or select existing project
+# 3. Enable "Maps JavaScript API" and "Places API"
+# 4. Go to "Credentials" → "Create Credentials" → "API Key"
+# 5. Copy the API key and paste it below
+# 6. (Optional) Restrict the API key to your domain for security
+# ============================================
+GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY_HERE
+

@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - GoGreenHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" :href="isBusinessPartner ? 'partner_dashboard.html' : 'index.html'">
+                    <i class="fas fa-leaf me-2"></i>GoGreenHub
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link" href="partner_dashboard.html">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="directory.html">Directory</a></li>
+                        <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="messages_business.html">Messages</a></li>
+                        <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                    </ul>
+                    
+                    <div class="auth-block">
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i>{{ businessName || userName || 'Business' }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item fw-bold" href="partner_dashboard.html">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Partner Dashboard
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a 
+                                        class="dropdown-item" 
+                                        href="#"
+                                        @click="viewPublicProfile"
+                                    >
+                                    <i class="fas fa-eye me-2"></i>View Public Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="goToSavedCompanies">
+                                        <i class="fas fa-heart me-2 text-danger"></i>Saved Companies
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" @click.prevent="logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="messaging-container">
+            <template v-if="!authInitialized">
+                <div class="text-center p-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Checking authentication...</p>
+                </div>
+            </template>
+
+            <template v-else-if="!isLoggedIn || !isBusinessPartner">
+                <div class="container text-center py-5">
+                    <h2 class="mb-4">Access Denied</h2>
+                    <p class="mb-4">You must be logged in as a business to access this page.</p>
+                    <a href="login_business.html" class="btn btn-success btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Business Login
+                    </a>
+                </div>
+            </template>
+
+            <template v-else-if="!currentUserId && !loadingConversations">
+                <div class="text-center p-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Initializing messages...</p>
+                </div>
+            </template>
+            
+            <template v-else-if="loadingConversations && currentUserId">
+                <div class="text-center p-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading conversations...</span>
+                    </div>
+                    <p class="mt-3">Loading conversations...</p>
+                </div>
+            </template>
+
+            <template v-else-if="currentUserId && !loadingConversations">
+                <div class="messaging-wrapper">
+                    <!-- Conversations Sidebar -->
+                    <div class="conversations-sidebar" :class="{'hidden': showChat}">
+                        <div class="conversations-header">
+                            <h3><i class="fas fa-comments me-2"></i>Customer Messages</h3>
+                            <div class="search-box">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Search conversations..."
+                                    v-model="searchQuery"
+                                >
+                            </div>
+                        </div>
+                        
+                        <div class="conversations-list">
+                            <div v-if="loadingConversations" class="text-center p-4">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <div v-else-if="filteredConversations.length === 0" class="text-center p-4 text-muted">
+                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                <p>No customer messages yet</p>
+                            </div>
+                            <div 
+                                v-else
+                                v-for="conv in filteredConversations" 
+                                :key="conv.id"
+                                class="conversation-item"
+                                :class="{'active': selectedConversation && selectedConversation.id === conv.id}"
+                                @click="selectConversation(conv)"
+                            >
+                                <div class="conversation-avatar">
+                                    {{ getInitials(conv.customerName) }}
+                                </div>
+                                <div class="conversation-content">
+                                    <div class="conversation-top">
+                                        <span class="conversation-name">{{ conv.customerName }}</span>
+                                        <span class="conversation-time">{{ formatTime(conv.lastMessageTime) }}</span>
+                                    </div>
+                                    <div class="conversation-preview">
+                                        <span v-if="conv.unread > 0" class="unread-badge">{{ conv.unread }}</span>
+                                        {{ conv.lastMessage }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Area -->
+                    <div class="chat-area" :class="{'mobile-show': showChat}">
+                        <div v-if="!selectedConversation" class="empty-state">
+                            <i class="fas fa-comments"></i>
+                            <h3>Select a conversation</h3>
+                            <p>Choose a customer from the list to view messages</p>
+                        </div>
+
+                        <template v-else>
+                            <!-- Chat Header -->
+                            <div class="chat-header">
+                                <div class="chat-header-left">
+                                    <button class="btn btn-sm btn-link d-md-none me-2 p-1" @click="backToList" style="color: var(--primary-green);">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </button>
+                                    <div class="chat-avatar">
+                                        {{ getInitials(selectedConversation.customerName) }}
+                                    </div>
+                                    <div class="chat-info">
+                                        <h4 class="mb-1">{{ selectedConversation.customerName }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Messages Container -->
+                            <div class="messages-container" ref="messagesContainer">
+                                <div v-if="loadingMessages" class="text-center p-4">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Loading messages...</span>
+                                    </div>
+                                </div>
+                                <template v-else-if="messages.length === 0">
+                                    <div class="text-center p-5 text-muted">
+                                        <i class="fas fa-comments fa-3x mb-3"></i>
+                                        <p>No messages yet. Start the conversation!</p>
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    <div v-for="(group, date) in groupedMessages" :key="date">
+                                        <div class="message-date">
+                                            <span>{{ date }}</span>
+                                        </div>
+                                        
+                                        <div v-for="msg in group" :key="msg.id" class="message" :class="msg.sent ? 'sent' : 'received'">
+                                        <div class="message-bubble">
+                                            <div class="message-text">{{ msg.text }}</div>
+                                            <div class="message-footer d-flex justify-content-between align-items-center">
+                                                <div class="message-time">{{ msg.time }}</div>
+                                                <div v-if="msg.sent" class="message-read-status ms-2">
+                                                    <i v-if="msg.read_at" class="fas fa-check-double text-primary" title="Read"></i>
+                                                    <i v-else class="fas fa-check text-muted" title="Sent"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Message Input -->
+                            <div class="message-input-area">
+                                <div class="message-input-wrapper">
+                                    <textarea 
+                                        class="message-input" 
+                                        placeholder="Type your reply..."
+                                        v-model="newMessage"
+                                        @keydown.enter.exact.prevent="sendMessage"
+                                        @keydown.shift.enter.prevent
+                                        rows="1"
+                                    ></textarea>
+                                    <button 
+                                        class="send-button" 
+                                        @click="sendMessage"
+                                        :disabled="!newMessage.trim() || sendingMessage || !selectedConversation"
+                                        title="Send message"
+                                    >
+                                        <i v-if="!sendingMessage" class="fas fa-paper-plane"></i>
+                                        <i v-else class="fas fa-spinner fa-spin"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+    import { authMixin } from './js/auth-mixin.js';
+
+    const { createApp } = Vue;
+
+    createApp({
+        mixins: [authMixin],
+        data() {
+            return {
+                businessName: '',
+                businessId: null,
+                currentUserId: null,
+                mysqlUserId: null,
+                searchQuery: '',
+                selectedConversation: null,
+                newMessage: '',
+                showChat: false,
+                conversations: [],
+                messages: [],
+                loadingConversations: true,
+                loadingMessages: false,
+                sendingMessage: false,
+                pollingInterval: null,
+                messagesPollingInterval: null,
+                lastMessageId: null
+            };
+        },
+        computed: {
+            filteredConversations() {
+                if (!this.searchQuery) return this.conversations;
+                return this.conversations.filter(conv => 
+                    conv.customerName.toLowerCase().includes(this.searchQuery.toLowerCase())
+                );
+            },
+            groupedMessages() {
+                if (this.messages.length === 0) return {};
+                
+                const groups = {};
+                this.messages.forEach(msg => {
+                    const date = this.formatDate(msg.timestamp);
+                    if (!groups[date]) {
+                        groups[date] = [];
+                    }
+                    groups[date].push(msg);
+                });
+                return groups;
+            }
+        },
+        watch: {
+            authInitialized(newVal) {
+                if (newVal && this.isLoggedIn && this.isBusinessPartner) {
+                    this.$nextTick(() => {
+                        this.initBusinessMessaging();
+                        this.initializeBootstrapDropdowns();
+                    });
+                } else if (newVal && (!this.isLoggedIn || !this.isBusinessPartner)) {
+                    window.location.href = 'login_business.html';
+                }
+            },
+            isLoggedIn(newVal) {
+                if (newVal && this.isBusinessPartner && this.authInitialized) {
+                    this.$nextTick(() => {
+                        this.initBusinessMessaging();
+                        this.initializeBootstrapDropdowns();
+                    });
+                }
+            },
+            businessId(newVal) {
+                if (newVal && this.isLoggedIn && this.isBusinessPartner) {
+                    this.loadConversations(true);
+                }
+            },
+            businessName() {
+                this.$nextTick(() => {
+                    this.initializeBootstrapDropdowns();
+                });
+            }
+        },
+        async mounted() {
+            this.$nextTick(() => {
+                this.initializeBootstrapDropdowns();
+            });
+            
+            
+            let attempts = 0;
+            const maxAttempts = 25; 
+            const checkAuthAndLoad = () => {
+                if (this.authInitialized) {
+                    if (this.isLoggedIn && this.isBusinessPartner) {
+                        this.initBusinessMessaging();
+                        this.$nextTick(() => {
+                            this.initializeBootstrapDropdowns();
+                        });
+                    } else {
+                        window.location.href = 'login_business.html';
+                    }
+                } else if (attempts < maxAttempts) {
+                    attempts++;
+                    setTimeout(checkAuthAndLoad, 200);
+                } else {
+                    console.error('Auth initialization timeout');
+                    window.location.href = 'login_business.html';
+                }
+            };
+            
+            checkAuthAndLoad();
+        },
+        methods: {
+            initializeBootstrapDropdowns() {
+                this.$nextTick(() => {
+                    setTimeout(() => {
+                        const Bootstrap = window.bootstrap?.Dropdown || window.Bootstrap?.Dropdown;
+                        
+                        if (Bootstrap) {
+                            const dropdownElementList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+                            dropdownElementList.forEach(dropdownToggleEl => {
+                                const existingInstance = Bootstrap.getInstance(dropdownToggleEl);
+                                if (!existingInstance) {
+                                    try {
+                                        new Bootstrap(dropdownToggleEl);
+                                    } catch (e) {
+                                        console.warn('Failed to initialize dropdown:', e);
+                                    }
+                                }
+                            });
+                        } else {
+                            console.warn('Bootstrap Dropdown not found. Make sure Bootstrap JS is loaded.');
+                        }
+                    }, 100);
+                });
+            },
+            async initBusinessMessaging() {
+                if (!this.authInitialized) {
+                    console.log('Waiting for auth initialization...');
+                    for (let i = 0; i < 20; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        if (this.authInitialized) break;
+                    }
+                }
+                
+                if (!this.isLoggedIn || !this.isBusinessPartner) {
+                    console.log('Not logged in or not a business partner', {
+                        isLoggedIn: this.isLoggedIn,
+                        isBusinessPartner: this.isBusinessPartner,
+                        authInitialized: this.authInitialized,
+                        userType: this.userType
+                    });
+                    window.location.href = 'login_business.html';
+                    return;
+                }
+                
+                if (!this.isLoggedIn || !this.userId) {
+                    window.location.href = 'login_business.html';
+                    return;
+                }
+                
+                this.currentUserId = this.userId.toString(); 
+                const urlParams = new URLSearchParams(window.location.search);
+                let receiverId = urlParams.get('receiver_id');
+                let receiverType = urlParams.get('receiver_type');
+                
+                if (!receiverId) {
+                    receiverId = urlParams.get('business_id');
+                    if (receiverId) {
+                        receiverType = 'business';
+                    }
+                }
+                
+                if (receiverId && receiverType === 'business') {
+                    sessionStorage.setItem('openConversation', receiverId);
+                    sessionStorage.setItem('receiver_type', 'business');
+                }
+                
+                try {
+                    const sessionResp = await fetch('api/bridge.php?action=get_user', {
+                        credentials: 'include'
+                    });
+                    
+                    if (sessionResp.ok) {
+                        const sessionData = await sessionResp.json();
+                        if (sessionData.success && sessionData.user?.userType === 'business') {
+                            this.mysqlUserId = String(sessionData.user.userId);
+                            this.businessId = sessionData.business?.businessId || null;
+                            this.businessName = this.userName || 'Business';
+                            
+                            if (this.businessId) {
+                                this.loadConversations(true);
+                            } else {
+                                this.loadBusinessData();
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error getting session:', error);
+                }
+            },
+            
+            async loadBusinessData() {
+                try {
+                    const response = await fetch('api/data.php?action=business_profile', {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.businessId) {
+                            this.businessId = parseInt(data.businessId);
+                            this.businessName = data.business.business_name || this.userName || 'Business';
+                            
+                            if (this.mysqlUserId) {
+                                this.loadConversations(true);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading business data:', error);
+                }
+            },
+            
+            async loadConversations(showLoading = false) {
+                if (!this.mysqlUserId) return;
+                
+                if (showLoading) {
+                this.loadingConversations = true;
+                }
+                
+                try {
+                    const response = await fetch('api/messages.php?action=conversations', {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            alert('Session expired. Please log in again.');
+                            window.location.href = 'login_business.html';
+                            return;
+                        }
+                        throw new Error('Failed to load conversations');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        console.log('Loaded conversations from API:', data.conversations);
+                        console.log('Business ID:', this.businessId);
+                        data.conversations.forEach(conv => {
+                            console.log(`=== Conversation ${conv.id} ===`);
+                            console.log(`  business_name: "${conv.business_name}"`);
+                            console.log(`  business_name_1: "${conv.business_name_1}"`);
+                            console.log(`  business_name_2: "${conv.business_name_2}"`);
+                            console.log(`  business_id_1: ${conv.business_id_1}`);
+                            console.log(`  business_id_2: ${conv.business_id_2}`);
+                            console.log(`  consumer_id: ${conv.consumer_id}`);
+                            console.log(`  Full object:`, conv);
+                        });
+                        const newConversations = data.conversations.map(conv => {
+                            console.log('Processing conversation:', conv);
+                            let lastMessageTime = conv.last_message_time || null;
+                            
+                            let customerName = conv.business_name || conv.consumer_name || conv.customer_name || 'Customer';
+                            
+                            return {
+                                id: conv.id,
+                                consumer_id: conv.consumer_id,
+                                customerId: conv.consumer_id,
+                                customerName: customerName,
+                                business_id_1: conv.business_id_1,
+                                business_id_2: conv.business_id_2,
+                                lastMessage: conv.last_message || '',
+                                lastMessageTime: lastMessageTime,
+                                unread: conv.unread_count || 0
+                            };
+                        });
+                        
+                        const existingMapById = new Map();
+                        const existingPlaceholders = [];
+                        this.conversations.forEach(conv => {
+                            if (conv.id !== null && conv.id !== undefined) {
+                                existingMapById.set(conv.id, conv);
+                            } else {
+                                // Store placeholder conversations separately
+                                existingPlaceholders.push(conv);
+                            }
+                        });
+                        
+                        const newMap = new Map();
+                        newConversations.forEach(newConv => {
+                            if (newConv.id !== null && newConv.id !== undefined) {
+                                newMap.set(newConv.id, newConv);
+                            }
+                        });
+                        
+                        let hasChanged = false;
+                        newConversations.forEach(newConv => {
+                            if (newConv.id !== null && newConv.id !== undefined) {
+                                const oldConv = existingMapById.get(newConv.id);
+                                if (!oldConv || 
+                                    oldConv.lastMessage !== newConv.lastMessage ||
+                                    oldConv.lastMessageTime !== newConv.lastMessageTime ||
+                                    oldConv.unread !== newConv.unread ||
+                                    oldConv.customerName !== newConv.customerName) {
+                                    hasChanged = true;
+                                }
+                            }
+                        });
+                        
+                        if (this.conversations.length !== newConversations.length) {
+                            hasChanged = true;
+                        }
+                        
+                        if (hasChanged || this.conversations.length === 0) {
+                            if (this.conversations.length > 0) {
+                                const matchedPlaceholderIndices = new Set();
+                                
+                                newConversations.forEach(newConv => {
+                                    if (newConv.id !== null && newConv.id !== undefined) {
+                                        const existing = existingMapById.get(newConv.id);
+                                        if (existing) {
+                                            existing.lastMessage = newConv.lastMessage;
+                                            existing.lastMessageTime = newConv.lastMessageTime;
+                                            existing.unread = newConv.unread;
+                                            existing.customerName = newConv.customerName;
+                                        } else {
+                                            let matchingPlaceholderIndex = -1;
+                                            for (let i = 0; i < existingPlaceholders.length; i++) {
+                                                const ph = existingPlaceholders[i];
+                                                if (matchedPlaceholderIndices.has(i)) continue;
+                                                
+                                                if (ph.business_id_1 && ph.business_id_2 && newConv.business_id_1 && newConv.business_id_2) {
+                                                    if ((ph.business_id_1 === newConv.business_id_1 && ph.business_id_2 === newConv.business_id_2) ||
+                                                        (ph.business_id_1 === newConv.business_id_2 && ph.business_id_2 === newConv.business_id_1)) {
+                                                        matchingPlaceholderIndex = i;
+                                                        break;
+                                                    }
+                                                }
+                                                if (ph.customerId && newConv.customerId && ph.customerId === newConv.customerId) {
+                                                    matchingPlaceholderIndex = i;
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            if (matchingPlaceholderIndex !== -1) {
+                                                const placeholder = existingPlaceholders[matchingPlaceholderIndex];
+                                                const index = this.conversations.indexOf(placeholder);
+                                                if (index !== -1) {
+                                                    this.conversations[index] = newConv;
+                                                    matchedPlaceholderIndices.add(matchingPlaceholderIndex);
+                                                } else {
+                                                    this.conversations.push(newConv);
+                                                }
+                                            } else {
+                                                this.conversations.push(newConv);
+                                            }
+                                        }
+                                    }
+                                });
+                                
+                                this.conversations = this.conversations.filter(conv => {
+                                    if (conv.id === null || conv.id === undefined) {
+                                        const placeholderIndex = existingPlaceholders.indexOf(conv);
+                                        if (placeholderIndex !== -1 && matchedPlaceholderIndices.has(placeholderIndex)) {
+                                            return false; 
+                                        }
+                                        return true;
+                                    }
+                                    return newMap.has(conv.id);
+                                });
+                                
+                                const seenIds = new Set();
+                                this.conversations = this.conversations.filter(conv => {
+                                    if (conv.id === null || conv.id === undefined) {
+                                        let key;
+                                        if (conv.business_id_1 && conv.business_id_2) {
+                                            key = `b2b_${Math.min(conv.business_id_1, conv.business_id_2)}_${Math.max(conv.business_id_1, conv.business_id_2)}`;
+                                        } else if (conv.customerId) {
+                                            key = `customer_${conv.customerId}`;
+                                        } else {
+                                            return true; 
+                                        }
+                                        if (seenIds.has(key)) {
+                                            return false;
+                                        }
+                                        seenIds.add(key);
+                                        return true;
+                                    } else {
+                                        if (seenIds.has(conv.id)) {
+                                            return false;
+                                        }
+                                        seenIds.add(conv.id);
+                                        return true;
+                                    }
+                                });
+                            } else {
+                                this.conversations = newConversations;
+                            }
+                            
+                            this.conversations.sort((a, b) => {
+                                const timeA = a.lastMessageTime ? new Date(a.lastMessageTime) : new Date(0);
+                                const timeB = b.lastMessageTime ? new Date(b.lastMessageTime) : new Date(0);
+                                return timeB.getTime() - timeA.getTime();
+                            });
+                        }
+                        
+                        this.loadingConversations = false;
+                        
+                        const openConversationId = sessionStorage.getItem('openConversation');
+                        const receiverType = sessionStorage.getItem('receiver_type');
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const urlBusinessId = urlParams.get('business_id');
+                        
+                        const targetBusinessId = openConversationId || urlBusinessId;
+                        
+                        if (targetBusinessId && (receiverType === 'business' || urlBusinessId)) {
+                            const businessId = parseInt(targetBusinessId);
+                            let targetConversation = this.conversations.find(conv => 
+                                (conv.business_id_1 === businessId || conv.business_id_2 === businessId) && 
+                                !conv.consumer_id
+                            );
+                            
+                            if (!targetConversation) {
+                                let businessName = 'Business';
+                                try {
+                                    const nameResponse = await fetch(`api/data.php?action=get_business_name&business_id=${businessId}`, {
+                                        credentials: 'include'
+                                    });
+                                    if (nameResponse.ok) {
+                                        const nameData = await nameResponse.json();
+                                        if (nameData.success && nameData.name) {
+                                            businessName = nameData.name;
+                                            console.log(`Fetched business name for ID ${businessId}: ${businessName}`);
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('Error fetching business name:', error);
+                                }
+                                
+                                targetConversation = {
+                                    id: null,
+                                    customerName: businessName,
+                                    lastMessage: '',
+                                    lastMessageTime: null,
+                                    unread: 0,
+                                    business_id_1: this.businessId, 
+                                    business_id_2: businessId 
+                                };
+                                this.conversations.unshift(targetConversation);
+                            }
+                            
+                            this.selectConversation(targetConversation);
+                            
+                            sessionStorage.removeItem('openConversation');
+                            sessionStorage.removeItem('receiver_type');
+                            
+                            if (urlBusinessId) {
+                                const newUrl = window.location.pathname;
+                                window.history.replaceState({}, '', newUrl);
+                            }
+                        }
+                        
+                        if (!this.pollingInterval) {
+                            this.pollingInterval = setInterval(() => this.loadConversations(false), 5000); 
+                        }
+                    } else {
+                        throw new Error(data.error || 'Failed to load conversations');
+                    }
+                } catch (error) {
+                    console.error('Error loading conversations:', error);
+                    this.loadingConversations = false;
+                    this.conversations = [];
+                }
+            },
+            
+            async selectConversation(conv) {
+                this.selectedConversation = conv;
+                conv.unread = 0;
+                this.showChat = true;
+                
+                if (conv.id) {
+                    this.loadMessages(conv.id);
+                } else {
+                    this.messages = [];
+                    this.loadingMessages = false;
+                }
+                
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+            },
+            
+            async loadMessages(conversationId, preserveScroll = false) {
+                if (!conversationId) return;
+                
+                if (!preserveScroll) {
+                this.loadingMessages = true;
+                this.messages = [];
+                }
+                if (this.messagesPollingInterval) {
+                    clearInterval(this.messagesPollingInterval);
+                }
+                
+                try {
+                    const response = await fetch(`api/messages.php?action=messages&conversation_id=${conversationId}`, {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to load messages');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        let scrollTop = 0;
+                        let scrollHeight = 0;
+                        const container = this.$refs.messagesContainer;
+                        if (preserveScroll && container) {
+                            scrollTop = container.scrollTop;
+                            scrollHeight = container.scrollHeight;
+                        }
+                        
+                        this.messages = data.messages.map(msg => {
+                            let timestampStr = msg.timestamp;
+                            let dateObj = new Date(timestampStr);
+                            
+                            return {
+                                id: msg.id,
+                                text: msg.text,
+                                senderId: msg.sender_id,
+                                senderName: msg.sender_name,
+                                sent: this.mysqlUserId && msg.sender_id == this.mysqlUserId,
+                                timestamp: dateObj,
+                                time: this.formatTime(timestampStr),
+                                read_at: msg.read_at || null
+                            };
+                        });
+                        
+                        this.lastMessageId = this.messages.length > 0 ? this.messages[this.messages.length - 1].id : null;
+                        this.loadingMessages = false;
+                        
+                        if (preserveScroll && container) {
+                            this.$nextTick(() => {
+                                const newScrollHeight = container.scrollHeight;
+                                const scrollDiff = newScrollHeight - scrollHeight;
+                                container.scrollTop = scrollTop + scrollDiff;
+                            });
+                        } else {
+                        this.$nextTick(() => {
+                            this.scrollToBottom();
+                        });
+                        }
+                        
+                        this.messagesPollingInterval = setInterval(() => {
+                            this.pollMessages(conversationId);
+                        }, 3000); 
+                    } else {
+                        throw new Error(data.error || 'Failed to load messages');
+                    }
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                    this.loadingMessages = false;
+                }
+            },
+            
+            async pollMessages(conversationId) {
+                if (!conversationId || !this.selectedConversation || this.selectedConversation.id !== conversationId) {
+                    return; 
+                }
+                
+                try {
+                    const response = await fetch(`api/messages.php?action=messages&conversation_id=${conversationId}`, {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    
+                    if (response.ok) {
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            const text = await response.text();
+                            console.error('API returned non-JSON response:', text.substring(0, 200));
+                            return; 
+                        }
+                        const data = await response.json();
+                        
+                        if (data.success && data.messages.length > 0) {
+                            const lastMsg = data.messages[data.messages.length - 1];
+                            if (lastMsg.id !== this.lastMessageId) {
+                                const existingIds = new Set(this.messages.map(m => m.id));
+                                let hasNewMessages = false;
+                                
+                                data.messages.forEach(msg => {
+                                    if (!existingIds.has(msg.id)) {
+                                        let timestampStr = msg.timestamp;
+                                        let dateObj = new Date(timestampStr);
+                                        
+                                        const newMsg = {
+                                            id: msg.id,
+                                            text: msg.text,
+                                            senderId: msg.sender_id,
+                                            senderName: msg.sender_name,
+                                            sent: this.mysqlUserId && msg.sender_id == this.mysqlUserId,
+                                            timestamp: dateObj,
+                                            time: this.formatTime(timestampStr),
+                                            read_at: msg.read_at || null
+                                        };
+                                        this.messages.push(newMsg);
+                                        hasNewMessages = true;
+                                    } else {
+                                        const existingMsg = this.messages.find(m => m.id === msg.id);
+                                        if (existingMsg && existingMsg.sent) {
+                                            existingMsg.read_at = msg.read_at || null;
+                                        }
+                                    }
+                                });
+                                
+                                if (hasNewMessages) {
+                                    this.lastMessageId = this.messages[this.messages.length - 1].id;
+                                    const container = this.$refs.messagesContainer;
+                                    if (container) {
+                                        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
+                                        if (isNearBottom) {
+                                            setTimeout(() => {
+                                                this.scrollToBottom();
+                                            }, 100);
+                                        }
+                                    }
+                                }
+                            } else {
+                                const messageMap = new Map(data.messages.map(msg => [msg.id, msg]));
+                                this.messages.forEach(msg => {
+                                    if (msg.sent && messageMap.has(msg.id)) {
+                                        const updatedMsg = messageMap.get(msg.id);
+                                        msg.read_at = updatedMsg.read_at || null;
+                                    }
+                                });
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error polling messages:', error);
+                }
+            },
+            
+            async sendMessage() {
+                if (!this.newMessage.trim() || !this.selectedConversation || this.sendingMessage) return;
+                if (!this.mysqlUserId) {
+                    alert('Error: Could not identify user. Please refresh the page.');
+                    return;
+                }
+                
+                if (this.isBusinessPartner && !this.businessId) {
+                    console.log('BusinessId not set, attempting to load...');
+                    await this.loadBusinessData();
+                    if (!this.businessId) {
+                        alert('Error: Could not identify business. Please refresh the page.');
+                        return;
+                    }
+                }
+                
+                this.sendingMessage = true;
+                
+                try {
+                    const conversationId = this.selectedConversation.id;
+                    const messageText = this.newMessage.trim();
+                    
+                    console.log('=== SEND MESSAGE DEBUG ===');
+                    console.log('Selected Conversation:', this.selectedConversation);
+                    console.log('Business ID:', this.businessId);
+                    console.log('MySQL User ID:', this.mysqlUserId);
+                    console.log('Conversation ID:', conversationId);
+                   
+                    const requestBody = {
+                        conversation_id: conversationId || null,
+                        text: messageText
+                    };
+                    
+                    console.log('Initial request body:', requestBody);
+                    
+                    if (!conversationId || conversationId === null) {
+                        let receiverType = null;
+                        let receiverId = null;
+                        
+                        const sessionReceiverType = sessionStorage.getItem('receiver_type');
+                        const sessionReceiverId = sessionStorage.getItem('openConversation');
+                        if (sessionReceiverType === 'business' && sessionReceiverId) {
+                            receiverType = 'business';
+                            receiverId = parseInt(sessionReceiverId);
+                        }
+                        if (!receiverId && this.selectedConversation) {
+                            const hasBusinessId1 = this.selectedConversation.business_id_1 !== null && this.selectedConversation.business_id_1 !== undefined;
+                            const hasBusinessId2 = this.selectedConversation.business_id_2 !== null && this.selectedConversation.business_id_2 !== undefined;
+                            
+                            if ((hasBusinessId1 || hasBusinessId2) && !this.selectedConversation.consumer_id) {
+                                const currentBusinessId = parseInt(this.businessId);
+                                const convBusinessId1 = hasBusinessId1 ? parseInt(this.selectedConversation.business_id_1) : null;
+                                const convBusinessId2 = hasBusinessId2 ? parseInt(this.selectedConversation.business_id_2) : null;
+                                
+                                if (convBusinessId1 === currentBusinessId) {
+                                  
+                                    receiverId = convBusinessId2;
+                                } else if (convBusinessId2 === currentBusinessId) {
+                                    receiverId = convBusinessId1;
+                                } else {
+                                    
+                                    if (convBusinessId1 && convBusinessId1 !== currentBusinessId) {
+                                        receiverId = convBusinessId1;
+                                    } else if (convBusinessId2 && convBusinessId2 !== currentBusinessId) {
+                                        receiverId = convBusinessId2;
+                                    } else {
+                                       
+                                        receiverId = convBusinessId1 || convBusinessId2;
+                                    }
+                                }
+                                if (receiverId) {
+                                    receiverType = 'business';
+                                }
+                            } else if (this.selectedConversation.customerId) {
+                               
+                                receiverId = this.selectedConversation.customerId;
+                                receiverType = 'user';
+                            }
+                        }
+                        
+                        if (!receiverId) {
+                            console.log('Receiver detection failed:', {
+                                selectedConversation: this.selectedConversation,
+                                businessId: this.businessId,
+                                sessionReceiverId: sessionStorage.getItem('openConversation'),
+                                sessionReceiverType: sessionStorage.getItem('receiver_type')
+                            });
+                        }
+                        
+                        if (receiverId && receiverType) {
+                            requestBody.receiver_id = parseInt(receiverId);
+                            requestBody.receiver_type = receiverType;
+                            console.log('Added receiver info - receiver_id:', receiverId, 'receiver_type:', receiverType);
+                        } else {
+                           
+                            console.error('Failed to determine receiver:', {
+                                selectedConversation: this.selectedConversation,
+                                businessId: this.businessId,
+                                sessionReceiverId: sessionStorage.getItem('openConversation'),
+                                sessionReceiverType: sessionStorage.getItem('receiver_type')
+                            });
+                            throw new Error('Unable to determine receiver. Please try selecting the conversation again.');
+                        }
+                    }
+                    
+                    console.log('Final request body:', requestBody);
+                    console.log('Sending to: api/messages.php?action=send');
+                    
+                    const response = await fetch('api/messages.php?action=send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(requestBody)
+                    });
+                   
+                    let data;
+                    try {
+                        const responseText = await response.text();
+                        try {
+                            data = JSON.parse(responseText);
+                        } catch (e) {
+                           
+                            throw new Error(responseText || 'Failed to send message');
+                        }
+                    } catch (e) {
+                       
+                        throw e;
+                    }
+                    
+                    if (!response.ok) {
+                       
+                        console.error('Server error response:', {
+                            status: response.status,
+                            statusText: response.statusText,
+                            data: data
+                        });
+                        const errorMsg = data.error || data.message || `Failed to send message (${response.status})`;
+                        if (data.debug) {
+                            console.error('Debug info from server:', data.debug);
+                        }
+                        throw new Error(errorMsg);
+                    }
+                    
+                    if (data.success) {
+                        console.log('Message sent successfully!', data);
+                        if (data.message) {
+                           
+                            let timestampStr = data.message.timestamp;
+                            let dateObj = new Date(timestampStr);
+                           
+                            const newMsg = {
+                                id: data.message.id,
+                                text: data.message.text,
+                                senderId: data.message.sender_id,
+                                senderName: data.message.sender_name,
+                                sent: true,
+                                timestamp: dateObj,
+                                time: this.formatTime(timestampStr),
+                                read_at: null 
+                            };
+                            this.messages.push(newMsg);
+                            this.lastMessageId = newMsg.id;
+                        }
+                      
+                        if (this.selectedConversation && this.selectedConversation.id === data.conversation_id) {
+                           
+                            this.selectedConversation.lastMessage = data.message?.text || '';
+                           
+                            let timestamp = data.message?.timestamp || '';
+                            this.selectedConversation.lastMessageTime = timestamp;
+                          
+                            if (data.message && !data.message.sent) {
+                                this.selectedConversation.unread = (this.selectedConversation.unread || 0) + 1;
+                            }
+                        }
+
+                     this.newMessage = '';
+                       
+                        setTimeout(() => {
+                         this.scrollToBottom();
+                        }, 100);
+                    } else {
+                        throw new Error(data.error || 'Failed to send message');
+                    }
+                 } catch (error) {
+                     console.error('Error sending message:', error);
+                     alert('Error sending message: ' + (error.message || 'Please try again.'));
+                 } finally {
+                     this.sendingMessage = false;
+                 }
+             },
+            async viewPublicProfile() {
+                if (!this.businessId) {
+                    alert('Business ID not available. Please refresh the page.');
+                    return;
+                }
+                window.location.href = `business_profile.html?id=${this.businessId}`;
+            },
+            goToSavedCompanies() {
+                sessionStorage.setItem('switchToTab', 'interests');
+                window.location.href = 'partner_dashboard.html';
+            },
+            backToList() {
+                this.showChat = false;
+            },
+            scrollToBottom() {
+                this.$nextTick(() => {
+                    setTimeout(() => {
+                        const container = this.$refs.messagesContainer;
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    }, 50);
+                });
+            },
+            getInitials(name) {
+                if (!name) return '?';
+                const parts = name.split(' ');
+                if (parts.length > 1) {
+                    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                }
+                return name[0].toUpperCase();
+            },
+            formatTime(date) {
+                if (!date) return '';
+                let d;
+                
+                if (typeof date === 'string') {
+                    let normalized = date.trim();
+                    if (normalized.includes(' ') && !normalized.includes('T')) {
+                        const parts = normalized.split(' ');
+                        if (parts.length === 2) {
+                            const datePart = parts[0].split('-');
+                            const timePart = parts[1].split(':');
+                            if (datePart.length === 3 && timePart.length === 3) {
+                                d = new Date(
+                                    parseInt(datePart[0]),      
+                                    parseInt(datePart[1]) - 1,  
+                                    parseInt(datePart[2]),     
+                                    parseInt(timePart[0]),     
+                                    parseInt(timePart[1]),     
+                                    parseInt(timePart[2])       
+                                );
+                            } else {
+                                normalized = normalized.replace(' ', 'T');
+                                d = new Date(normalized);
+                            }
+                        } else {
+                            normalized = normalized.replace(' ', 'T');
+                            d = new Date(normalized);
+                        }
+                    } else {
+                        d = new Date(normalized);
+                    }
+                } else if (date instanceof Date) {
+                    d = new Date(date);
+                } else {
+                    d = new Date(date);
+                }
+                if (isNaN(d.getTime())) {
+                    return '';
+                }
+                
+                const now = new Date();
+                const diffMs = now.getTime() - d.getTime();
+                let diff = Math.floor(diffMs / 1000);
+                
+                if (diff < 0) {
+                    return 'Just now';
+                }
+                
+                if (diff < 60) {
+                    return 'Just now';
+                }
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                const msgDate = new Date(d);
+                msgDate.setHours(0, 0, 0, 0);
+                const isToday = msgDate.getTime() === today.getTime();
+                const isYesterday = msgDate.getTime() === yesterday.getTime();
+                
+                if (isToday) {
+                    if (diff < 3600) {
+                        const mins = Math.floor(diff / 60);
+                        return mins === 1 ? '1 min ago' : mins + ' min ago';
+                    } else {
+                        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    }
+                }
+                
+                if (isYesterday) {
+                    return 'Yesterday ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                }
+                
+                if (diff < 604800) {
+                    const days = Math.floor(diff / 86400);
+                    if (days === 0) {
+                        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    } else if (days === 1) {
+                        return 'Yesterday';
+                    } else {
+                        return days + ' days ago';
+                    }
+                }
+                
+                if (diff < 2592000) {
+                    const weeks = Math.floor(diff / 604800);
+                    return weeks === 1 ? '1 week ago' : weeks + ' weeks ago';
+                }
+                
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            },
+            
+            formatDate(date) {
+                if (!date) return '';
+                
+                let d;
+                if (typeof date === 'string') {
+                    let normalized = date.trim();
+                    if (normalized.includes(' ') && !normalized.includes('T')) {
+                        normalized = normalized.replace(' ', 'T');
+                    }
+                    d = new Date(normalized);
+                } else if (date instanceof Date) {
+                    d = new Date(date);
+                } else {
+                    d = new Date(date);
+                }
+                if (isNaN(d.getTime())) {
+                    return '';
+                }
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                const msgDate = new Date(d);
+                msgDate.setHours(0, 0, 0, 0);
+                
+                if (msgDate.getTime() === today.getTime()) return 'Today';
+                if (msgDate.getTime() === yesterday.getTime()) return 'Yesterday';
+                return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            }
+        },
+        beforeUnmount() {
+            if (this.pollingInterval) {
+                clearInterval(this.pollingInterval);
+            }
+            if (this.messagesPollingInterval) {
+                clearInterval(this.messagesPollingInterval);
+            }
+        }
+    }).mount('#app');
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop() || 'messages_business.html';
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const linkHref = link.getAttribute('href');
+                if (linkHref && (linkHref === currentPage || (currentPage === '' && linkHref === 'messages_business.html'))) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

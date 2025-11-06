@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - GoGreenHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="fas fa-leaf me-2"></i>GoGreenHub
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <!-- Business Navbar -->
+                        <template v-if="isBusinessPartner">
+                            <li class="nav-item"><a class="nav-link" href="partner_dashboard.html">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="directory.html">Directory</a></li>
+                            <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                            <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+                            <li class="nav-item" v-if="isLoggedIn">
+                                <a class="nav-link" href="messages_business.html">Messages</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                        </template>
+                        <!-- Consumer Navbar -->
+                        <template v-else>
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.html">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="directory.html">Directory</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                            <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+                            <li class="nav-item" v-if="isLoggedIn">
+                                <a class="nav-link" href="messages.html">Messages</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="about.html">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.html">Contact</a>
+                            </li>
+                        </template>
+                    </ul>
+                    
+                    <div class="auth-block">
+                        <template v-if="!isLoggedIn">
+                            <a href="login.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                            </a>
+                            <a href="register.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                            <div class="dropdown ms-2">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-building me-1"></i>For Businesses
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="register_business.html">
+                                    <i class="fas fa-store me-2"></i>Register Green Business
+                                </a></li>
+                                <li><a class="dropdown-item" href="login_business.html">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Business Sign In
+                                </a></li>
+                            </ul>
+                        </div>
+                        </template>
+                        
+                        <template v-else>
+                            <!-- Business User Dropdown -->
+                            <template v-if="isBusinessPartner">
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item fw-bold" href="partner_dashboard.html">
+                                                <i class="fas fa-tachometer-alt me-2"></i>Partner Dashboard
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="viewPublicProfile">
+                                                <i class="fas fa-eye me-2"></i>View Public Profile
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="goToSavedCompanies">
+                                                <i class="fas fa-heart me-2 text-danger"></i>Saved Companies
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="logout">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </template>
+                            <!-- Consumer User Dropdown -->
+                            <template v-else>
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm dropdown-toggle position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                        <span v-if="unreadCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.2rem 0.3rem;">
+                                            {{ unreadCount > 9 ? '9+' : unreadCount }}
+                                        </span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item fw-bold d-flex align-items-center justify-content-between" href="user_account.html">
+                                                <span><i class="fas fa-user me-2"></i>My Profile</span>
+                                                <span v-if="unreadCount > 0" class="badge bg-danger ms-2" style="font-size: 0.65rem; padding: 0.2rem 0.4rem;">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="user_account.html#interests">
+                                                <i class="fas fa-heart me-2"></i>My Interests
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="user_account.html#profile">
+                                                <i class="fas fa-cog me-2"></i>Settings
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="register_business.html">
+                                                <i class="fas fa-plus me-2"></i>List Your Business
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button class="btn btn-outline-light btn-sm" @click="logout">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                </button>
+                            </template>
+                        </template>
+                    </div>
+                    
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <div class="row g-4">
+                <div class="col-lg-3">
+                    <div class="sidebar-nav">
+                        <h5 class="px-3 mb-3 text-secondary text-uppercase small fw-bold">My Account</h5>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: activeTab === 'profile'}" href="#" @click.prevent="activeTab = 'profile'">
+                                    <i class="fas fa-user-circle me-2"></i>Profile Details
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: activeTab === 'interests'}" href="#" @click.prevent="activeTab = 'interests'">
+                                    <i class="fas fa-heart me-2 text-danger"></i>Saved Companies
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center justify-content-between" :class="{active: activeTab === 'notifications'}" href="#" @click.prevent="activeTab = 'notifications'">
+                                    <span><i class="fas fa-bell me-2"></i>Notifications</span>
+                                    <span v-if="unreadCount > 0" class="badge bg-danger ms-2" style="font-size: 0.7rem; padding: 0.2rem 0.4rem;">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="messages.html">
+                                    <i class="fas fa-envelope me-2"></i>Messages
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-9">
+                    
+
+                    <div v-if="activeTab === 'profile'">
+                        <div class="preferences-card">
+                            <h4 class="mb-4"><i class="fas fa-user-circle me-2 text-primary"></i>Edit Profile Details</h4>
+                            <form @submit.prevent="updateProfile">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Full Name</label>
+                                        <input type="text" class="form-control" v-model="userProfile.name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Email Address</label>
+                                        <input type="email" class="form-control" v-model="userProfile.email" disabled>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Phone Number</label>
+                                        <input type="tel" class="form-control" v-model="userProfile.phone" @input="filterPhoneNumber">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Location / City</label>
+                                        <input type="text" class="form-control" v-model="userProfile.location">
+                                    </div>
+                                    <div v-if="!isBusinessPartner" class="col-12">
+                                        <label class="form-label fw-bold">Bio</label>
+                                        <textarea 
+                                            class="form-control" 
+                                            rows="4" 
+                                            v-model="userProfile.bio" 
+                                            placeholder="Tell us about yourself..."
+                                            maxlength="500"
+                                        ></textarea>
+                                        <small class="text-muted">{{ (userProfile.bio || '').length }} of 500 characters</small>
+                                    </div>
+                                </div>
+                                <h6 class="mt-4 mb-3">Change Password</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <input type="password" class="form-control" placeholder="Current Password">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="password" class="form-control" placeholder="New Password">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="password" class="form-control" placeholder="Confirm New Password">
+                                    </div>
+                                </div>
+                                <div class="alert alert-success mt-3" v-if="profileMessage">
+                                    <i class="fas fa-check-circle me-2"></i>{{ profileMessage }}
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg mt-4">
+                                    <i class="fas fa-save me-2"></i>Save Profile Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div v-if="activeTab === 'interests'">
+                        <div class="preferences-card mb-3">
+                            <h4 class="mb-3"><i class="fas fa-heart me-2 text-danger"></i>Saved Companies</h4>
+                            <p class="text-muted">Companies you're interested in</p>
+                        </div>
+
+                        <div v-if="savedCompanies.length === 0" class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            You haven't saved any companies yet. Browse the directory to add companies to your interests!
+                        </div>
+
+                        <div v-for="company in savedCompanies" :key="company.id" class="company-card" style="cursor: pointer;" @click="viewBusiness(company.id)">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="mb-1">{{ company.name }}</h5>
+                                    <span class="location-badge">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ company.location }}
+                                    </span>
+                                </div>
+                                <button class="btn btn-sm btn-danger" @click.stop="removeCompany(company.id)">
+                                    <i class="fas fa-trash me-1"></i>Remove
+                                </button>
+                            </div>
+                            
+                            <p class="text-muted mt-3 mb-2">{{ company.description }}</p>
+                            
+                            <div class="mt-3">
+                                <strong class="small">Categories:</strong>
+                                <div>
+                                    <span v-for="category in company.categories" :key="category" class="category-badge">
+                                        {{ category }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mt-2">
+                                <strong class="small">Topics:</strong>
+                                <div>
+                                    <span v-for="topic in company.topics" :key="topic" class="category-badge" style="background: #3b82f6;">
+                                        {{ topic }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <small class="text-muted d-block mt-3">Saved on: {{ formatDate(company.savedDate) }}</small>
+                        </div>
+
+                        <div class="preferences-card mt-4">
+                            <h6 class="mb-3"><i class="fas fa-chart-line me-2"></i>Interest Stats</h6>
+                            <p><strong>{{ savedCompanies.length }}</strong> Companies Saved</p>
+                        </div>
+                    </div>
+
+
+                    <!-- Notifications Tab -->
+                    <div v-if="activeTab === 'notifications'">
+                        <div class="preferences-card mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h4 class="mb-0"><i class="fas fa-bell me-2 text-primary"></i>Notifications</h4>
+                                <button v-if="unreadCount > 0" class="btn btn-sm btn-outline-primary" @click="markAllNotificationsRead">
+                                    <i class="fas fa-check-double me-2"></i>Mark all as read
+                                </button>
+                            </div>
+
+                            <div v-if="notifications.length === 0" class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>You have no notifications.
+                            </div>
+
+                            <div v-else class="notification-list">
+                                <div v-for="notification in notifications" :key="notification.id" 
+                                     class="notification-item mb-2 p-2 rounded" 
+                                     :class="{'bg-light border-start border-2 border-primary': !notification.is_read, 'border': notification.is_read}">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <small class="mb-0 me-2 fw-semibold" :class="{'fw-bold': !notification.is_read}">{{ notification.title }}</small>
+                                                <span v-if="!notification.is_read" class="badge bg-primary" style="font-size: 0.65rem; padding: 0.15rem 0.4rem;">New</span>
+                                            </div>
+                                            <p class="text-muted mb-1 small" style="font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; max-height: 2.6em;">{{ notification.message }}</p>
+                                            <small class="text-muted" style="font-size: 0.75rem;">
+                                                <i class="fas fa-clock me-1"></i>{{ formatNotificationTime(notification.created_at) }}
+                                            </small>
+                                        </div>
+                                        <button v-if="!notification.is_read" 
+                                                class="btn btn-sm btn-outline-success ms-2" 
+                                                style="padding: 0.2rem 0.4rem; font-size: 0.75rem;"
+                                                @click="markNotificationRead(notification.id)" 
+                                                title="Mark as read">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+        import { authMixin } from './js/auth-mixin.js';
+        import { notificationMixin } from './js/notification-mixin.js';
+        const { createApp } = Vue;
+
+        createApp({
+            mixins: [authMixin, notificationMixin],
+            data() {
+                return {
+                    activeTab: (window.location.hash.substring(1) || 'profile').toLowerCase(),
+                    profileMessage: '',
+                    dataLoaded: false, 
+                    
+                    userProfile: {
+                        bio: '',
+                        name: '',
+                        email: '',
+                        phone: '',
+                        location: ''
+                    },
+
+                    savedCompanies: []
+                }
+            },
+            mounted() {
+                
+                const hash = window.location.hash.substring(1).toLowerCase();
+                const normalizedHash = hash === 'settings' ? 'profile' : hash;
+                if (normalizedHash && ['profile', 'interests', 'notifications'].includes(normalizedHash)) {
+                    this.activeTab = normalizedHash;
+                }
+                
+                window.addEventListener('hashchange', () => {
+                    const newHash = window.location.hash.substring(1).toLowerCase();
+                    const normalized = newHash === 'settings' ? 'profile' : newHash;
+                    if (normalized && ['profile', 'interests', 'notifications'].includes(normalized)) {
+                        this.activeTab = normalized;
+                    }
+                });
+                
+                this.$nextTick(() => {
+                    setTimeout(() => {
+                        if (this.isLoggedIn) {
+                            this.loadUserData();
+                            this.dataLoaded = true;
+                        } else {
+                            setTimeout(() => {
+                                if (!this.isLoggedIn) {
+                                    window.location.href = 'login.html';
+                                }
+                            }, 2000);
+                        }
+                    }, 500);
+                });
+            },
+            watch: {
+                activeTab(newTab) {
+                    if (newTab === 'notifications') {
+                        this.checkNotifications();
+                    }
+                },
+                isLoggedIn(newVal) {
+                    if (newVal && !this.dataLoaded) {
+                        this.loadUserData();
+                        this.dataLoaded = true;
+                    } else if (!newVal && this.dataLoaded) {
+                        window.location.href = 'login.html';
+                    }
+                }
+            },
+            methods: {
+                loadUserData() {
+                    this.fetchUserData();
+                    this.fetchDashboardData();
+                },
+                
+                async fetchUserData() {
+                    if (!this.isLoggedIn) {
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch('api/bridge.php?action=get_user', {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.success && data.user) {
+                                this.userProfile.name = data.user.name || this.userProfile.name;
+                                this.userProfile.email = data.user.email || this.userProfile.email;
+                                this.userProfile.phone = data.user.phone || '';
+                                const locationValue = data.user.location;
+                                if (locationValue && !locationValue.includes('@')) {
+                                    this.userProfile.location = locationValue;
+                                } else {
+                                    this.userProfile.location = '';
+                                }
+                                this.userProfile.bio = data.user.bio || '';
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching user data:', error);
+                    }
+                },
+                
+                async fetchDashboardData() {
+                    try {
+                        const savedResponse = await fetch('api/data.php?action=get_saved_businesses', {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+
+                        if (savedResponse.ok) {
+                            const savedData = await savedResponse.json();
+                            if (savedData.success) {
+                                this.savedCompanies = savedData.savedCompanies.map(company => ({
+                                    ...company,
+                                    savedDate: company.savedDate || new Date().toISOString()
+                                }));
+                            }
+                        }
+
+                        try {
+                            const response = await fetch('api/bridge.php?action=get_user', {
+                                method: 'GET',
+                                credentials: 'include'
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.success && data.user) {
+                                    this.userProfile.name = data.user.name || this.userProfile.name;
+                                    this.userProfile.phone = data.user.phone || '';
+                                    const locationValue = data.user.location;
+                                    if (locationValue && !locationValue.includes('@')) {
+                                        this.userProfile.location = locationValue;
+                                    } else {
+                                        this.userProfile.location = '';
+                                    }
+                                    this.userProfile.bio = data.user.bio || '';
+                                    this.userName = data.user.name || this.userName;
+                                }
+                            }
+                        } catch (error) {
+                            console.log('User API not available');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching dashboard data:', error);
+                    }
+                },
+
+
+
+                filterPhoneNumber(event) {
+                    // Only allow digits
+                    event.target.value = event.target.value.replace(/\D/g, '');
+                    this.userProfile.phone = event.target.value;
+                },
+
+                async updateProfile() {
+                    try {
+                        const response = await fetch('api/bridge.php?action=update_user_profile', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                                name: this.userProfile.name,
+                                phone: this.userProfile.phone || null,
+                                location: this.userProfile.location || null,
+                                bio: !this.isBusinessPartner ? (this.userProfile.bio || null) : null
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            this.profileMessage = 'Profile updated successfully!';
+                            this.userName = this.userProfile.name;
+                            sessionStorage.setItem('currentUser', JSON.stringify({
+                                name: this.userProfile.name,
+                                email: this.userProfile.email
+                            }));
+                            setTimeout(() => { this.profileMessage = ''; }, 3000);
+                        } else {
+                            alert(data.error || 'Failed to update profile');
+                        }
+                    } catch (error) {
+                        console.error('Error updating profile:', error);
+                        alert('Error updating profile. Please try again.');
+                    }
+                },
+
+                async removeCompany(companyId) {
+                    if (!confirm('Remove this company from your favorites?')) return;
+                    
+                    try {
+                        const response = await fetch('api/data.php?action=remove_business', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                                business_id: companyId
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            this.savedCompanies = this.savedCompanies.filter(c => c.id !== companyId);
+                            alert('Company removed from your favorites!');
+                        } else {
+                            alert(data.error || 'Failed to remove company');
+                        }
+                    } catch (error) {
+                        console.error('Error removing company:', error);
+                        alert('Error removing company. Please try again.');
+                    }
+                },
+
+                viewBusiness(companyId) {
+                    window.location.href = `business_profile.html?id=${companyId}`;
+                },
+
+                formatDate(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-SG', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+    <script>
+        function handleHashNavigation() {
+            const hash = window.location.hash.substring(1).toLowerCase();
+            if (hash && ['profile', 'interests', 'notifications'].includes(hash)) {
+                const appEl = document.querySelector('#app');
+                if (appEl && appEl.__vueParentComponent) {
+                    const appInstance = appEl.__vueParentComponent.ctx;
+                    if (appInstance && appInstance.activeTab !== undefined) {
+                        appInstance.activeTab = hash;
+                    }
+                } else {
+                    const vueApp = window.vueApp || appEl?._vnode?.ctx;
+                    if (vueApp && vueApp.activeTab !== undefined) {
+                        vueApp.activeTab = hash;
+                    }
+                }
+            }
+        }
+        
+        window.addEventListener('hashchange', handleHashNavigation);
+        
+        window.addEventListener('load', () => {
+            setTimeout(handleHashNavigation, 100);
+        });
+    </script>
+</body>
+</html>

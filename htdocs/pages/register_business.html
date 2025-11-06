@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Green Business - GoGreenHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="fas fa-leaf me-2"></i>GoGreenHub
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="directory.html">Directory</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="about.html">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contact.html">Contact</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="auth-buttons d-flex align-items-center">
+                        <a href="login_business.html" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="register-container">
+                <div class="register-card">
+                    <div class="register-header">
+                        <i class="fas fa-store"></i>
+                        <h2>Register Your Green Business</h2>
+                        <p class="text-muted">Join Singapore's premier sustainable business directory</p>
+                    </div>
+
+                    <form @submit.prevent="handleRegister">
+                        <h5 class="section-title">
+                            <i class="fas fa-building me-2"></i>Business Information
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Business Name *</label>
+                                <input type="text" class="form-control" v-model="registerForm.name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Contact Email *</label>
+                                <input type="email" class="form-control" v-model="registerForm.email" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Password *</label>
+                                <input type="password" class="form-control" v-model="registerForm.password" minlength="6" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Phone Number</label>
+                                <input type="tel" class="form-control" v-model="registerForm.phone" @input="filterPhoneNumber">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Business Description *</label>
+                                <textarea class="form-control" rows="4" v-model="registerForm.description" maxlength="500" required></textarea>
+                                <small class="text-muted">{{ registerForm.description.length }}/500 characters</small>
+                            </div>
+                        </div>
+
+                        <h5 class="section-title">
+                            <i class="fas fa-tag me-2"></i>Business Category *
+                        </h5>
+
+                        <div class="mb-3">
+                            <select class="form-select" v-model="registerForm.category" required>
+                                <option value="">Select a category</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Food and Beverage">Food and Beverage</option>
+                                <option value="Energy">Energy</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Manufacturing">Manufacturing</option>
+                                <option value="Services">Services</option>
+                            </select>
+                        </div>
+
+                        <h5 class="section-title">
+                            <i class="fas fa-certificate me-2"></i>Green Certification
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Certification Name *</label>
+                                <select class="form-select" v-model="registerForm.certificationName" required>
+                                    <option value="">Select a Certification</option>
+                                    <option value="BCA Green Mark">BCA Green Mark</option>
+                                    <option value="Singapore Green Label (SGLS)">Singapore Green Label (SGLS)</option>
+                                    <option value="Singapore Green Building Product (SGBP)">Singapore Green Building Product (SGBP)</option>
+                                    <option value="Eco Office Certification">Eco Office Certification</option>
+                                    <option value="Eco Shop / Eco F&B">Eco Shop / Eco F&B</option>
+                                    <option value="LowCarbonSG Mark">LowCarbonSG Mark</option>
+                                    <option value="Zero Waste SG Certification">Zero Waste SG Certification</option>
+                                    <option value="SS ISO 14001 (Environmental Management)">SS ISO 14001 (Environmental Management)</option>
+                                    <option value="SS ISO 50001 (Energy Management)">SS ISO 50001 (Energy Management)</option>
+                                    <option value="Carbon Neutral / CarbonNeutral®">Carbon Neutral / CarbonNeutral®</option>
+                                    <option value="Climate Neutral Certified">Climate Neutral Certified</option>
+                                    <option value="B Corp">B Corp</option>
+                                    <option value="LEED Certification">LEED Certification</option>
+                                    <option value="ISO 26000 (Social Responsibility)">ISO 26000 (Social Responsibility)</option>
+                                    <option value="Cradle to Cradle Certified™">Cradle to Cradle Certified™</option>
+                                    <option value="Green Globe Certification">Green Globe Certification</option>
+                                    <option value="Fair Trade Certified">Fair Trade Certified</option>
+                                    <option value="Energy Star">Energy Star</option>
+                                    <option value="Carbon Disclosure Project (CDP)">Carbon Disclosure Project (CDP)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Certificate Number *</label>
+                                <input type="text" class="form-control" v-model="registerForm.certificateNumber" required>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-success mt-4" v-if="registerMessage">
+                            <i class="fas fa-check-circle me-2"></i>{{ registerMessage }}
+                        </div>
+
+                        <div class="alert alert-danger mt-4" v-if="registerError">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ registerError }}
+                        </div>
+
+                        <button type="submit" class="btn btn-register btn-lg w-100 mt-4" :disabled="isLoading">
+                            <span v-if="!isLoading">
+                                <i class="fas fa-check me-2"></i>Register Business
+                            </span>
+                            <span v-else>
+                                <i class="fas fa-spinner fa-spin me-2"></i>Registering...
+                            </span>
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4 pt-4" style="border-top: 1px solid #eee;">
+                        <p class="mb-0">Already have an account? 
+                            <a href="login_business.html" class="text-decoration-none fw-bold" style="color: var(--accent-green);">
+                                Sign in here
+                            </a>
+                        </p>
+                    </div>
+
+                    <div class="text-center mt-3 pt-3" style="border-top: 1px solid #eee;">
+                        <p class="mb-2 text-muted small">Are you a consumer?</p>
+                        <a href="login.html" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-user me-1"></i>Consumer Sign In
+                        </a>
+                        <span class="mx-2 text-muted">or</span>
+                        <a href="register.html" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-user-plus me-1"></i>Consumer Sign Up
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                registerForm: {
+                    name: '',
+                    email: '',
+                    password: '',
+                    phone: '',
+                    category: '',
+                    description: '',
+                    address: ''
+                },
+                registerMessage: '',
+                registerError: '',
+                isLoading: false
+            }
+        },
+        methods: {
+            filterPhoneNumber(event) {
+                // Only allow digits
+                event.target.value = event.target.value.replace(/\D/g, '');
+                this.registerForm.phone = event.target.value;
+            },
+
+            async handleRegister() {
+                this.registerError = '';
+                this.registerMessage = '';
+                
+                if (!this.registerForm.name || !this.registerForm.email || 
+                    !this.registerForm.password || !this.registerForm.category ||
+                    !this.registerForm.description) {
+                    this.registerError = 'Please fill in all required fields';
+                    return;
+                }
+
+                if (this.registerForm.password.length < 6) {
+                    this.registerError = 'Password must be at least 6 characters';
+                    return;
+                }
+
+                this.isLoading = true;
+                
+                try {
+                    const response = await fetch('api/auth.php?action=register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            name: this.registerForm.name,
+                            email: this.registerForm.email,
+                            password: this.registerForm.password,
+                            phone: this.registerForm.phone || '',
+                            userType: 'business',
+                            businessName: this.registerForm.name,
+                            category: this.registerForm.category,
+                            description: this.registerForm.description,
+                            address: this.registerForm.address || '',
+                            certificationName: this.registerForm.certificationName || '',
+                            certificateNumber: this.registerForm.certificateNumber || ''
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!response.ok || result.error) {
+                        throw new Error(result.error || 'Registration failed');
+                    }
+                    
+                    if (result.success) {
+                        this.registerMessage = 'Business registered successfully! Redirecting to dashboard...';
+                       
+                        if (result.user) {
+                            sessionStorage.setItem('user', JSON.stringify(result.user));
+                            if (result.business) {
+                                sessionStorage.setItem('business', JSON.stringify(result.business));
+                            }
+                        }
+                        
+                        setTimeout(() => {
+                            window.location.href = 'partner_dashboard.html';
+                        }, 1500);
+                    } else {
+                        throw new Error(result.message || 'Registration failed');
+                    }
+                    
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    if (error.message.includes('already') || error.message.includes('exists')) {
+                        this.registerError = 'Email already in use';
+                    } else if (error.message.includes('Invalid email')) {
+                        this.registerError = 'Invalid email address';
+                    } else {
+                        this.registerError = error.message || 'Registration failed. Please try again.';
+                    }
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+        },
+        mounted() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = urlParams.get('message');
+            if (message) {
+                this.loginMessage = decodeURIComponent(message);
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>

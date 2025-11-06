@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Profile - GoGreenHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" :href="isBusinessPartner ? 'partner_dashboard.html' : 'index.html'">
+                    <i class="fas fa-leaf me-2"></i>GoGreenHub
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <!-- Business Navbar -->
+                        <template v-if="authInitialized && isBusinessPartner">
+                            <li class="nav-item"><a class="nav-link" href="partner_dashboard.html">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="directory.html">Directory</a></li>
+                            <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                            <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+                            <li class="nav-item" v-if="isLoggedIn">
+                                <a class="nav-link" href="messages_business.html">Messages</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                        </template>
+                        <!-- Consumer Navbar -->
+                        <template v-else-if="authInitialized">
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.html">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="directory.html">Directory</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                            <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+                            <li class="nav-item" v-if="isLoggedIn">
+                                <a class="nav-link" href="messages.html">Messages</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="about.html">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.html">Contact</a>
+                            </li>
+                        </template>
+                        <!-- Loading state (while auth initializes) -->
+                        <template v-else>
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.html">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="directory.html">Directory</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                            <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="about.html">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.html">Contact</a>
+                            </li>
+                        </template>
+                    </ul>
+                    
+                    <div class="auth-block">
+                        <template v-if="!isLoggedIn">
+                        <a href="login.html" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                        </a>
+                            <a href="register.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                            <div class="dropdown ms-2" v-if="!isLoggedIn || !isBusinessPartner">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-building me-1"></i>For Businesses
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="register_business.html">
+                                        <i class="fas fa-store me-2"></i>Register Green Business
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="login_business.html">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Business Sign In
+                                    </a></li>
+                                </ul>
+                    </div>
+                        </template>
+                    
+                        <template v-else>
+                            <!-- Business User Dropdown -->
+                            <template v-if="isBusinessPartner">
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item fw-bold" href="partner_dashboard.html">
+                                                <i class="fas fa-tachometer-alt me-2"></i>Partner Dashboard
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="viewPublicProfile">
+                                                <i class="fas fa-eye me-2"></i>View Public Profile
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="goToSavedCompanies">
+                                                <i class="fas fa-heart me-2 text-danger"></i>Saved Companies
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="logout">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </template>
+                            <!-- Consumer User Dropdown -->
+                            <template v-else>
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm dropdown-toggle position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                        <span v-if="unreadCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.2rem 0.3rem;">
+                                            {{ unreadCount > 9 ? '9+' : unreadCount }}
+                                        </span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item fw-bold d-flex align-items-center justify-content-between" href="user_account.html">
+                                                <span><i class="fas fa-user me-2"></i>My Profile</span>
+                                                <span v-if="unreadCount > 0" class="badge bg-danger ms-2" style="font-size: 0.65rem; padding: 0.2rem 0.4rem;">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="user_account.html#interests">
+                                                <i class="fas fa-heart me-2"></i>My Interests
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="user_account.html#profile">
+                                                <i class="fas fa-cog me-2"></i>Settings
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="register_business.html">
+                                                <i class="fas fa-plus me-2"></i>List Your Business
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button class="btn btn-outline-light btn-sm" @click="logout">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                </button>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Loading State -->
+        <div v-if="!businessLoaded" class="container text-center py-5">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading business profile...</p>
+        </div>
+
+        <!-- Profile Content -->
+        <template v-if="businessLoaded">
+            <!-- Profile Hero -->
+            <div class="profile-hero">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="profile-image">
+                                <i :class="business.icon"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h1 class="mb-2">{{ business.name }}</h1>
+                                    <p class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ business.address }}</p>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <span class="badge bg-light text-dark">{{ business.category }}</span>
+                                        <span v-for="cert in business.certifications" :key="cert" class="badge bg-success">
+                                            <i class="fas fa-certificate me-1"></i>{{ cert }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="ms-3 favorite-button-container">
+                                    <button 
+                                        v-if="isLoggedIn && !isOwnBusiness"
+                                        @click="toggleFavorite" 
+                                        class="btn favorite-btn"
+                                        :class="isFavorite ? 'btn-danger' : 'btn-outline-danger'"
+                                        title="Save to favorites"
+                                    >
+                                        <i :class="isFavorite ? 'fas fa-heart' : 'far fa-heart'"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="d-flex gap-2 align-items-center">
+                                <a href="directory.html" class="btn btn-light">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Directory
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="container mb-5">
+                <div class="row g-4">
+                    <!-- Left Column -->
+                    <div class="col-lg-8">
+                        <!-- About Section -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h3 class="mb-3"><i class="fas fa-info-circle me-2 text-success"></i>About</h3>
+                                <p>{{ business.description }}</p>
+                                <p class="mb-0">{{ business.longDescription }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Eco Practices -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h3 class="mb-3"><i class="fas fa-leaf me-2 text-success"></i>Eco-Friendly Practices</h3>
+                                <div v-for="(practice, index) in business.ecoPractices" :key="index" class="eco-practice-item">
+                                    <h5 class="mb-2"><i class="fas fa-check-circle me-2 text-success"></i>{{ practice.title }}</h5>
+                                    <p class="mb-0 text-muted">{{ practice.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Products/Services with Comparison -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h3 class="mb-3"><i class="fas fa-box me-2 text-success"></i>Green Products & Services</h3>
+                                <div class="row g-3">
+                                    <div v-for="product in business.products" :key="product.name" class="col-md-6">
+                                        <div class="product-card">
+                                            <!-- Product Image -->
+                                            <div v-if="product.image_url" class="product-image mb-3">
+                                                <img :src="'../' + product.image_url" :alt="product.name" class="img-fluid rounded" style="max-height: 200px; width: 100%; object-fit: cover;">
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="mb-0">{{ product.name }}</h5>
+                                                <button 
+                                                    v-if="product.comparison"
+                                                    class="btn btn-sm btn-outline-success"
+                                                    @click="toggleComparison(product.name)">
+                                                    <i class="fas fa-chart-bar me-1"></i>Compare
+                                                </button>
+                                            </div>
+                                            <p class="text-muted mb-2">{{ product.description }}</p>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="badge" :class="product.available ? 'bg-success' : 'bg-secondary'">
+                                                    {{ product.available ? 'Available' : 'Out of Stock' }}
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- Comparison Section -->
+                                            <div v-if="product.comparison && showComparison[product.name]" class="comparison-wrapper mt-3 pt-3" style="border-top: 2px dashed #4caf50;">
+                                                <h6 class="text-success mb-3">
+                                                    <i class="fas fa-leaf me-2"></i>Environmental Impact Comparison
+                                                </h6>
+                                                
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-6">
+                                                        <div class="comparison-box green-box">
+                                                            <div class="text-center mb-2">
+                                                                <i class="fas fa-check-circle text-success fs-4"></i>
+                                                                <div class="fw-bold text-success small">GREEN PRODUCT</div>
+                                                            </div>
+                                                            <div class="metric-item" v-for="(value, key) in product.comparison.green" :key="key">
+                                                                <small class="text-muted d-block">{{ formatMetricName(key) }}</small>
+                                                                <strong class="text-success">{{ value }}</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="comparison-box conventional-box">
+                                                            <div class="text-center mb-2">
+                                                                <i class="fas fa-times-circle text-danger fs-4"></i>
+                                                                <div class="fw-bold text-danger small">CONVENTIONAL</div>
+                                                            </div>
+                                                            <div class="metric-item" v-for="(value, key) in product.comparison.conventional" :key="key">
+                                                                <small class="text-muted d-block">{{ formatMetricName(key) }}</small>
+                                                                <strong class="text-danger">{{ value }}</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="savings-highlight">
+                                                    <i class="fas fa-award me-2 text-warning"></i>
+                                                    <strong>Annual Savings:</strong>
+                                                    <span class="text-success">{{ product.comparison.savings }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <!-- Retail Locations -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h3 class="mb-3"><i class="fas fa-store me-2 text-success"></i>Retail Locations</h3>
+                                <div v-for="location in business.locations" :key="location.name" class="location-pin">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="mb-1"><i class="fas fa-map-marker-alt me-2 text-danger"></i>{{ location.name }}</h5>
+                                            <p class="text-muted mb-1">{{ location.address }}</p>
+                                            <small class="text-muted">{{ location.hours }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reviews Section -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h3 class="mb-0"><i class="fas fa-star me-2 text-warning"></i>Customer Reviews</h3>
+                                    <div class="text-end">
+                                        <div class="h4 mb-0">{{ averageRating.toFixed(1) }} <i class="fas fa-star text-warning"></i></div>
+                                        <small class="text-muted">{{ reviews.length }} reviews</small>
+                                    </div>
+                                </div>
+
+                                <!-- Write Review Form (Only for logged in users, not for own business) -->
+                                <div v-if="isLoggedIn && !isOwnBusiness" class="write-review-section mb-4 p-3 bg-light rounded">
+                                    <h5 class="mb-3">Write a Review</h5>
+                                    <form @submit.prevent="submitReview">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Your Rating</label>
+                                            <div class="star-rating">
+                                                <i v-for="star in 5" :key="star" 
+                                                    class="fas fa-star star-icon"
+                                                    @click="newReview.rating = star"
+                                                    @mouseover="hoverRating = star"
+                                                    @mouseleave="hoverRating = 0"
+                                                    :style="{ color: (star <= (hoverRating || newReview.rating)) ? '#ffc107' : '#e0e0e0' }">
+                                                </i>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Your Review</label>
+                                            <textarea 
+                                                class="form-control" 
+                                                rows="4" 
+                                                v-model="newReview.comment"
+                                                placeholder="Share your experience with this business..."
+                                                required>
+                                            </textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-paper-plane me-2"></i>Submit Review
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Login prompt for non-logged in users -->
+                                <div v-else-if="!isOwnBusiness" class="alert alert-info mb-4">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Please <a href="login.html" class="alert-link">sign in</a> to write a review.
+                                </div>
+
+                                <!-- Reviews List -->
+                                <div class="reviews-list">
+                                    <div v-if="reviews.length === 0" class="text-center text-muted py-4">
+                                        <i class="fas fa-comments fa-3x mb-3"></i>
+                                        <p>No reviews yet. Be the first to review!</p>
+                                    </div>
+                                    <div v-else v-for="(review, index) in reviews" :key="index" class="review-item mb-3" :class="{ 'border-bottom': index < reviews.length - 1 }">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="mb-1">{{ review.userName }}</h6>
+                                                <div class="stars mb-1">
+                                                    <i v-for="star in 5" :key="star" 
+                                                        class="fas fa-star"
+                                                        :style="{ color: star <= review.rating ? '#ffc107' : '#e0e0e0' }">
+                                                    </i>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">{{ review.date }}</small>
+                                        </div>
+                                        <p class="mb-0">{{ review.comment }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-lg-4">
+                        <!-- Certifications -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h4 class="mb-3">Certifications & Awards</h4>
+                                <div v-for="cert in business.fullCertifications" :key="cert.name" class="certification-card mb-3">
+                                    <h5 class="mb-2">
+                                        <i class="fas fa-award me-2 text-warning"></i>{{ cert.name }}
+                                    </h5>
+                                    <small class="text-muted d-block" v-if="cert.code">Certificate Number: {{ cert.code }}</small>
+                                    <small class="text-muted d-block" v-if="cert.issued">Issued: {{ formatCertDate(cert.issued) }}</small>
+                                    <small class="text-muted d-block" v-if="cert.expiry">Valid Until: {{ formatCertDate(cert.expiry) }}</small>
+                                    <small class="text-muted d-block" v-if="!cert.issued && !cert.expiry">Date information not available</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact -->
+                        <div class="card shadow-sm">
+                            <div class="card-body p-4">
+                                <h4 class="mb-3">Contact Information</h4>
+                                <p class="mb-2">
+                                    <i class="fas fa-phone me-2 text-success"></i>
+                                    <strong>Phone:</strong> <a :href="'tel:' + business.contact.phone" class="text-decoration-none">{{ business.contact.phone }}</a>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-envelope me-2 text-success"></i>
+                                    <strong>Email:</strong> <a :href="'mailto:' + business.contact.email" class="text-decoration-none">{{ business.contact.email }}</a>
+                                </p>
+                                <p class="mb-3">
+                                    <i class="fas fa-globe me-2 text-success"></i>
+                                    <strong>Website:</strong> <a :href="(business.contact.website.startsWith('http://') || business.contact.website.startsWith('https://')) ? business.contact.website : 'https://' + business.contact.website" target="_blank" class="text-decoration-none">{{ business.contact.website }}</a>
+                                </p>
+                                <button v-if="!isOwnBusiness" class="btn btn-success w-100" @click="openMessaging">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Message
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="js/utils.js"></script>
+    <script type="module">
+        import { authMixin } from './js/auth-mixin.js';
+        import { notificationMixin } from './js/notification-mixin.js';
+        const { createApp } = Vue;
+
+        createApp({
+            mixins: [authMixin, notificationMixin],
+            data() {
+                return {
+                    businessLoaded: false,
+                    business: null,
+                    showComparison: {},
+                    reviews: [],
+                    newReview: {
+                        rating: 0,
+                        comment: ''
+                    },
+                    isFavorite: false,
+                    viewedBusinessId: null  // The business being viewed (from URL)
+                }
+            },
+            computed: {
+                averageRating() {
+                    if (this.reviews.length === 0) return 0;
+                    const sum = this.reviews.reduce((acc, review) => acc + review.rating, 0);
+                    return sum / this.reviews.length;
+                },
+                isOwnBusiness() {
+                    // Check if logged-in business user owns this business
+                    // Compare logged-in user's businessId (from mixin) with viewed business ID
+                    const userBusinessId = this.businessId; // From authMixin
+                    const viewedId = parseInt(this.viewedBusinessId || this.business?.id || 0);
+                    return this.isBusinessPartner && userBusinessId && viewedId && userBusinessId === viewedId;
+                }
+            },
+            mounted() {
+           
+                this.loadBusinessFromUrl();
+                this.loadReviews();
+            },
+            watch: {
+                isLoggedIn(newVal) {
+                    if (newVal && this.viewedBusinessId) {
+                        this.checkIfFavorite();
+                    }
+                },
+                viewedBusinessId(newVal) {
+                    if (newVal && this.isLoggedIn) {
+                        this.checkIfFavorite();
+                    }
+                }
+            },
+            methods: {
+                async viewPublicProfile(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    let businessIdToUse = this.businessId;
+                    
+                    if (!businessIdToUse || isNaN(businessIdToUse)) {
+                        try {
+                            const response = await fetch('api/bridge.php?action=get_user', {
+                                method: 'GET',
+                                credentials: 'include'
+                            });
+                            
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.business?.businessId) {
+                                    businessIdToUse = data.business.businessId;
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error fetching business ID:', error);
+                        }
+                    }
+                    
+                    if (!businessIdToUse || isNaN(businessIdToUse) || businessIdToUse <= 0) {
+                        alert('Unable to load business ID. Please access this from the Partner Dashboard.');
+                        return;
+                    }
+                    
+                    businessIdToUse = parseInt(businessIdToUse);
+                    window.location.href = 'business_profile.html?id=' + businessIdToUse;
+                },
+                goToSavedCompanies() {
+                    // Navigate to partner dashboard and set active tab
+                    sessionStorage.setItem('switchToTab', 'interests');
+                    window.location.href = 'partner_dashboard.html';
+                },
+                formatDate: formatDate,
+                getCategoryIcon: getCategoryIcon,
+                formatCertDate(dateString) {
+                    if (!dateString) return 'N/A';
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return dateString; 
+                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                },
+                async loadBusinessFromUrl() {
+                    const params = new URLSearchParams(window.location.search);
+                    const businessId = parseInt(params.get('id') || '1');
+                    this.viewedBusinessId = businessId;
+                    
+                    try {
+                        const response = await fetch(`api/data.php?action=get_business&id=${businessId}`);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data && data.success === true && data.business) {
+                            this.business = { ...data.business };
+                            this.business.icon = getCategoryIcon(this.business.category);
+                            this.businessLoaded = true;
+                            
+                            if (this.isLoggedIn) {
+                                this.checkIfFavorite();
+                            }
+                        } else {
+                            alert('Business not found. Redirecting to directory...');
+                            setTimeout(() => window.location.href = 'directory.html', 1000);
+                        }
+                    } catch (error) {
+                        console.error('Error loading business:', error);
+                        alert('Error loading business profile: ' + error.message);
+                        setTimeout(() => window.location.href = 'directory.html', 1000);
+                    }
+                },
+                toggleComparison(productName) {
+                    this.showComparison[productName] = !this.showComparison[productName];
+                },
+                formatMetricName(key) {
+                    const nameMap = {
+                        energyUse: 'Energy Use',
+                        co2Emissions: 'CO₂ Emissions',
+                        renewableEnergy: 'Renewable Energy',
+                        eWaste: 'E-Waste',
+                        waterUsage: 'Water Usage',
+                        pesticides: 'Pesticides',
+                        deforestation: 'Deforestation',
+                        energyCost: 'Energy Cost',
+                        gridDependency: 'Grid Dependency',
+                        paybackPeriod: 'Payback Period',
+                        packaging: 'Packaging',
+                        transportDistance: 'Transport Distance',
+                        lifespan: 'Lifespan',
+                        plasticSaved: 'Plastic Saved',
+                        recycledContent: 'Recycled Content',
+                        strength: 'Strength',
+                        embodiedEnergy: 'Embodied Energy',
+                        biodegradable: 'Biodegradable',
+                        avgCO2Reduction: 'Avg CO₂ Reduction',
+                        costSavings: 'Cost Savings',
+                        roi: 'ROI'
+                    };
+                    return nameMap[key] || key;
+                },
+
+                async loadReviews() {
+                    const params = new URLSearchParams(window.location.search);
+                    const businessId = params.get('id') || '1';
+                    
+                    try {
+                        const response = await fetch(`api/displayReviews.php?b_id=${businessId}`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.reviews = data.reviews;
+                        } else {
+                            this.reviews = [];
+                        }
+                    } catch (error) {
+                        console.error('Error fetching reviews:', error);
+                        this.reviews = [];
+                    }
+                },
+                async submitReview() {
+                    if (this.newReview.rating === 0) {
+                        alert('Please select a star rating');
+                        return;
+                    }
+                    
+                    if (!this.newReview.comment.trim()) {
+                        alert('Please write a review comment');
+                        return;
+                    }
+
+                    if (!this.isLoggedIn) {
+                        alert('Please log in to submit a review');
+                        return;
+                    }
+                    
+                    // Prevent businesses from reviewing their own company
+                    if (this.isOwnBusiness) {
+                        alert('You cannot write a review for your own business');
+                        return;
+                    }
+
+                    const params = new URLSearchParams(window.location.search);
+                    const businessId = params.get('id');
+                    
+                    const reviewData = {
+                        comment: this.newReview.comment,
+                        rating: this.newReview.rating,
+                        b_id: parseInt(businessId)
+                    };
+
+                    try {
+                        const response = await fetch('api/addReview.php', {
+                            method: 'POST',
+                            credentials: "include",
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(reviewData)
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.reviews.unshift(data.review);
+                            
+                            this.newReview.rating = 0;
+                            this.newReview.comment = '';
+                            
+                            alert('Thank you for your review!');
+                            this.loadReviews(); // Reload reviews to update the list
+                        } else {
+                            alert(data.message || 'Error submitting review. Please try again.');
+                        }
+                    } catch (error) {
+                        console.error('Error submitting review:', error);
+                        alert('Error submitting review. Please try again.');
+                    }
+                },
+                async checkIfFavorite() {
+                    const businessIdToCheck = this.viewedBusinessId || parseInt(this.business?.id || 0);
+                    if (!this.isLoggedIn || !businessIdToCheck) return;
+                    
+                    try {
+                        const response = await fetch(`api/data.php?action=check_saved&business_id=${businessIdToCheck}`, {
+                            credentials: 'include'
+                        });
+                        const data = await response.json();
+                        this.isFavorite = data.saved || false;
+                    } catch (error) {
+                        console.error('Error checking favorite status:', error);
+                    }
+                },
+                async toggleFavorite(event) {
+                    if (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    
+                    if (!this.isLoggedIn) {
+                        alert('Please log in to save businesses to favorites');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    // Prevent businesses from favoriting their own company
+                    if (this.isOwnBusiness) {
+                        alert('You cannot favorite your own business');
+                        return;
+                    }
+                    
+                    const businessIdToFavorite = this.viewedBusinessId || parseInt(this.business?.id || 0);
+                    if (!businessIdToFavorite || businessIdToFavorite <= 0) {
+                        console.error('Business ID not set');
+                        alert('Unable to save favorite: Business ID not found');
+                        return;
+                    }
+                    
+                    try {
+                        const action = this.isFavorite ? 'remove_business' : 'save_business';
+                        const response = await fetch(`api/data.php?action=${action}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ business_id: businessIdToFavorite })
+                        });
+                        
+                        let data;
+                        try {
+                            data = await response.json();
+                        } catch (parseError) {
+                            // If JSON parsing fails, try to get text response
+                            const text = await response.text();
+                            throw new Error(text || `HTTP error! status: ${response.status}`);
+                        }
+                        
+                        if (response.ok && data.success) {
+                            this.isFavorite = !this.isFavorite;
+                            console.log('Favorite toggled:', this.isFavorite);
+                        } else {
+                            // Handle error response
+                            const errorMsg = data.error || data.message || 'Failed to update favorite';
+                            console.error('API error:', errorMsg);
+                            alert(errorMsg);
+                        }
+                    } catch (error) {
+                        console.error('Error toggling favorite:', error);
+                        // Extract error message from response if available
+                        let errorMessage = 'Error updating favorite. Please try again.';
+                        if (error.message && !error.message.includes('HTTP error')) {
+                            errorMessage = error.message;
+                        }
+                        alert(errorMessage);
+                    }
+                },
+                openMessaging() {
+                    if (!this.isLoggedIn) {
+                        alert('Please log in to send a message');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    const params = new URLSearchParams(window.location.search);
+                    const businessId = params.get('id');
+                    
+                    // Check if user is a business partner - redirect to business messages page
+                    if (this.isBusinessPartner) {
+                        if (businessId) {
+                            window.location.href = `messages_business.html?business_id=${businessId}`;
+                        } else {
+                            window.location.href = 'messages_business.html';
+                        }
+                    } else {
+                        // Consumer user - redirect to consumer messages page
+                        if (businessId) {
+                            window.location.href = `messages.html?business_id=${businessId}`;
+                        } else {
+                            window.location.href = 'messages.html';
+                        }
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

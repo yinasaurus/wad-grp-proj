@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - GoGreenHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/events.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" :href="isBusinessPartner ? 'partner_dashboard.html' : 'index.html'">
+                    <i class="fas fa-leaf me-2"></i>GoGreenHub
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <!-- Business Navbar -->
+                        <template v-if="isBusinessPartner">
+                            <li class="nav-item"><a class="nav-link" href="partner_dashboard.html">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="directory.html">Directory</a></li>
+                            <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                            <li class="nav-item"><a class="nav-link active" href="event.html">Events</a></li>
+                            <li class="nav-item" v-if="isLoggedIn">
+                                <a class="nav-link" href="messages_business.html">Messages</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                        </template>
+                        <!-- Consumer Navbar -->
+                        <template v-else>
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.html">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="directory.html">Directory</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="forum.html">Community</a></li>
+                            <li class="nav-item"><a class="nav-link active" href="event.html">Events</a></li>
+                            <li class="nav-item" v-if="isLoggedIn">
+                                <a class="nav-link" href="messages.html">Messages</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="about.html">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.html">Contact</a>
+                            </li>
+                        </template>
+                    </ul>
+                    
+                    <div class="auth-block">
+                        <template v-if="!isLoggedIn">
+                            <a href="login.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                            </a>
+                            <a href="register.html" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                            <div class="dropdown ms-2" v-if="!isLoggedIn || !isBusinessPartner">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-building me-1"></i>For Businesses
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="register_business.html">
+                                        <i class="fas fa-store me-2"></i>Register Green Business
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="login_business.html">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Business Sign In
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </template>
+                    
+                        <template v-else>
+                            <!-- Business User Dropdown -->
+                            <template v-if="isBusinessPartner">
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item fw-bold" href="partner_dashboard.html">
+                                                <i class="fas fa-tachometer-alt me-2"></i>Partner Dashboard
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="viewPublicProfile">
+                                                <i class="fas fa-eye me-2"></i>View Public Profile
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="goToSavedCompanies">
+                                                <i class="fas fa-heart me-2 text-danger"></i>Saved Companies
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="logout">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </template>
+                            <!-- Consumer User Dropdown -->
+                            <template v-else>
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm dropdown-toggle position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-user-circle me-1"></i>{{ userName }}
+                                        <span v-if="unreadCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.2rem 0.3rem;">
+                                            {{ unreadCount > 9 ? '9+' : unreadCount }}
+                                        </span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item fw-bold d-flex align-items-center justify-content-between" href="user_account.html">
+                                                <span><i class="fas fa-user me-2"></i>My Profile</span>
+                                                <span v-if="unreadCount > 0" class="badge bg-danger ms-2" style="font-size: 0.65rem; padding: 0.2rem 0.4rem;">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="user_account.html#interests">
+                                                <i class="fas fa-heart me-2"></i>My Interests
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="user_account.html#profile">
+                                                <i class="fas fa-cog me-2"></i>Settings
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="register_business.html">
+                                                <i class="fas fa-plus me-2"></i>List Your Business
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button class="btn btn-outline-light btn-sm" @click="logout">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                </button>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Events Page Content -->
+        <div class="container mt-4 mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0"><i class="fas fa-calendar-alt me-2 text-success"></i>Events</h1>
+                <button v-if="isLoggedIn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                    <i class="fas fa-plus me-2"></i>Create Event
+                </button>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="d-flex gap-2 mb-4">
+                <button class="btn" :class="viewMode === 'calendar' ? 'btn-success' : 'btn-outline-success'" @click="viewMode = 'calendar'">
+                    <i class="fas fa-calendar me-2"></i>Calendar View
+                </button>
+                <button class="btn" :class="viewMode === 'list' ? 'btn-success' : 'btn-outline-success'" @click="viewMode = 'list'">
+                    <i class="fas fa-list me-2"></i>List View
+                </button>
+                <button v-if="isLoggedIn" class="btn" :class="viewMode === 'my-events' ? 'btn-success' : 'btn-outline-success'" @click="viewMode = 'my-events'">
+                    <i class="fas fa-calendar-check me-2"></i>My Events
+                </button>
+            </div>
+
+            <!-- Calendar View -->
+            <div v-if="viewMode === 'calendar'" class="events-calendar-view mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar me-2"></i>{{ currentMonthYear }}
+                            </h5>
+                            <div class="btn-group">
+                                <button class="btn btn-light btn-sm" @click="previousMonth">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="btn btn-light btn-sm" @click="today">
+                                    Today
+                                </button>
+                                <button class="btn btn-light btn-sm" @click="nextMonth">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="calendar-grid">
+                            <!-- Day headers -->
+                            <div class="calendar-weekdays">
+                                <div class="calendar-day-header" v-for="day in weekDays" :key="day">{{ day }}</div>
+                            </div>
+                            <!-- Calendar days -->
+                            <div class="calendar-days">
+                                <div 
+                                    v-for="day in calendarDays" 
+                                    :key="day.date"
+                                    class="calendar-day"
+                                    :class="{
+                                        'other-month': !day.inCurrentMonth,
+                                        'today': day.isToday,
+                                        'has-events': day.eventCount > 0
+                                    }"
+                                    @click="selectDate(day.date)"
+                                >
+                                    <div class="day-number">{{ day.day }}</div>
+                                    <div v-if="day.eventCount > 0" class="event-indicator">
+                                        <span class="badge bg-success">{{ day.eventCount }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Events for Selected Date -->
+                <div v-if="selectedDate && selectedDateEvents.length > 0" class="card shadow-sm mt-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-day me-2"></i>
+                            Events on {{ formatDisplayDate(selectedDate) }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div v-for="event in selectedDateEvents" :key="event.id" class="event-card mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-2">
+                                        <i :class="event.isBusiness && !isBusinessPartner ? 'fas fa-building text-primary' : (event.isBusiness ? 'fas fa-building text-success' : 'fas fa-user text-success')"></i>
+                                        {{ event.title }}
+                                    </h5>
+                                    <p class="text-muted mb-2">{{ event.description }}</p>
+                                    <div class="event-details">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>{{ formatEventTime(event.start_time) }}
+                                            <span v-if="event.end_time"> - {{ formatEventTime(event.end_time) }}</span>
+                                        </small>
+                                        <small class="text-muted ms-3" v-if="event.location">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ event.location }}
+                                        </small>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">
+                                        <i class="fas fa-user me-1"></i>Posted by: {{ event.organizer_name }}
+                                        <span v-if="event.isBusiness && !isBusinessPartner" class="badge bg-primary ms-2">Business</span>
+                                    </small>
+                                </div>
+                                <div class="ms-3 d-flex gap-2">
+                                    <button v-if="isLoggedIn && !event.isRegistered && !isOwnEvent(event)" class="btn btn-sm btn-success" @click="signupForEvent(event.id)">
+                                        <i class="fas fa-user-plus me-1"></i>Sign Up
+                                    </button>
+                                    <button v-else-if="isLoggedIn && event.isRegistered" class="btn btn-sm btn-outline-secondary" disabled>
+                                        <i class="fas fa-check me-1"></i>Registered
+                                    </button>
+                                    <button v-if="isLoggedIn && canEditEvent(event)" class="btn btn-sm btn-outline-primary" @click="openEditModal(event)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button v-if="isLoggedIn && canDeleteEvent(event)" class="btn btn-sm btn-outline-danger" @click="deleteEvent(event.id)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="selectedDate" class="card shadow-sm mt-4">
+                    <div class="card-body text-center text-muted">
+                        <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                        <p>No events on this date</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List View -->
+            <div v-if="viewMode === 'list'">
+                <div class="row g-4">
+                    <div v-for="event in sortedEvents" :key="event.id" class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm h-100 event-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">{{ event.title }}</h5>
+                                    <span v-if="event.isBusiness && !isBusinessPartner" class="badge bg-primary">Business</span>
+                                    <span v-else-if="!event.isBusiness" class="badge bg-success">Community</span>
+                                </div>
+                                <p class="card-text text-muted">{{ event.description }}</p>
+                                <div class="event-meta mb-3">
+                                    <div class="mb-2">
+                                        <i class="fas fa-calendar me-2 text-success"></i>
+                                        <strong>{{ formatEventDate(event.start_time) }}</strong>
+                                    </div>
+                                    <div class="mb-2" v-if="event.start_time">
+                                        <i class="fas fa-clock me-2 text-success"></i>
+                                        {{ formatEventTime(event.start_time) }}
+                                        <span v-if="event.end_time"> - {{ formatEventTime(event.end_time) }}</span>
+                                    </div>
+                                    <div v-if="event.location">
+                                        <i class="fas fa-map-marker-alt me-2 text-success"></i>
+                                        {{ event.location }}
+                                    </div>
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-user me-1"></i>Organized by: {{ event.organizer_name }}
+                                </div>
+                                <div class="mt-3 d-flex gap-2">
+                                    <button v-if="isLoggedIn && !event.isRegistered && !isOwnEvent(event)" class="btn btn-sm btn-success" @click="signupForEvent(event.id)">
+                                        <i class="fas fa-user-plus me-1"></i>Sign Up
+                                    </button>
+                                    <button v-else-if="isLoggedIn && event.isRegistered" class="btn btn-sm btn-outline-secondary" disabled>
+                                        <i class="fas fa-check me-1"></i>Registered
+                                    </button>
+                                    <button v-if="isLoggedIn && canEditEvent(event)" class="btn btn-sm btn-outline-primary" @click="openEditModal(event)">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </button>
+                                    <button v-if="isLoggedIn && canDeleteEvent(event)" class="btn btn-sm btn-outline-danger" @click="deleteEvent(event.id)">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="sortedEvents.length === 0" class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No events yet. Be the first to create one!</p>
+                </div>
+            </div>
+
+            <!-- My Events View -->
+            <div v-if="viewMode === 'my-events'">
+                <div v-if="!isLoggedIn" class="card shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-sign-in-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Please log in to view your registered events.</p>
+                        <a href="login.html" class="btn btn-success">Log In</a>
+                    </div>
+                </div>
+                <div v-else>
+                    <div v-if="myRegistrations.length > 0" class="row g-4">
+                        <div v-for="registration in myRegistrations" :key="registration.registration_id" class="col-md-6 col-lg-4">
+                            <div class="card shadow-sm h-100 event-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title mb-0">{{ registration.title }}</h5>
+                                        <span class="badge bg-success">Registered</span>
+                                    </div>
+                                    <p class="card-text text-muted">{{ registration.description }}</p>
+                                    <div class="event-meta mb-3">
+                                        <div class="mb-2">
+                                            <i class="fas fa-calendar me-2 text-success"></i>
+                                            <strong>{{ formatEventDate(registration.start_time) }}</strong>
+                                        </div>
+                                        <div class="mb-2" v-if="registration.start_time">
+                                            <i class="fas fa-clock me-2 text-success"></i>
+                                            {{ formatEventTime(registration.start_time) }}
+                                            <span v-if="registration.end_time"> - {{ formatEventTime(registration.end_time) }}</span>
+                                        </div>
+                                        <div v-if="registration.location" class="mb-2">
+                                            <i class="fas fa-map-marker-alt me-2 text-success"></i>
+                                            {{ registration.location }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            <i class="fas fa-user me-1"></i>Organized by: {{ registration.organizer_name }}
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-outline-danger" @click="cancelRegistration(registration.registration_id)">
+                                            <i class="fas fa-times me-1"></i>Cancel Registration
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="text-center py-5">
+                        <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">You haven't registered for any events yet.</p>
+                        <button class="btn btn-success" @click="viewMode = 'list'">
+                            <i class="fas fa-search me-2"></i>Browse Events
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Event Modal -->
+        <div class="modal fade" id="createEventModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-plus me-2"></i>Create New Event
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="createEvent">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Event Title *</label>
+                                <input type="text" class="form-control" v-model="newEvent.title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Description *</label>
+                                <textarea class="form-control" rows="4" v-model="newEvent.description" required></textarea>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Event Date *</label>
+                                    <input type="date" class="form-control" v-model="newEvent.date" :min="minDate" required>
+                                    <small class="text-muted">Event must be scheduled at least one week (7 days) from today</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Start Time</label>
+                                    <input type="time" class="form-control" v-model="newEvent.start_time">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">End Time</label>
+                                    <input type="time" class="form-control" v-model="newEvent.end_time">
+                                </div>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label class="form-label fw-bold">Location</label>
+                                <input type="text" class="form-control" v-model="newEvent.location" placeholder="e.g., Marina Bay, Singapore">
+                            </div>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success" :disabled="creatingEvent">
+                                    <i class="fas fa-check me-2"></i>{{ creatingEvent ? 'Creating...' : 'Create Event' }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Event Modal -->
+        <div class="modal fade" id="editEventModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-edit me-2"></i>Edit Event
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="updateEvent">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Event Title *</label>
+                                <input type="text" class="form-control" v-model="editEvent.title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Description *</label>
+                                <textarea class="form-control" rows="4" v-model="editEvent.description" required></textarea>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Event Date *</label>
+                                    <input type="date" class="form-control" v-model="editEvent.date" :min="minDate" required>
+                                    <small class="text-muted">Event must be scheduled at least one week (7 days) from today</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Start Time</label>
+                                    <input type="time" class="form-control" v-model="editEvent.start_time">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">End Time</label>
+                                    <input type="time" class="form-control" v-model="editEvent.end_time">
+                                </div>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label class="form-label fw-bold">Location</label>
+                                <input type="text" class="form-control" v-model="editEvent.location" placeholder="e.g., Marina Bay, Singapore">
+                            </div>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary" :disabled="updatingEvent">
+                                    <i class="fas fa-save me-2"></i>{{ updatingEvent ? 'Updating...' : 'Update Event' }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+        import { authMixin } from './js/auth-mixin.js';
+        import { notificationMixin } from './js/notification-mixin.js';
+        const { createApp } = Vue;
+
+        createApp({
+            mixins: [authMixin, notificationMixin],
+            data() {
+                return {
+                    viewMode: 'calendar',
+                    events: [],
+                    myRegistrations: [],
+                    selectedDate: null,
+                    currentDate: new Date(),
+                    newEvent: {
+                        title: '',
+                        description: '',
+                        date: '',
+                        start_time: '',
+                        end_time: '',
+                        location: '',
+                    },
+                    creatingEvent: false,
+                    editEvent: {
+                        id: null,
+                        title: '',
+                        description: '',
+                        date: '',
+                        start_time: '',
+                        end_time: '',
+                        location: '',
+                    },
+                    updatingEvent: false
+                }
+            },
+            computed: {
+                minDate() {
+                    // Events can only be created one week (7 days) later
+                    const today = new Date();
+                    const oneWeekLater = new Date(today);
+                    oneWeekLater.setDate(today.getDate() + 7);
+                    const year = oneWeekLater.getFullYear();
+                    const month = String(oneWeekLater.getMonth() + 1).padStart(2, '0');
+                    const day = String(oneWeekLater.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                },
+                currentMonthYear() {
+                    return this.currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                },
+                weekDays() {
+                    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                },
+                calendarDays() {
+                    const year = this.currentDate.getFullYear();
+                    const month = this.currentDate.getMonth();
+                    const firstDay = new Date(year, month, 1);
+                    const lastDay = new Date(year, month + 1, 0);
+                    const daysInMonth = lastDay.getDate();
+                    const startingDayOfWeek = firstDay.getDay();
+                    
+                    const days = [];
+                   
+                    const prevMonth = new Date(year, month - 1, 0);
+                    const prevMonthDays = prevMonth.getDate();
+                    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+                        const date = new Date(year, month - 1, prevMonthDays - i);
+                        days.push({
+                            date: this.formatDateString(date),
+                            day: prevMonthDays - i,
+                            inCurrentMonth: false,
+                            isToday: false,
+                            eventCount: this.getEventCountForDate(date)
+                        });
+                    }
+                    
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    for (let i = 1; i <= daysInMonth; i++) {
+                        const date = new Date(year, month, i);
+                        const dateStr = this.formatDateString(date);
+                        days.push({
+                            date: dateStr,
+                            day: i,
+                            inCurrentMonth: true,
+                            isToday: dateStr === this.formatDateString(today),
+                            eventCount: this.getEventCountForDate(date)
+                        });
+                    }
+                    
+                    const remainingDays = 42 - days.length; 
+                    for (let i = 1; i <= remainingDays; i++) {
+                        const date = new Date(year, month + 1, i);
+                        days.push({
+                            date: this.formatDateString(date),
+                            day: i,
+                            inCurrentMonth: false,
+                            isToday: false,
+                            eventCount: this.getEventCountForDate(date)
+                        });
+                    }
+                    
+                    return days;
+                },
+                selectedDateEvents() {
+                    if (!this.selectedDate) return [];
+                    return this.events.filter(event => {
+                        const eventDate = event.start_time.split(' ')[0];
+                        return eventDate === this.selectedDate;
+                    });
+                },
+                sortedEvents() {
+                    return [...this.events].sort((a, b) => {
+                        return new Date(a.start_time) - new Date(b.start_time);
+                    });
+                }
+            },
+            mounted() {
+                this.loadEvents();
+                if (this.isLoggedIn) {
+                    this.loadMyRegistrations();
+                }
+                const today = new Date();
+                this.newEvent.date = today.toISOString().split('T')[0];
+            },
+            watch: {
+                isLoggedIn(newVal) {
+                    if (newVal) {
+                        this.loadMyRegistrations();
+                        this.checkRegistrations();
+                    } else {
+                        this.myRegistrations = [];
+                        this.events.forEach(event => {
+                            event.isRegistered = false;
+                        });
+                    }
+                },
+                viewMode(newVal) {
+                    if (newVal === 'my-events' && this.isLoggedIn) {
+                        this.loadMyRegistrations();
+                    }
+                }
+            },
+            methods: {
+                async viewPublicProfile(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    let businessIdToUse = this.businessId;
+                    
+                    
+                    if (!businessIdToUse || isNaN(businessIdToUse)) {
+                        try {
+                            const response = await fetch('api/bridge.php?action=get_user', {
+                                method: 'GET',
+                                credentials: 'include'
+                            });
+                            
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.business?.businessId) {
+                                    businessIdToUse = data.business.businessId;
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error fetching business ID:', error);
+                        }
+                    }
+                    
+                    if (!businessIdToUse || isNaN(businessIdToUse) || businessIdToUse <= 0) {
+                        alert('Unable to load business ID. Please access this from the Partner Dashboard.');
+                        return;
+                    }
+                    
+                    businessIdToUse = parseInt(businessIdToUse);
+                    window.location.href = 'business_profile.html?id=' + businessIdToUse;
+                },
+                goToSavedCompanies() {
+                    // Navigate to partner dashboard and set active tab
+                    sessionStorage.setItem('switchToTab', 'interests');
+                    window.location.href = 'partner_dashboard.html';
+                },
+                async loadEvents() {
+                    try {
+                        console.log('Loading events...');
+                        const response = await fetch('api/event.php?action=get_events', {
+                            credentials: 'include'
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('Events response:', data);
+                        
+                        if (data.success) {
+                            this.events = data.events || [];
+                            console.log(`Loaded ${this.events.length} events`);
+                            
+                            if (this.isLoggedIn) {
+                                this.checkRegistrations();
+                            }
+                        } else {
+                            console.error('Error loading events:', data.error);
+                            alert('Error loading events: ' + (data.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error loading events:', error);
+                        alert('Error loading events. Please check the console for details.');
+                    }
+                },
+                formatDateString(date) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                },
+                getEventCountForDate(date) {
+                    const dateStr = this.formatDateString(date);
+                    return this.events.filter(event => {
+                        const eventDate = event.start_time.split(' ')[0];
+                        return eventDate === dateStr;
+                    }).length;
+                },
+                selectDate(date) {
+                    this.selectedDate = date;
+                },
+                previousMonth() {
+                    const newDate = new Date(this.currentDate);
+                    newDate.setMonth(newDate.getMonth() - 1);
+                    this.currentDate = newDate;
+                },
+                nextMonth() {
+                    const newDate = new Date(this.currentDate);
+                    newDate.setMonth(newDate.getMonth() + 1);
+                    this.currentDate = newDate;
+                },
+                today() {
+                    this.currentDate = new Date();
+                    this.selectedDate = this.formatDateString(new Date());
+                },
+                formatDisplayDate(dateStr) {
+                    const date = new Date(dateStr + 'T00:00:00');
+                    return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                },
+                formatEventDate(dateTimeStr) {
+                    const date = new Date(dateTimeStr);
+                    return date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+                },
+                formatEventTime(dateTimeStr) {
+                    const date = new Date(dateTimeStr);
+                    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                },
+                async createEvent() {
+                    if (!this.newEvent.title || !this.newEvent.description || !this.newEvent.date) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+                    
+                    const selectedDate = new Date(this.newEvent.date + 'T00:00:00');
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Calculate one week from today
+                    const oneWeekLater = new Date(today);
+                    oneWeekLater.setDate(today.getDate() + 7);
+                    oneWeekLater.setHours(0, 0, 0, 0);
+                    
+                    if (selectedDate < oneWeekLater) {
+                        alert('Event date must be at least one week (7 days) from today. Please select a date at least 7 days in the future.');
+                        return;
+                    }
+               
+                    if (selectedDate.getTime() === today.getTime() && this.newEvent.start_time) {
+                        const now = new Date();
+                        const [hours, minutes] = this.newEvent.start_time.split(':');
+                        const eventTime = new Date();
+                        eventTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                        
+                        if (eventTime < now) {
+                            alert('For events scheduled today, the start time must be in the future. Please select a later time.');
+                            return;
+                        }
+                    }
+                    
+                    this.creatingEvent = true;
+                    
+                    try {
+                        // Combine date and time
+                        let startDateTime = this.newEvent.date;
+                        if (this.newEvent.start_time) {
+                            startDateTime += ' ' + this.newEvent.start_time + ':00';
+                        } else {
+                            startDateTime += ' 00:00:00';
+                        }
+                        
+                        let endDateTime = null;
+                        if (this.newEvent.end_time) {
+                            endDateTime = this.newEvent.date + ' ' + this.newEvent.end_time + ':00';
+                        }
+                        
+                        const eventData = {
+                            title: this.newEvent.title,
+                            description: this.newEvent.description,
+                            start_time: startDateTime,
+                            end_time: endDateTime,
+                            location: this.newEvent.location || null
+                        };
+                        
+                        const response = await fetch('api/event.php?action=create_event', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(eventData)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('Event created successfully!');
+                            this.newEvent = {
+                                title: '',
+                                description: '',
+                                date: new Date().toISOString().split('T')[0],
+                                start_time: '',
+                                end_time: '',
+                                location: '',
+                            };
+                            // Close modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('createEventModal'));
+                            if (modal) modal.hide();
+                            this.loadEvents();
+                        } else {
+                            alert('Error creating event: ' + (data.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error creating event:', error);
+                        alert('Error creating event. Please try again.');
+                    } finally {
+                        this.creatingEvent = false;
+                    }
+                },
+                openEditModal(event) {
+                    // Parse the event date and time
+                    const startDate = new Date(event.start_time);
+                    const endDate = event.end_time ? new Date(event.end_time) : null;
+                    
+                    // Format date as YYYY-MM-DD
+                    const dateStr = startDate.toISOString().split('T')[0];
+                    
+                    // Format time as HH:MM
+                    const startTimeStr = startDate.toTimeString().split(' ')[0].substring(0, 5);
+                    const endTimeStr = endDate ? endDate.toTimeString().split(' ')[0].substring(0, 5) : '';
+                    
+                    // Populate edit form
+                    this.editEvent = {
+                        id: event.id,
+                        title: event.title,
+                        description: event.description,
+                        date: dateStr,
+                        start_time: startTimeStr,
+                        end_time: endTimeStr,
+                        location: event.location || '',
+                    };
+                    
+                    // Open modal
+                    const modal = new bootstrap.Modal(document.getElementById('editEventModal'));
+                    modal.show();
+                },
+                async updateEvent() {
+                    if (!this.editEvent.title || !this.editEvent.description || !this.editEvent.date) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+                    
+                    const selectedDate = new Date(this.editEvent.date + 'T00:00:00');
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Calculate one week from today
+                    const oneWeekLater = new Date(today);
+                    oneWeekLater.setDate(today.getDate() + 7);
+                    oneWeekLater.setHours(0, 0, 0, 0);
+                    
+                    if (selectedDate < oneWeekLater) {
+                        alert('Event date must be at least one week (7 days) from today. Please select a date at least 7 days in the future.');
+                        return;
+                    }
+               
+                    if (selectedDate.getTime() === today.getTime() && this.editEvent.start_time) {
+                        const now = new Date();
+                        const [hours, minutes] = this.editEvent.start_time.split(':');
+                        const eventTime = new Date();
+                        eventTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                        
+                        if (eventTime < now) {
+                            alert('For events scheduled today, the start time must be in the future. Please select a later time.');
+                            return;
+                        }
+                    }
+                    
+                    this.updatingEvent = true;
+                    
+                    try {
+                        // Combine date and time
+                        let startDateTime = this.editEvent.date;
+                        if (this.editEvent.start_time) {
+                            startDateTime += ' ' + this.editEvent.start_time + ':00';
+                        } else {
+                            startDateTime += ' 00:00:00';
+                        }
+                        
+                        let endDateTime = null;
+                        if (this.editEvent.end_time) {
+                            endDateTime = this.editEvent.date + ' ' + this.editEvent.end_time + ':00';
+                        }
+                        
+                        const eventData = {
+                            event_id: this.editEvent.id,
+                            title: this.editEvent.title,
+                            description: this.editEvent.description,
+                            start_time: startDateTime,
+                            end_time: endDateTime,
+                            location: this.editEvent.location || null
+                        };
+                        
+                        const response = await fetch('api/event.php?action=update_event', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(eventData)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('Event updated successfully!');
+                            // Reset edit form
+                            this.editEvent = {
+                                id: null,
+                                title: '',
+                                description: '',
+                                date: '',
+                                start_time: '',
+                                end_time: '',
+                                location: '',
+                            };
+                            // Close modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('editEventModal'));
+                            if (modal) modal.hide();
+                            this.loadEvents();
+                            if (this.isLoggedIn) {
+                                this.loadMyRegistrations();
+                            }
+                        } else {
+                            alert('Error updating event: ' + (data.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error updating event:', error);
+                        alert('Error updating event. Please try again.');
+                    } finally {
+                        this.updatingEvent = false;
+                    }
+                },
+                async deleteEvent(eventId) {
+                    if (!confirm('Are you sure you want to delete this event?')) return;
+                    
+                    try {
+                        const response = await fetch('api/event.php?action=delete_event', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ event_id: eventId })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('Event deleted successfully!');
+                            this.loadEvents();
+                            this.selectedDate = null;
+                            if (this.isLoggedIn) {
+                                this.loadMyRegistrations();
+                            }
+                        } else {
+                            alert('Error deleting event: ' + (data.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error deleting event:', error);
+                        alert('Error deleting event. Please try again.');
+                    }
+                },
+                async signupForEvent(eventId) {
+                    // Check if this is the user's own event
+                    const event = this.events.find(e => e.id === eventId);
+                    if (event && this.isOwnEvent(event)) {
+                        alert('You cannot sign up for your own event');
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch('api/event.php?action=register_event', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ event_id: eventId })
+                        });
+                        
+                        // Check if response is ok before parsing JSON
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+                            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('Successfully registered for event!');
+                            const event = this.events.find(e => e.id === eventId);
+                            if (event) {
+                                event.isRegistered = true;
+                            }
+                            // Reload my registrations
+                            this.loadMyRegistrations();
+                            // Refresh notifications to show immediate notification
+                            if (this.checkNotifications) {
+                                await this.checkNotifications();
+                            }
+                        } else {
+                            const errorMsg = data.error || 'Unknown error';
+                            console.error('Registration error:', errorMsg);
+                            alert('Error registering for event: ' + errorMsg);
+                        }
+                    } catch (error) {
+                        console.error('Error signing up for event:', error);
+                        // Try to get error message from response if available
+                        if (error.response) {
+                            error.response.json().then(data => {
+                                alert('Error registering for event: ' + (data.error || error.message));
+                            }).catch(() => {
+                                alert('Error signing up for event. Please try again.');
+                            });
+                        } else {
+                            alert('Error signing up for event. Please try again.');
+                        }
+                    }
+                },
+                async loadMyRegistrations() {
+                    if (!this.isLoggedIn) return;
+                    
+                    try {
+                        const response = await fetch('api/event.php?action=get_my_registrations', {
+                            credentials: 'include'
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.myRegistrations = data.registrations || [];
+                            console.log(`Loaded ${this.myRegistrations.length} registrations`);
+                        } else {
+                            console.error('Error loading registrations:', data.error);
+                        }
+                    } catch (error) {
+                        console.error('Error loading registrations:', error);
+                    }
+                },
+                async checkRegistrations() {
+                    if (!this.isLoggedIn) return;
+                    
+                    for (const event of this.events) {
+                        try {
+                            const response = await fetch(`api/event.php?action=check_registration&event_id=${event.id}`, {
+                                credentials: 'include'
+                            });
+                            
+                            if (response.ok) {
+                                // Check if response is JSON
+                                const contentType = response.headers.get('content-type');
+                                if (!contentType || !contentType.includes('application/json')) {
+                                    console.warn(`Event API returned non-JSON response for event ${event.id}`);
+                                    continue;
+                                }
+                                
+                                try {
+                                    const data = await response.json();
+                                    if (data.success) {
+                                        event.isRegistered = data.isRegistered || false;
+                                    }
+                                } catch (jsonError) {
+                                    console.warn(`Error parsing registration check JSON for event ${event.id}:`, jsonError);
+                                }
+                            }
+                        } catch (error) {
+                            console.error(`Error checking registration for event ${event.id}:`, error);
+                        }
+                    }
+                },
+                async cancelRegistration(registrationId) {
+                    if (!confirm('Are you sure you want to cancel your registration for this event?')) return;
+                    
+                    // Get the event_id from the registration (in case id column doesn't exist, registration_id might be event_id)
+                    const registration = this.myRegistrations.find(r => r.registration_id === registrationId);
+                    const eventId = registration?.event_id || registrationId; // Fallback to registrationId if event_id not found
+                    
+                    try {
+                        const response = await fetch('api/event.php?action=cancel_registration', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ registration_id: registrationId, event_id: eventId })
+                        });
+                        
+                        // Check if response is ok before parsing JSON
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+                            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('Registration cancelled successfully!');
+                            const registration = this.myRegistrations.find(r => r.registration_id === registrationId);
+                            this.myRegistrations = this.myRegistrations.filter(r => r.registration_id !== registrationId);
+                            if (registration) {
+                                const event = this.events.find(e => e.id === registration.event_id);
+                                if (event) {
+                                    event.isRegistered = false;
+                                }
+                            }
+                            this.checkRegistrations();
+                        } else {
+                            alert('Error cancelling registration: ' + (data.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error cancelling registration:', error);
+                        alert('Error cancelling registration. Please try again.');
+                    }
+                },
+                canEditEvent(event) {
+                    if (!event || !this.isLoggedIn) return false;
+                    
+                    if (event.organizer_type === 'consumer' && this.userType === 'consumer' && event.organizer_id === this.userId) {
+                        return true;
+                    }
+                    
+                    if (event.organizer_type === 'business' && this.userType === 'business' && event.organizer_id === this.businessId) {
+                        return true;
+                    }
+                    
+                    return false;
+                },
+                canDeleteEvent(event) {
+                    if (!event || !this.isLoggedIn) return false;
+                    
+                    if (event.organizer_type === 'consumer' && this.userType === 'consumer' && event.organizer_id === this.userId) {
+                        return true;
+                    }
+                    
+                    if (event.organizer_type === 'business' && this.userType === 'business' && event.organizer_id === this.businessId) {
+                        return true;
+                    }
+                    
+                    return false;
+                },
+                isOwnEvent(event) {
+                    if (!event || !this.isLoggedIn) return false;
+                    
+                    // Check if consumer created this event
+                    if (event.organizer_type === 'consumer' && this.userType === 'consumer' && event.organizer_id === this.userId) {
+                        return true;
+                    }
+                    
+                    // Check if business created this event
+                    if (event.organizer_type === 'business' && this.userType === 'business' && event.organizer_id === this.businessId) {
+                        return true;
+                    }
+                    
+                    return false;
+                }
+            }
+        }).mount('#app');
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop() || 'event.html';
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const linkHref = link.getAttribute('href');
+                if (linkHref && (linkHref === currentPage || (currentPage === '' && linkHref === 'event.html'))) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
