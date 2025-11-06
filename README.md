@@ -8,10 +8,8 @@ A comprehensive platform connecting eco-conscious consumers with sustainable bus
 - **Production URL:** `https://gogreenhub.rf.gd/pages/index.html`
 - **First Page:** `https://gogreenhub.rf.gd/pages/index.html`
 
-**For local development:**
-- **Local URL:** `http://localhost/pages/index.html` (or your configured path)
-
----
+**GitHub link:**
+- https://github.com/yinasaurus/wad-grp-proj
 
 ## 📋 Table of Contents
 
